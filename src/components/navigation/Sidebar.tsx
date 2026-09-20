@@ -27,10 +27,10 @@ export function Sidebar({
   onNavigate,
 }: SidebarProps) {
   return (
-    <aside className="border-b border-slate-200 bg-white lg:fixed lg:inset-y-0 lg:left-0 lg:w-64 lg:border-b-0 lg:border-r">
+    <aside className="border-b border-slate-200 bg-white lg:fixed lg:left-0 lg:top-20 lg:h-[calc(100vh-5rem)] lg:w-56 lg:border-b-0 lg:border-r">
       <nav
         aria-label="Primary"
-        className="overflow-x-auto px-4 py-3 sm:px-6 lg:flex lg:h-full lg:flex-col lg:overflow-hidden lg:px-5 lg:py-8"
+        className="overflow-x-auto px-4 py-3 sm:px-6 lg:flex lg:h-full lg:flex-col lg:overflow-hidden lg:px-4 lg:py-6"
       >
         <div className="flex min-w-max gap-2 lg:min-w-0 lg:flex-col lg:gap-2">
           {items.map((item) => (
@@ -44,16 +44,16 @@ export function Sidebar({
           ))}
         </div>
 
-        <div className="hidden lg:mt-auto lg:block lg:pt-8">
+        <div className="hidden lg:mt-auto lg:block lg:pt-6">
           <div className="overflow-hidden rounded-xl bg-green-50">
-            <div className="flex h-24 items-end justify-center bg-green-100">
+            <div className="flex h-20 items-end justify-center bg-green-100">
               <div
                 aria-hidden="true"
-                className="h-14 w-full rounded-t-[50%] bg-green-200"
+                className="h-12 w-full rounded-t-[50%] bg-green-200"
               />
             </div>
 
-            <div className="space-y-2 p-4">
+            <div className="space-y-2 p-3.5">
               <h2 className="text-sm font-bold leading-5 text-slate-900">
                 From official statistics to informed decisions
               </h2>

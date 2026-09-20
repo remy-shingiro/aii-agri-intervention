@@ -7,7 +7,7 @@ import {
 
 export function Navbar() {
   return (
-    <header className="border-b border-slate-200 bg-white shadow-sm">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
       <div className="mx-auto flex min-h-16 w-full max-w-[1600px] items-center justify-between gap-3 px-4 sm:min-h-20 sm:gap-6 sm:px-6 lg:px-8">
         {/* Product identity */}
         <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
@@ -76,7 +76,10 @@ export function Navbar() {
             className="flex size-9 shrink-0 items-center justify-center rounded-full border border-slate-300 text-slate-600 transition-colors hover:border-slate-400 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2 sm:size-10"
             type="button"
           >
-            <UserCircle aria-hidden="true" className="size-5 sm:size-5" />
+            <UserCircle
+              aria-hidden="true"
+              className="size-5"
+            />
           </button>
         </div>
       </div>
