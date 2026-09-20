@@ -1,11 +1,11 @@
 import { useState } from 'react'
 
 import { AppShell } from '../components/layout/AppShell'
+import {
+  navigationItems,
+  type NavigationItem,
+} from '../components/navigation/navigation.types'
 import { OverviewPage } from '../features/overview/pages/OverviewPage'
-
-const navigation = ['Overview', 'District profile', 'Evidence', 'Methodology'] as const
-
-type NavigationItem = (typeof navigation)[number]
 
 export function App() {
   const [activePage, setActivePage] = useState<NavigationItem>('Overview')
@@ -13,7 +13,7 @@ export function App() {
   return (
     <AppShell
       activePage={activePage}
-      navigation={navigation}
+      navigation={navigationItems}
       onNavigate={setActivePage}
     >
       {activePage === 'Overview' && <OverviewPage />}

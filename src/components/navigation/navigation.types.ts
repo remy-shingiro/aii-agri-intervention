@@ -1,8 +1,8 @@
 export const navigationItems = [
   'Overview',
-  'District profile',
+  'District Profile',
   'Evidence',
-  'Methodology',
+  'Data & Methodology',
 ] as const
 
 export type NavigationItem = (typeof navigationItems)[number]
