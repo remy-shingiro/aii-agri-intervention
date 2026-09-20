@@ -1,16 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
-import {
-  Compass,
-  LocateFixed,
-  Minus,
-  Plus,
-} from 'lucide-react'
-import maplibregl from 'maplibre-gl'
-
-import { districtEvidence } from '../data/districtEvidence'
-import { AttentionLegend } from './AttentionLegend'
+import { Compass, LocateFixed, Minus, Plus } from 'lucide-react'
+import { Map } from 'maplibre-gl'
+import type {
+  DataDrivenPropertyValueSpecification,
+  MapLayerMouseEvent,
+} from 'maplibre-gl'
 
 import 'maplibre-gl/dist/maplibre-gl.css'
+
+import { districtEvidence } from '../data/districtEvidence'
+import type { DistrictEvidence } from '../types/overview.types'
+import { AttentionLegend } from './AttentionLegend'
 
 const RWANDA_CENTER: [number, number] = [29.8739, -1.9441]
 
@@ -25,11 +25,28 @@ const DISTRICT_SOURCE_URL =
 const SOURCE_ID = 'rwanda-districts'
 const FILL_LAYER_ID = 'rwanda-district-fills'
 const OUTLINE_LAYER_ID = 'rwanda-district-outlines'
-const LABEL_LAYER_ID = 'rwanda-district-labels'
 
 interface RwandaMapPanelProps {
   selectedDistrict?: string
   onDistrictSelect?: (districtName: string) => void
+}
+
+function createDistrictFillColorExpression(): DataDrivenPropertyValueSpecification<string> {
+  const expression: unknown[] = [
+    'match',
+    ['to-string', ['get', 'district_i']],
+  ]
+
+  for (const district of districtEvidence) {
+    expression.push(
+      String(district.districtId),
+      getAttentionColor(district.attention),
+    )
+  }
+
+  expression.push('#dbe5df')
+
+  return expression as DataDrivenPropertyValueSpecification<string>
 }
 
 export function RwandaMapPanel({
@@ -37,22 +54,32 @@ export function RwandaMapPanel({
   onDistrictSelect,
 }: RwandaMapPanelProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null)
-  const mapRef = useRef<maplibregl.Map | null>(null)
+  const mapRef = useRef<Map | null>(null)
+  const onDistrictSelectRef = useRef(onDistrictSelect)
+
   const [mapReady, setMapReady] = useState(false)
+  const [mapError, setMapError] = useState<string | null>(null)
+
+  useEffect(() => {
+    onDistrictSelectRef.current = onDistrictSelect
+  }, [onDistrictSelect])
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) {
       return
     }
 
-    const map = new maplibregl.Map({
+    setMapError(null)
+    setMapReady(false)
+
+    const map = new Map({
       container: mapContainerRef.current,
       center: RWANDA_CENTER,
       zoom: 7.5,
       minZoom: 6.5,
       maxZoom: 11,
       maxBounds: RWANDA_BOUNDS,
-      attributionControl: true,
+attributionControl: {},
       style: {
         version: 8,
         sources: {},
@@ -61,7 +88,7 @@ export function RwandaMapPanel({
             id: 'background',
             type: 'background',
             paint: {
-              'background-color': '#f7faf8',
+              'background-color': '#f8faf9',
             },
           },
         ],
@@ -70,78 +97,66 @@ export function RwandaMapPanel({
 
     mapRef.current = map
 
-    map.on('load', () => {
-      map.addSource(SOURCE_ID, {
-        type: 'geojson',
-        data: DISTRICT_SOURCE_URL,
-        promoteId: 'district_id',
-      })
+    const handleMapLoad = () => {
+      if (mapRef.current !== map) {
+        return
+      }
 
-      map.addLayer({
-        id: FILL_LAYER_ID,
-        type: 'fill',
-        source: SOURCE_ID,
-        paint: {
-          'fill-color': [
-            'match',
-            ['get', 'district_id'],
+      try {
+        map.addSource(SOURCE_ID, {
+          type: 'geojson',
+          data: DISTRICT_SOURCE_URL,
+          promoteId: 'district_i',
+        })
 
-            ...districtEvidence.flatMap((district) => [
-              district.districtId,
-              getAttentionColor(district.attention),
-            ]),
+        map.addLayer({
+          id: FILL_LAYER_ID,
+          type: 'fill',
+          source: SOURCE_ID,
+          paint: {
+            'fill-color': createDistrictFillColorExpression(),
+            'fill-opacity': [
+              'case',
+              ['boolean', ['feature-state', 'selected'], false],
+              0.95,
+              0.78,
+            ],
+          },
+        })
 
-            '#e2e8f0',
-          ],
-          'fill-opacity': [
-            'case',
-            ['boolean', ['feature-state', 'selected'], false],
-            0.9,
-            0.78,
-          ],
-        },
-      })
+        map.addLayer({
+          id: OUTLINE_LAYER_ID,
+          type: 'line',
+          source: SOURCE_ID,
+          paint: {
+            'line-color': '#ffffff',
+            'line-width': 1.2,
+          },
+        })
 
-      map.addLayer({
-        id: OUTLINE_LAYER_ID,
-        type: 'line',
-        source: SOURCE_ID,
-        paint: {
-          'line-color': '#ffffff',
-          'line-width': 1.2,
-        },
-      })
+        setMapReady(true)
+      } catch (error) {
+        console.error('Failed to initialize Rwanda district map:', error)
 
-      map.addLayer({
-        id: LABEL_LAYER_ID,
-        type: 'symbol',
-        source: SOURCE_ID,
-        layout: {
-          'text-field': ['get', 'name'],
-          'text-size': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            6.5,
-            8,
-            9,
-            11,
-          ],
-          'text-font': ['Open Sans Regular'],
-          'text-allow-overlap': false,
-          'text-ignore-placement': false,
-        },
-        paint: {
-          'text-color': '#17324d',
-          'text-halo-color': '#ffffff',
-          'text-halo-width': 1.5,
-        },
-      })
+        setMapError(
+          'The Rwanda district map could not be initialized.',
+        )
+      }
+    }
 
-      setMapReady(true)
-    })
+    const handleMapError = (event: {
+      error?: {
+        message?: string
+      }
+    }) => {
+      const message = event.error?.message
 
-    map.on('click', FILL_LAYER_ID, (event) => {
+      if (message) {
+        console.error('MapLibre error:', message)
+      }
+    }
+
+    const handleDistrictClick = (event: MapLayerMouseEvent) => {
       const feature = event.features?.[0]
 
       if (!feature) {
@@ -155,23 +170,30 @@ export function RwandaMapPanel({
       )
 
       if (districtName) {
-        onDistrictSelect?.(districtName)
+        onDistrictSelectRef.current?.(districtName)
       }
-    })
+    }
 
-    map.on('mouseenter', FILL_LAYER_ID, () => {
+    const handleMouseEnter = () => {
       map.getCanvas().style.cursor = 'pointer'
-    })
+    }
 
-    map.on('mouseleave', FILL_LAYER_ID, () => {
+    const handleMouseLeave = () => {
       map.getCanvas().style.cursor = ''
-    })
+    }
+
+    map.on('load', handleMapLoad)
+    map.on('error', handleMapError)
+    map.on('click', FILL_LAYER_ID, handleDistrictClick)
+    map.on('mouseenter', FILL_LAYER_ID, handleMouseEnter)
+    map.on('mouseleave', FILL_LAYER_ID, handleMouseLeave)
 
     return () => {
+      setMapReady(false)
       map.remove()
       mapRef.current = null
     }
-  }, [onDistrictSelect])
+  }, [])
 
   useEffect(() => {
     const map = mapRef.current
@@ -180,20 +202,7 @@ export function RwandaMapPanel({
       return
     }
 
-    map.setPaintProperty(FILL_LAYER_ID, 'fill-opacity', [
-      'case',
-      [
-        'boolean',
-        ['feature-state', 'selected'],
-        false,
-      ],
-      0.95,
-      0.78,
-    ])
-
-    const source = map.getSource(SOURCE_ID)
-
-    if (!source || source.type !== 'geojson') {
+    if (!map.getLayer(FILL_LAYER_ID)) {
       return
     }
 
@@ -201,17 +210,19 @@ export function RwandaMapPanel({
       const features = map.querySourceFeatures(SOURCE_ID)
 
       for (const feature of features) {
-        if (feature.id !== undefined) {
-          map.setFeatureState(
-            {
-              source: SOURCE_ID,
-              id: feature.id,
-            },
-            {
-              selected: false,
-            },
-          )
+        if (feature.id === undefined) {
+          continue
         }
+
+        map.setFeatureState(
+          {
+            source: SOURCE_ID,
+            id: feature.id,
+          },
+          {
+            selected: false,
+          },
+        )
       }
     }
 
@@ -233,17 +244,19 @@ export function RwandaMapPanel({
       return name === selectedDistrict
     })
 
-    if (selectedFeature?.id !== undefined) {
-      map.setFeatureState(
-        {
-          source: SOURCE_ID,
-          id: selectedFeature.id,
-        },
-        {
-          selected: true,
-        },
-      )
+    if (selectedFeature?.id === undefined) {
+      return
     }
+
+    map.setFeatureState(
+      {
+        source: SOURCE_ID,
+        id: selectedFeature.id,
+      },
+      {
+        selected: true,
+      },
+    )
   }, [selectedDistrict, mapReady])
 
   const zoomIn = () => {
@@ -264,11 +277,11 @@ export function RwandaMapPanel({
   return (
     <section
       aria-label="Rwanda district agricultural attention map"
-      className="relative h-[min(72vh,680px)] min-h-[440px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50"
+      className="relative h-[520px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 sm:h-[600px] lg:h-[680px]"
     >
       <div
-        className="absolute inset-0"
         ref={mapContainerRef}
+        className="absolute inset-0"
       />
 
       <div className="absolute left-3 top-3 z-10 sm:left-4 sm:top-4">
@@ -308,7 +321,7 @@ export function RwandaMapPanel({
         </button>
       </div>
 
-      <div className="absolute bottom-4 right-4 z-10 hidden items-center gap-3 sm:flex">
+      <div className="absolute bottom-4 right-4 z-10 hidden sm:block">
         <div className="rounded-lg border border-slate-200 bg-white/95 px-3 py-2 shadow-sm">
           <div className="flex items-center gap-2">
             <Compass
@@ -323,11 +336,25 @@ export function RwandaMapPanel({
         </div>
       </div>
 
-      {!mapReady && (
+      {!mapReady && !mapError && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-50">
           <p className="text-sm text-slate-500">
             Loading Rwanda district map…
           </p>
+        </div>
+      )}
+
+      {mapError && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-50 px-6 text-center">
+          <div>
+            <p className="text-sm font-semibold text-slate-800">
+              Unable to load the district map
+            </p>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Check the district boundary source connection and try again.
+            </p>
+          </div>
         </div>
       )}
     </section>
@@ -336,7 +363,7 @@ export function RwandaMapPanel({
 
 function getAttentionColor(
   attention: DistrictEvidence['attention'],
-) {
+): string {
   switch (attention) {
     case 'high':
       return '#ef6a4a'
