@@ -8,8 +8,7 @@ import type {
 
 import 'maplibre-gl/dist/maplibre-gl.css'
 
-import { districtEvidence } from '../data/districtEvidence'
-import type { DistrictEvidence } from '../types/overview.types'
+import { districtInsights } from '../data/districtInsights'
 import { AttentionLegend } from './AttentionLegend'
 
 const RWANDA_CENTER: [number, number] = [29.8739, -1.9441]
@@ -19,29 +18,98 @@ const RWANDA_BOUNDS: [[number, number], [number, number]] = [
   [31.0, -1.0],
 ]
 
-const DISTRICT_SOURCE_URL =
-  'https://gis.naeb.gov.rw/server/rest/services/Hosted/Administrative_Boundaries_WFL1/FeatureServer/0/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=geojson'
-
+const DISTRICT_SOURCE_URL = '/data/rwanda-districts.geojson'
 const SOURCE_ID = 'rwanda-districts'
 const FILL_LAYER_ID = 'rwanda-district-fills'
 const OUTLINE_LAYER_ID = 'rwanda-district-outlines'
 
 interface RwandaMapPanelProps {
+  crop: string
+  districtSearch: string
+  season: string
   selectedDistrict?: string
+  year: string
   onDistrictSelect?: (districtName: string) => void
 }
 
-function createDistrictFillColorExpression(): DataDrivenPropertyValueSpecification<string> {
+function getInsightFilters(
+  crop: string,
+  season: string,
+  year: string,
+) {
+  const cropLabel = getCropLabel(crop)
+  const seasonLabel = getSeasonLabel(season)
+  const yearLabel = getYearLabel(year)
+
+  return districtInsights.filter(
+    (district) =>
+      district.crop.toLowerCase() === cropLabel.toLowerCase() &&
+      district.season.toLowerCase() === seasonLabel.toLowerCase() &&
+      district.year === yearLabel,
+  )
+}
+
+function getCropLabel(value: string): string {
+  const labels: Record<string, string> = {
+    maize: 'Maize',
+    beans: 'Beans',
+    rice: 'Rice',
+    wheat: 'Wheat',
+  }
+
+  return labels[value] ?? value
+}
+
+function getSeasonLabel(value: string): string {
+  const labels: Record<string, string> = {
+    'season-a': 'Season A',
+    'season-b': 'Season B',
+    'season-c': 'Season C',
+  }
+
+  return labels[value] ?? value
+}
+
+function getYearLabel(value: string): string {
+  const labels: Record<string, string> = {
+    '2024-25': '2024/25',
+    '2023-24': '2023/24',
+    '2022-23': '2022/23',
+  }
+
+  return labels[value] ?? value
+}
+
+function createDistrictFillColorExpression(
+  crop: string,
+  season: string,
+  year: string,
+): DataDrivenPropertyValueSpecification<string> {
+  const matchingInsights = getInsightFilters(crop, season, year)
+
+  if (matchingInsights.length === 0) {
+    return '#dbe5df'
+  }
+
   const expression: unknown[] = [
     'match',
-    ['to-string', ['get', 'district_i']],
+    ['downcase', ['to-string', ['get', 'district']]],
   ]
 
-  for (const district of districtEvidence) {
-    expression.push(
-      String(district.districtId),
-      getAttentionColor(district.attention),
-    )
+  for (const district of matchingInsights) {
+    const insight = district.insight.toLowerCase()
+
+    let color = '#63b36b'
+
+    if (
+      insight.includes('below') ||
+      insight.includes('constraint') ||
+      insight.includes('opportunity')
+    ) {
+      color = '#ef6a4a'
+    }
+
+    expression.push(district.district.toLowerCase(), color)
   }
 
   expression.push('#dbe5df')
@@ -50,7 +118,11 @@ function createDistrictFillColorExpression(): DataDrivenPropertyValueSpecificati
 }
 
 export function RwandaMapPanel({
+  crop,
+  districtSearch,
+  season,
   selectedDistrict,
+  year,
   onDistrictSelect,
 }: RwandaMapPanelProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null)
@@ -79,7 +151,7 @@ export function RwandaMapPanel({
       minZoom: 6.5,
       maxZoom: 11,
       maxBounds: RWANDA_BOUNDS,
-attributionControl: {},
+      attributionControl: {},
       style: {
         version: 8,
         sources: {},
@@ -114,7 +186,11 @@ attributionControl: {},
           type: 'fill',
           source: SOURCE_ID,
           paint: {
-            'fill-color': createDistrictFillColorExpression(),
+            'fill-color': createDistrictFillColorExpression(
+              crop,
+              season,
+              year,
+            ),
             'fill-opacity': [
               'case',
               ['boolean', ['feature-state', 'selected'], false],
@@ -164,9 +240,7 @@ attributionControl: {},
       }
 
       const districtName = String(
-        feature.properties?.name ??
-          feature.properties?.district ??
-          '',
+        feature.properties?.district ?? '',
       )
 
       if (districtName) {
@@ -194,6 +268,59 @@ attributionControl: {},
       mapRef.current = null
     }
   }, [])
+
+  useEffect(() => {
+    const map = mapRef.current
+
+    if (!map || !mapReady) {
+      return
+    }
+
+    if (!map.getLayer(FILL_LAYER_ID)) {
+      return
+    }
+
+    map.setPaintProperty(
+      FILL_LAYER_ID,
+      'fill-color',
+      createDistrictFillColorExpression(crop, season, year),
+    )
+  }, [crop, season, year, mapReady])
+
+  useEffect(() => {
+    const map = mapRef.current
+
+    if (!map || !mapReady) {
+      return
+    }
+
+    if (
+      !map.getLayer(FILL_LAYER_ID) ||
+      !map.getLayer(OUTLINE_LAYER_ID)
+    ) {
+      return
+    }
+
+    const searchTerm = districtSearch.trim().toLowerCase()
+
+    if (!searchTerm) {
+      map.setFilter(FILL_LAYER_ID, null)
+      map.setFilter(OUTLINE_LAYER_ID, null)
+      return
+    }
+
+    map.setFilter(FILL_LAYER_ID, [
+      '==',
+      ['downcase', ['to-string', ['get', 'district']]],
+      searchTerm,
+    ])
+
+    map.setFilter(OUTLINE_LAYER_ID, [
+      '==',
+      ['downcase', ['to-string', ['get', 'district']]],
+      searchTerm,
+    ])
+  }, [districtSearch, mapReady])
 
   useEffect(() => {
     const map = mapRef.current
@@ -235,13 +362,14 @@ attributionControl: {},
     const features = map.querySourceFeatures(SOURCE_ID)
 
     const selectedFeature = features.find((feature) => {
-      const name = String(
-        feature.properties?.name ??
-          feature.properties?.district ??
-          '',
+      const districtName = String(
+        feature.properties?.district ?? '',
       )
 
-      return name === selectedDistrict
+      return (
+        districtName.toLowerCase() ===
+        selectedDistrict.toLowerCase()
+      )
     })
 
     if (selectedFeature?.id === undefined) {
@@ -282,6 +410,7 @@ attributionControl: {},
       <div
         ref={mapContainerRef}
         className="absolute inset-0"
+        style={{ position: 'absolute' }}
       />
 
       <div className="absolute left-3 top-3 z-10 sm:left-4 sm:top-4">
@@ -359,22 +488,4 @@ attributionControl: {},
       )}
     </section>
   )
-}
-
-function getAttentionColor(
-  attention: DistrictEvidence['attention'],
-): string {
-  switch (attention) {
-    case 'high':
-      return '#ef6a4a'
-
-    case 'medium':
-      return '#f3c84b'
-
-    case 'low':
-      return '#63b36b'
-
-    default:
-      return '#dbe3e0'
-  }
 }
