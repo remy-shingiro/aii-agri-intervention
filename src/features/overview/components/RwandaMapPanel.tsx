@@ -80,6 +80,18 @@ function getYearLabel(value: string): string {
   return labels[value] ?? value
 }
 
+function getDistrictAttentionColor(yieldGapPct: number): string {
+  if (yieldGapPct <= -20) {
+    return '#ef6a4a'
+  }
+
+  if (yieldGapPct < -10) {
+    return '#f3a35c'
+  }
+
+  return '#63b36b'
+}
+
 function createDistrictFillColorExpression(
   crop: string,
   season: string,
@@ -97,19 +109,16 @@ function createDistrictFillColorExpression(
   ]
 
   for (const district of matchingInsights) {
-    const insight = district.insight.toLowerCase()
+    const yieldGapPct = district.yieldGapPct
 
-    let color = '#63b36b'
+    const color = Number.isFinite(yieldGapPct)
+      ? getDistrictAttentionColor(yieldGapPct)
+      : '#dbe5df'
 
-    if (
-      insight.includes('below') ||
-      insight.includes('constraint') ||
-      insight.includes('opportunity')
-    ) {
-      color = '#ef6a4a'
-    }
-
-    expression.push(district.district.toLowerCase(), color)
+    expression.push(
+      district.district.toLowerCase(),
+      color,
+    )
   }
 
   expression.push('#dbe5df')
