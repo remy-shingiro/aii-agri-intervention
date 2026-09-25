@@ -1,3 +1,7 @@
+import {
+  MAIZE_NATIONAL_YIELD_KG_PER_HA,
+  maizeObservations,
+} from './maizeObservations'
 
 export interface DistrictInsight {
   district: string
@@ -10,49 +14,80 @@ export interface DistrictInsight {
   cultivatedArea: string
   averageYield: string
   inputUse: string
+  yieldGapPct: number
 }
 
-export const districtInsights: DistrictInsight[] = [
-  {
-    district: 'Gasabo',
-    crop: 'Maize',
-    season: 'Season A',
-    year: '2024/25',
-    insight:
-      'Maize productivity is below the national reference, suggesting this district should be examined for input-use and production constraints.',
-    evidenceLabel: 'View evidence',
-    totalProduction: '1.2M tonnes',
-    cultivatedArea: '620K ha',
-    averageYield: '1.9 t/ha',
-    inputUse: '68%',
+function formatTonnes(value: number): string {
+  return `${value.toLocaleString()} tonnes`
+}
+
+function formatArea(value: number): string {
+  return `${value.toLocaleString()} ha`
+}
+
+function formatYield(value: number): string {
+  return `${(value / 1000).toFixed(2)} t/ha`
+}
+
+function calculateYieldGapPct(yieldKgPerHa: number): number {
+  return (
+    ((yieldKgPerHa - MAIZE_NATIONAL_YIELD_KG_PER_HA) /
+      MAIZE_NATIONAL_YIELD_KG_PER_HA) *
+    100
+  )
+}
+
+function createInsight(
+  district: string,
+  yieldGapPct: number,
+): string {
+  if (yieldGapPct <= -20) {
+    return `Maize yield is ${Math.abs(yieldGapPct).toFixed(1)}% below the national reference, indicating a significant productivity gap that warrants further investigation.`
+  }
+
+  if (yieldGapPct < -10) {
+    return `Maize yield is ${Math.abs(yieldGapPct).toFixed(1)}% below the national reference, indicating a moderate productivity gap.`
+  }
+
+  if (yieldGapPct >= 10) {
+    return `Maize yield is ${yieldGapPct.toFixed(1)}% above the national reference, providing a useful productivity reference for comparison.`
+  }
+
+  return `Maize yield in ${district} is close to the national reference for Season A 2024/25.`
+}
+
+const districtInsights: DistrictInsight[] = maizeObservations.map(
+  (observation) => {
+    const yieldGapPct = calculateYieldGapPct(
+      observation.yieldKgPerHa,
+    )
+
+    return {
+      district: observation.district,
+      crop: 'Maize',
+      season: 'Season A',
+      year: '2024/25',
+      insight: createInsight(
+        observation.district,
+        yieldGapPct,
+      ),
+      evidenceLabel: 'View evidence',
+      totalProduction: formatTonnes(
+        observation.productionTonnes,
+      ),
+      cultivatedArea: formatArea(
+        observation.cultivatedAreaHa,
+      ),
+      averageYield: formatYield(
+        observation.yieldKgPerHa,
+      ),
+      inputUse: 'Not yet available',
+      yieldGapPct,
+    }
   },
-  {
-    district: 'Musanze',
-    crop: 'Maize',
-    season: 'Season A',
-    year: '2024/25',
-    insight:
-      'Musanze shows relatively strong maize productivity, providing a useful reference when comparing intervention needs across districts.',
-    evidenceLabel: 'View evidence',
-    totalProduction: '1.2M tonnes',
-    cultivatedArea: '620K ha',
-    averageYield: '2.4 t/ha',
-    inputUse: '74%',
-  },
-  {
-    district: 'Nyagatare',
-    crop: 'Maize',
-    season: 'Season A',
-    year: '2024/25',
-    insight:
-      'Production is substantial, but yield performance indicates an opportunity to investigate whether input access is translating into productivity gains.',
-    evidenceLabel: 'View evidence',
-    totalProduction: '1.2M tonnes',
-    cultivatedArea: '620K ha',
-    averageYield: '1.7 t/ha',
-    inputUse: '63%',
-  },
-]
+)
+
+export { districtInsights }
 
 const defaultInsight: DistrictInsight = {
   district: 'Rwanda',
@@ -60,12 +95,13 @@ const defaultInsight: DistrictInsight = {
   season: 'Season A',
   year: '2024/25',
   insight:
-    'Select a district on the map to see district-specific agricultural evidence and intervention signals.',
+    'Select a district on the map to see district-specific maize productivity evidence and intervention signals.',
   evidenceLabel: 'View evidence',
-  totalProduction: '1.2M tonnes',
-  cultivatedArea: '620K ha',
-  averageYield: '1.9 t/ha',
-  inputUse: '68%',
+  totalProduction: '481,246 tonnes',
+  cultivatedArea: '244,095 ha',
+  averageYield: '1.99 t/ha',
+  inputUse: 'Not yet available',
+  yieldGapPct: 0,
 }
 
 export function getDistrictInsight(
@@ -78,11 +114,12 @@ export function getDistrictInsight(
   return (
     districtInsights.find(
       (district) =>
-        district.district.toLowerCase() === districtName.toLowerCase(),
+        district.district.toLowerCase() ===
+        districtName.toLowerCase(),
     ) ?? {
       ...defaultInsight,
       district: districtName,
-      insight: `Agricultural evidence for ${districtName} will appear here as the district data is connected.`,
+      insight: `NISR maize productivity data for ${districtName} is not available in the current dataset.`,
     }
   )
 }
