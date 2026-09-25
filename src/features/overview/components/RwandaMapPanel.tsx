@@ -301,41 +301,57 @@ export function RwandaMapPanel({
     )
   }, [crop, season, year, mapReady])
 
-  useEffect(() => {
-    const map = mapRef.current
+useEffect(() => {
+  const map = mapRef.current
 
-    if (!map || !mapReady) {
-      return
-    }
+  if (!map || !mapReady) {
+    return
+  }
 
-    if (
-      !map.getLayer(FILL_LAYER_ID) ||
-      !map.getLayer(OUTLINE_LAYER_ID)
-    ) {
-      return
-    }
+  if (
+    !map.getLayer(FILL_LAYER_ID) ||
+    !map.getLayer(OUTLINE_LAYER_ID)
+  ) {
+    return
+  }
 
-    const searchTerm = districtSearch.trim().toLowerCase()
+  const searchTerm = districtSearch.trim().toLowerCase()
 
-    if (!searchTerm) {
-      map.setFilter(FILL_LAYER_ID, null)
-      map.setFilter(OUTLINE_LAYER_ID, null)
-      return
-    }
+  if (!searchTerm) {
+    map.setFilter(FILL_LAYER_ID, null)
+    map.setFilter(OUTLINE_LAYER_ID, null)
+    return
+  }
 
-    const partialMatchFilter: FilterSpecification = [
-      '>=',
-      [
-        'index-of',
-        searchTerm,
-        ['downcase', ['to-string', ['get', 'district']]],
-      ],
-      0,
-    ]
+  const features = map.querySourceFeatures(SOURCE_ID)
 
-    map.setFilter(FILL_LAYER_ID, partialMatchFilter)
-    map.setFilter(OUTLINE_LAYER_ID, partialMatchFilter)
-  }, [districtSearch, mapReady])
+  const hasMatch = features.some((feature) => {
+    const districtName = String(
+      feature.properties?.district ?? '',
+    ).toLowerCase()
+
+    return districtName.includes(searchTerm)
+  })
+
+  if (!hasMatch) {
+    map.setFilter(FILL_LAYER_ID, null)
+    map.setFilter(OUTLINE_LAYER_ID, null)
+    return
+  }
+
+  const partialMatchFilter: FilterSpecification = [
+    '>=',
+    [
+      'index-of',
+      searchTerm,
+      ['downcase', ['to-string', ['get', 'district']]],
+    ],
+    0,
+  ]
+
+  map.setFilter(FILL_LAYER_ID, partialMatchFilter)
+  map.setFilter(OUTLINE_LAYER_ID, partialMatchFilter)
+}, [districtSearch, mapReady])
 
   useEffect(() => {
     const map = mapRef.current
