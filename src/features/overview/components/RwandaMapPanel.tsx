@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { Compass, LocateFixed, Minus, Plus } from 'lucide-react'
 import { Map } from 'maplibre-gl'
 import type {
   DataDrivenPropertyValueSpecification,
+  FilterSpecification,
   MapLayerMouseEvent,
 } from 'maplibre-gl'
 
@@ -10,6 +10,8 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 
 import { districtInsights } from '../data/districtInsights'
 import { AttentionLegend } from './AttentionLegend'
+import { RwandaMapControls } from './RwandaMapControls'
+import { RwandaMapNorthIndicator } from './RwandaMapNorthIndicator'
 
 const RWANDA_CENTER: [number, number] = [29.8739, -1.9441]
 
@@ -80,10 +82,17 @@ function getYearLabel(value: string): string {
   return labels[value] ?? value
 }
 
-function getDistrictAttentionColor(yieldGapPct: number): string { 
-  if (yieldGapPct <= -20) { return '#ef6a4a' } 
-  if (yieldGapPct <= -10) { return '#f3a35c' } return '#63b36b'
- }
+function getDistrictAttentionColor(yieldGapPct: number): string {
+  if (yieldGapPct <= -20) {
+    return '#ef6a4a'
+  }
+
+  if (yieldGapPct <= -10) {
+    return '#f3a35c'
+  }
+
+  return '#63b36b'
+}
 
 function createDistrictFillColorExpression(
   crop: string,
@@ -214,7 +223,10 @@ export function RwandaMapPanel({
 
         setMapReady(true)
       } catch (error) {
-        console.error('Failed to initialize Rwanda district map:', error)
+        console.error(
+          'Failed to initialize Rwanda district map:',
+          error,
+        )
 
         setMapError(
           'The Rwanda district map could not be initialized.',
@@ -311,17 +323,18 @@ export function RwandaMapPanel({
       return
     }
 
-    map.setFilter(FILL_LAYER_ID, [
-      '==',
-      ['downcase', ['to-string', ['get', 'district']]],
-      searchTerm,
-    ])
+    const partialMatchFilter: FilterSpecification = [
+      '>=',
+      [
+        'index-of',
+        searchTerm,
+        ['downcase', ['to-string', ['get', 'district']]],
+      ],
+      0,
+    ]
 
-    map.setFilter(OUTLINE_LAYER_ID, [
-      '==',
-      ['downcase', ['to-string', ['get', 'district']]],
-      searchTerm,
-    ])
+    map.setFilter(FILL_LAYER_ID, partialMatchFilter)
+    map.setFilter(OUTLINE_LAYER_ID, partialMatchFilter)
   }, [districtSearch, mapReady])
 
   useEffect(() => {
@@ -419,53 +432,13 @@ export function RwandaMapPanel({
         <AttentionLegend />
       </div>
 
-      <div className="absolute bottom-4 left-4 z-10 flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-        <button
-          aria-label="Zoom in"
-          className="flex size-10 items-center justify-center text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
-          onClick={zoomIn}
-          type="button"
-        >
-          <Plus className="size-4" />
-        </button>
+      <RwandaMapControls
+        onResetView={resetView}
+        onZoomIn={zoomIn}
+        onZoomOut={zoomOut}
+      />
 
-        <div className="border-t border-slate-200" />
-
-        <button
-          aria-label="Zoom out"
-          className="flex size-10 items-center justify-center text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
-          onClick={zoomOut}
-          type="button"
-        >
-          <Minus className="size-4" />
-        </button>
-
-        <div className="border-t border-slate-200" />
-
-        <button
-          aria-label="Reset map view"
-          className="flex size-10 items-center justify-center text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
-          onClick={resetView}
-          type="button"
-        >
-          <LocateFixed className="size-4" />
-        </button>
-      </div>
-
-      <div className="absolute bottom-4 right-4 z-10 hidden sm:block">
-        <div className="rounded-lg border border-slate-200 bg-white/95 px-3 py-2 shadow-sm">
-          <div className="flex items-center gap-2">
-            <Compass
-              aria-hidden="true"
-              className="size-5 text-slate-700"
-            />
-
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-              North
-            </span>
-          </div>
-        </div>
-      </div>
+      <RwandaMapNorthIndicator />
 
       {!mapReady && !mapError && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-50">
@@ -483,7 +456,8 @@ export function RwandaMapPanel({
             </p>
 
             <p className="mt-1 text-sm text-slate-500">
-              Check the district boundary source connection and try again.
+              Check the district boundary source connection and try
+              again.
             </p>
           </div>
         </div>
