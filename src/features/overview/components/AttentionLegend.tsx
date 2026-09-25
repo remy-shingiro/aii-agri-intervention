@@ -1,54 +1,71 @@
-import type { AttentionLevel } from '../types/overview.types'
-
-interface AttentionLegendProps {
-  levels?: AttentionLevel[]
-}
-
-const legendItems = [
-  {
-    level: 'high' as const,
-    label: 'High',
-    className: 'bg-red-500',
-  },
-  {
-    level: 'medium' as const,
-    label: 'Medium',
-    className: 'bg-amber-400',
-  },
-  {
-    level: 'low' as const,
-    label: 'Low',
-    className: 'bg-green-500',
-  },
-]
-
-export function AttentionLegend({
-  levels = ['high', 'medium', 'low'],
-}: AttentionLegendProps) {
+export function AttentionLegend() {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white/95 p-3 shadow-sm backdrop-blur-sm">
-      <p className="text-xs font-semibold text-slate-900">
-        Attention level
-      </p>
+    <div className="rounded-xl border border-slate-200 bg-white/95 px-3 py-3 shadow-sm backdrop-blur sm:px-4">
+      <div className="mb-2.5">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+          Yield gap
+        </p>
+      </div>
 
-      <div className="mt-2.5 flex flex-wrap gap-x-4 gap-y-2">
-        {legendItems
-          .filter(({ level }) => levels.includes(level))
-          .map(({ level, label, className }) => (
-            <div
-              className="flex items-center gap-2"
-              key={level}
-            >
-              <span
-                aria-hidden="true"
-                className={`size-2.5 rounded-full ${className}`}
-              />
+      <div className="space-y-2">
+        <div className="flex items-center gap-2.5">
+          <span
+            aria-hidden="true"
+            className="size-3 shrink-0 rounded-sm"
+            style={{ backgroundColor: '#ef6a4a' }}
+          />
 
-              <span className="text-xs text-slate-600">
-                {label}
-              </span>
-            </div>
-          ))}
+          <span className="text-xs font-medium text-slate-700">
+            ≤ −20%
+          </span>
+
+          <span className="hidden text-xs text-slate-400 sm:inline">
+            Significant gap
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <span
+            aria-hidden="true"
+            className="size-3 shrink-0 rounded-sm"
+            style={{ backgroundColor: '#f3a35c' }}
+          />
+
+          <span className="text-xs font-medium text-slate-700">
+            −20% to −10%
+          </span>
+
+          <span className="hidden text-xs text-slate-400 sm:inline">
+            Moderate gap
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <span
+            aria-hidden="true"
+            className="size-3 shrink-0 rounded-sm"
+            style={{ backgroundColor: '#63b36b' }}
+          />
+
+          <span className="text-xs font-medium text-slate-700">
+            &gt; −10%
+          </span>
+
+          <span className="hidden text-xs text-slate-400 sm:inline">
+            Near reference
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <span
+            aria-hidden="true"
+            className="size-3 shrink-0 rounded-sm border border-slate-300 bg-[#dbe5df]"
+          />
+
+          <span className="text-xs font-medium text-slate-700">
+            No data
+          </span>
+        </div>
       </div>
     </div>
   )

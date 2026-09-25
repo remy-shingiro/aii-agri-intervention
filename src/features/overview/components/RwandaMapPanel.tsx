@@ -80,17 +80,10 @@ function getYearLabel(value: string): string {
   return labels[value] ?? value
 }
 
-function getDistrictAttentionColor(yieldGapPct: number): string {
-  if (yieldGapPct <= -20) {
-    return '#ef6a4a'
-  }
-
-  if (yieldGapPct < -10) {
-    return '#f3a35c'
-  }
-
-  return '#63b36b'
-}
+function getDistrictAttentionColor(yieldGapPct: number): string { 
+  if (yieldGapPct <= -20) { return '#ef6a4a' } 
+  if (yieldGapPct <= -10) { return '#f3a35c' } return '#63b36b'
+ }
 
 function createDistrictFillColorExpression(
   crop: string,
