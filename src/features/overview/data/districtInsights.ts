@@ -2,6 +2,8 @@ import {
   MAIZE_NATIONAL_YIELD_KG_PER_HA,
   maizeObservations,
 } from './maizeObservations'
+import type { InterventionSignal } from '../types/interventionSignal.types'
+import { calculateInterventionSignal } from '../utils/calculateInterventionSignal'
 
 export interface DistrictInsight {
   district: string
@@ -15,6 +17,7 @@ export interface DistrictInsight {
   averageYield: string
   inputUse: string
   yieldGapPct: number
+  interventionSignal: InterventionSignal
 }
 
 function formatTonnes(value: number): string {
@@ -62,6 +65,12 @@ const districtInsights: DistrictInsight[] = maizeObservations.map(
       observation.yieldKgPerHa,
     )
 
+    const interventionSignal =
+      calculateInterventionSignal({
+        yield: observation.yieldKgPerHa,
+        referenceYield: MAIZE_NATIONAL_YIELD_KG_PER_HA,
+      })
+
     return {
       district: observation.district,
       crop: 'Maize',
@@ -83,11 +92,18 @@ const districtInsights: DistrictInsight[] = maizeObservations.map(
       ),
       inputUse: 'Not yet available',
       yieldGapPct,
+      interventionSignal,
     }
   },
 )
 
 export { districtInsights }
+
+const defaultInterventionSignal =
+  calculateInterventionSignal({
+    yield: MAIZE_NATIONAL_YIELD_KG_PER_HA,
+    referenceYield: MAIZE_NATIONAL_YIELD_KG_PER_HA,
+  })
 
 const defaultInsight: DistrictInsight = {
   district: 'Rwanda',
@@ -102,6 +118,7 @@ const defaultInsight: DistrictInsight = {
   averageYield: '1.99 t/ha',
   inputUse: 'Not yet available',
   yieldGapPct: 0,
+  interventionSignal: defaultInterventionSignal,
 }
 
 export function getDistrictInsight(

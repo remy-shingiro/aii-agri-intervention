@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 
 import { getDistrictInsight } from '../data/districtInsights'
+import type { InterventionSignalLevel } from '../types/interventionSignal.types'
 
 interface AgriculturalInsightPanelProps {
   selectedDistrict?: string
@@ -45,10 +46,45 @@ function KpiCard({ label, value, icon: Icon }: KpiCardProps) {
   )
 }
 
+function getSignalLabel(level: InterventionSignalLevel): string {
+  switch (level) {
+    case 'attention':
+      return 'Attention'
+
+    case 'moderate':
+      return 'Moderate'
+
+    case 'near-reference':
+      return 'Near reference'
+  }
+}
+
+function getSignalDescription(
+  level: InterventionSignalLevel,
+): string {
+  switch (level) {
+    case 'attention':
+      return 'Yield is substantially below the national reference and warrants further investigation.'
+
+    case 'moderate':
+      return 'Yield is below the national reference and may warrant further investigation.'
+
+    case 'near-reference':
+      return 'Yield is close to the national reference for the selected period.'
+  }
+}
+
+function formatPercentage(value: number): string {
+  const sign = value > 0 ? '+' : ''
+
+  return `${sign}${value.toFixed(1)}%`
+}
+
 export function AgriculturalInsightPanel({
   selectedDistrict,
 }: AgriculturalInsightPanelProps) {
   const insight = getDistrictInsight(selectedDistrict)
+  const signal = insight.interventionSignal
 
   return (
     <aside
@@ -98,6 +134,63 @@ export function AgriculturalInsightPanel({
               {insight.evidenceLabel} →
             </button>
           </div>
+        </section>
+
+        {/* Intervention signal */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900">
+                Intervention Signal
+              </h3>
+
+              <p className="mt-1 text-xs text-slate-500">
+                Based on district yield relative to the national reference.
+              </p>
+            </div>
+
+            <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+              {getSignalLabel(signal.level)}
+            </span>
+          </div>
+
+          <div className="mt-5 grid grid-cols-2 gap-3">
+            <div className="rounded-lg bg-slate-50 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                District yield
+              </p>
+
+              <p className="mt-1 text-lg font-bold text-slate-900">
+                {insight.averageYield}
+              </p>
+            </div>
+
+            <div className="rounded-lg bg-slate-50 p-3">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Reference yield
+              </p>
+
+              <p className="mt-1 text-lg font-bold text-slate-900">
+                {(signal.referenceYield / 1000).toFixed(2)} t/ha
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-3 rounded-lg border border-slate-200 p-3">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-xs font-medium text-slate-500">
+                Yield gap
+              </span>
+
+              <span className="text-sm font-bold text-slate-900">
+                {formatPercentage(signal.yieldGapPct)}
+              </span>
+            </div>
+          </div>
+
+          <p className="mt-4 text-sm leading-6 text-slate-600">
+            {getSignalDescription(signal.level)}
+          </p>
         </section>
 
         {/* KPIs */}
