@@ -10,9 +10,17 @@ interface OverviewFilters {
   year: string
 }
 
-export function OverviewPage() {
-  const [selectedDistrict, setSelectedDistrict] = useState<string>()
+interface OverviewPageProps {
+  selectedDistrict?: string
+  onDistrictSelect: (district: string | undefined) => void
+}
+
+export function OverviewPage({
+  selectedDistrict,
+  onDistrictSelect,
+}: OverviewPageProps) {
   const [districtSearch, setDistrictSearch] = useState('')
+
   const [filters, setFilters] = useState<OverviewFilters>({
     crop: 'maize',
     season: 'season-a',
@@ -31,12 +39,16 @@ export function OverviewPage() {
 
   const handleDistrictSearchChange = (value: string) => {
     setDistrictSearch(value)
+    onDistrictSelect(undefined)
+  }
 
-    setSelectedDistrict(undefined)
+  const handleDistrictSelect = (district: string) => {
+    setDistrictSearch(district)
+    onDistrictSelect(district)
   }
 
   const handleApply = () => {
-    setSelectedDistrict(undefined)
+    onDistrictSelect(undefined)
   }
 
   return (
@@ -57,7 +69,7 @@ export function OverviewPage() {
             season={filters.season}
             selectedDistrict={selectedDistrict}
             year={filters.year}
-            onDistrictSelect={setSelectedDistrict}
+            onDistrictSelect={handleDistrictSelect}
           />
         </div>
       </main>

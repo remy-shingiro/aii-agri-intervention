@@ -12,16 +12,27 @@ export function App() {
   const [activePage, setActivePage] =
     useState<NavigationItem>('Overview')
 
+  const [selectedDistrict, setSelectedDistrict] =
+    useState<string>()
+
   return (
     <AppShell
       activePage={activePage}
       navigation={navigationItems}
       onNavigate={setActivePage}
     >
-      {activePage === 'Overview' && <OverviewPage />}
+      {activePage === 'Overview' && (
+        <OverviewPage
+          selectedDistrict={selectedDistrict}
+          onDistrictSelect={setSelectedDistrict}
+        />
+      )}
 
       {activePage === 'District Profile' && (
-        <DistrictProfilePage />
+        <DistrictProfilePage
+          selectedDistrict={selectedDistrict}
+          onDistrictSelect={setSelectedDistrict}
+        />
       )}
     </AppShell>
   )

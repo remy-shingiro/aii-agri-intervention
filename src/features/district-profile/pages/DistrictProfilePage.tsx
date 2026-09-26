@@ -2,10 +2,23 @@ import { ArrowLeft, MapPin } from 'lucide-react'
 
 import { getDistrictInsight } from '../../overview/data/districtInsights'
 
-const DEFAULT_DISTRICT = 'Gatsibo'
+interface DistrictProfilePageProps {
+  selectedDistrict?: string
+  onDistrictSelect: (district: string | undefined) => void
+}
 
-export function DistrictProfilePage() {
-  const insight = getDistrictInsight(DEFAULT_DISTRICT)
+export function DistrictProfilePage({
+  selectedDistrict,
+  onDistrictSelect,
+}: DistrictProfilePageProps) {
+  const insight = getDistrictInsight(selectedDistrict)
+
+  const signalLevel =
+    insight.interventionSignal.level === 'attention'
+      ? 'Attention'
+      : insight.interventionSignal.level === 'moderate'
+        ? 'Moderate'
+        : 'Near reference'
 
   return (
     <div className="space-y-8">
@@ -14,6 +27,7 @@ export function DistrictProfilePage() {
         <div className="flex items-center gap-2 text-sm">
           <button
             className="inline-flex items-center gap-1.5 font-medium text-slate-500 transition-colors hover:text-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2"
+            onClick={() => onDistrictSelect(undefined)}
             type="button"
           >
             <ArrowLeft
@@ -70,6 +84,7 @@ export function DistrictProfilePage() {
 
           <button
             className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2"
+            onClick={() => onDistrictSelect(undefined)}
             type="button"
           >
             Change district
@@ -87,11 +102,7 @@ export function DistrictProfilePage() {
               </h2>
 
               <span className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">
-                {insight.interventionSignal.level === 'attention'
-                  ? 'Attention'
-                  : insight.interventionSignal.level === 'moderate'
-                    ? 'Moderate'
-                    : 'Near reference'}
+                {signalLevel}
               </span>
             </div>
 
