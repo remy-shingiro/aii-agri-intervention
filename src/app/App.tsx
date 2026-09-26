@@ -5,10 +5,12 @@ import {
   navigationItems,
   type NavigationItem,
 } from '../components/navigation/navigation.types'
+import { DistrictProfilePage } from '../features/district-profile/pages/DistrictProfilePage'
 import { OverviewPage } from '../features/overview/pages/OverviewPage'
 
 export function App() {
-  const [activePage, setActivePage] = useState<NavigationItem>('Overview')
+  const [activePage, setActivePage] =
+    useState<NavigationItem>('Overview')
 
   return (
     <AppShell
@@ -17,6 +19,10 @@ export function App() {
       onNavigate={setActivePage}
     >
       {activePage === 'Overview' && <OverviewPage />}
+
+      {activePage === 'District Profile' && (
+        <DistrictProfilePage />
+      )}
     </AppShell>
   )
 }
