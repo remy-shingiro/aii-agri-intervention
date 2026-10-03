@@ -16,6 +16,7 @@ describe('agricultural data boundary', () => {
     const firstObservation = observations[0]
 
     expect(firstObservation).toMatchObject({
+      geographyLevel: 'district',
       district: 'Nyarugenge',
       crop: 'Maize',
       season: 'A',

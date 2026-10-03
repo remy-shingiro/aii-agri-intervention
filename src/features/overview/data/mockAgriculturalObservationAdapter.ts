@@ -6,6 +6,7 @@ export function adaptMockMaizeObservations(
   observations: readonly MaizeObservation[] = maizeObservations,
 ): readonly AgriculturalObservation[] {
   return observations.map((observation) => ({
+    geographyLevel: 'district',
     district: observation.district,
     crop: 'Maize',
     season: observation.season,
