@@ -1,5 +1,7 @@
 import { ArrowLeft, MapPin } from 'lucide-react'
 
+import { EvidenceCard } from '../components/EvidenceCard'
+import { getDistrictEvidence } from '../data/districtEvidence'
 import { getDistrictMetadata } from '../data/districtMetadata'
 import { getDistrictInsight } from '../../overview/data/districtInsights'
 
@@ -14,6 +16,7 @@ export function DistrictProfilePage({
 }: DistrictProfilePageProps) {
   const insight = getDistrictInsight(selectedDistrict)
   const metadata = getDistrictMetadata(insight.district)
+  const evidence = getDistrictEvidence(selectedDistrict)
 
   const districtName = metadata?.district ?? insight.district
   const provinceName =
@@ -234,8 +237,80 @@ export function DistrictProfilePage({
         </div>
       </section>
 
-      {/* Coming analytical sections */}
-      <section className="grid gap-5 lg:grid-cols-2">
+      {/* Evidence behind the signal */}
+      <section>
+        <div className="mb-4">
+          <h2 className="text-sm font-semibold text-slate-900">
+            Evidence Behind the Signal
+          </h2>
+
+          <p className="mt-1 max-w-3xl text-xs leading-5 text-slate-500">
+            Agricultural indicators associated with the selected
+            district that provide context for further investigation
+            of the productivity signal.
+          </p>
+        </div>
+
+        {evidence ? (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <EvidenceCard
+              label="Improved seed use"
+              value={evidence.improvedSeedUsePct}
+              description="Share of agricultural activity using improved seed."
+            />
+
+            <EvidenceCard
+              label="Fertilizer use"
+              value={evidence.fertilizerUsePct}
+              description="Observed use of fertilizer inputs."
+            />
+
+            <EvidenceCard
+              label="Irrigation use"
+              value={evidence.irrigationUsePct}
+              description="Observed use or access to irrigation."
+            />
+
+            <EvidenceCard
+              label="Extension access"
+              value={evidence.extensionAccessPct}
+              description="Farmers reporting access to extension services."
+            />
+
+            <EvidenceCard
+              label="Soil management"
+              value={evidence.soilManagementPct}
+              description="Observed soil and land management practices."
+            />
+
+            <EvidenceCard
+              label="Mechanization use"
+              value={evidence.mechanizationUsePct}
+              description="Observed use of agricultural mechanization."
+            />
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6">
+            <p className="text-sm font-medium text-slate-700">
+              Evidence not available
+            </p>
+
+            <p className="mt-1 text-sm leading-6 text-slate-500">
+              Evidence indicators for {districtName} are not available
+              in the current development dataset.
+            </p>
+          </div>
+        )}
+
+        <p className="mt-4 text-xs leading-5 text-slate-400">
+          Development data only. These indicators are presented for
+          UI development and do not represent verified NISR
+          statistics.
+        </p>
+      </section>
+
+      {/* Coming analytical section */}
+      <section>
         <article className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6">
           <h2 className="text-sm font-semibold text-slate-900">
             Yield Trend
@@ -245,18 +320,6 @@ export function DistrictProfilePage({
             Historical district performance and comparison with the
             national reference will appear here once the historical
             observations are connected.
-          </p>
-        </article>
-
-        <article className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6">
-          <h2 className="text-sm font-semibold text-slate-900">
-            Evidence Behind the Signal
-          </h2>
-
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            Input use, irrigation, extension, soil and other available
-            indicators will be connected here as verified NISR
-            evidence becomes available.
           </p>
         </article>
       </section>
