@@ -1,7 +1,11 @@
-import type { AgriculturalObservation } from '../../../types/data-contract'
+import type {
+  AgriculturalObservation,
+  AgriculturalYieldReference,
+} from '../../../types/data-contract'
 import { adaptNisrAgriculturalObservations } from './nisrAgriculturalObservationAdapter'
 import { mockAgriculturalObservations } from './mockAgriculturalObservationAdapter'
 import { nisrMaizeSas2025Source } from './nisrMaizeSas2025Source'
+import { nisrMaizeSas2025NationalYieldReference } from './nisrMaizeSas2025NationalYieldReference'
 
 const agriculturalObservationsBySource = {
   mock: mockAgriculturalObservations,
@@ -13,11 +17,13 @@ const activeDataSource: keyof typeof agriculturalObservationsBySource = 'nisr'
 const activeAgriculturalObservations =
   agriculturalObservationsBySource[activeDataSource]
 
-export { MAIZE_NATIONAL_YIELD_KG_PER_HA } from './maizeObservations'
-
 export interface AgriculturalObservationPeriod {
   readonly season: AgriculturalObservation['season']
   readonly agriculturalYear: string
+}
+
+export function getNationalMaizeYieldReference(): AgriculturalYieldReference {
+  return nisrMaizeSas2025NationalYieldReference
 }
 
 export function getAgriculturalObservations(): readonly AgriculturalObservation[] {

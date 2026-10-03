@@ -30,7 +30,7 @@ export function AttentionLegend() {
           />
 
           <span className="text-xs font-medium text-slate-700">
-            −20% to −10%
+            &gt; −20% to ≤ −10%
           </span>
 
           <span className="hidden text-xs text-slate-400 sm:inline">

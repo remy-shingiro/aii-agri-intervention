@@ -1,15 +1,19 @@
 import type { InterventionSignal } from '../types/interventionSignal.types'
-import type { AgriculturalObservationSource } from '../../../types/data-contract'
+import type {
+  AgriculturalObservationSource,
+  AgriculturalYieldReference,
+} from '../../../types/data-contract'
 import { calculateInterventionSignal } from '../utils/calculateInterventionSignal'
 import {
   getAgriculturalObservations,
-  MAIZE_NATIONAL_YIELD_KG_PER_HA,
+  getNationalMaizeYieldReference,
 } from './agriculturalData'
 
 export interface DistrictInsight {
   district: string
   crop: string
   source: AgriculturalObservationSource
+  nationalYieldReference: AgriculturalYieldReference
   season: string
   year: string
   insight: string
@@ -34,20 +38,12 @@ function formatYield(value: number): string {
   return `${(value / 1000).toFixed(2)} t/ha`
 }
 
-function calculateYieldGapPct(yieldKgPerHa: number): number {
-  return (
-    ((yieldKgPerHa - MAIZE_NATIONAL_YIELD_KG_PER_HA) /
-      MAIZE_NATIONAL_YIELD_KG_PER_HA) *
-    100
-  )
-}
-
 function createInsight(district: string, yieldGapPct: number): string {
   if (yieldGapPct <= -20) {
     return `Maize yield is ${Math.abs(yieldGapPct).toFixed(1)}% below the national reference, indicating a significant productivity gap that warrants further investigation.`
   }
 
-  if (yieldGapPct < -10) {
+  if (yieldGapPct <= -10) {
     return `Maize yield is ${Math.abs(yieldGapPct).toFixed(1)}% below the national reference, indicating a moderate productivity gap.`
   }
 
@@ -58,16 +54,15 @@ function createInsight(district: string, yieldGapPct: number): string {
   return `Maize yield in ${district} is close to the national reference for Season A 2024/25.`
 }
 
+const nationalYieldReference = getNationalMaizeYieldReference()
+
 const districtInsights: DistrictInsight[] = getAgriculturalObservations().map(
   (observation) => {
-    const yieldGapPct = calculateYieldGapPct(
-      observation.yieldKilogramsPerHectare,
-    )
-
     const interventionSignal = calculateInterventionSignal({
       yield: observation.yieldKilogramsPerHectare,
-      referenceYield: MAIZE_NATIONAL_YIELD_KG_PER_HA,
+      referenceYield: nationalYieldReference.value,
     })
+    const yieldGapPct = interventionSignal.yieldGapPct
 
     return {
       district: observation.district,
@@ -75,6 +70,7 @@ const districtInsights: DistrictInsight[] = getAgriculturalObservations().map(
       season: `Season ${observation.season}`,
       year: observation.agriculturalYear,
       source: observation.source,
+      nationalYieldReference,
       insight: createInsight(observation.district, yieldGapPct),
       evidenceLabel: 'View evidence',
       totalProduction: formatTonnes(observation.productionTonnes),
@@ -90,8 +86,8 @@ const districtInsights: DistrictInsight[] = getAgriculturalObservations().map(
 export { districtInsights }
 
 const defaultInterventionSignal = calculateInterventionSignal({
-  yield: MAIZE_NATIONAL_YIELD_KG_PER_HA,
-  referenceYield: MAIZE_NATIONAL_YIELD_KG_PER_HA,
+  yield: nationalYieldReference.value,
+  referenceYield: nationalYieldReference.value,
 })
 
 const defaultInsight: DistrictInsight = {
@@ -101,6 +97,7 @@ const defaultInsight: DistrictInsight = {
     kind: 'mock',
     dataset: 'Mock national maize summary',
   },
+  nationalYieldReference,
   season: 'Season A',
   year: '2024/25',
   insight:
@@ -108,7 +105,7 @@ const defaultInsight: DistrictInsight = {
   evidenceLabel: 'View evidence',
   totalProduction: '481,246 tonnes',
   cultivatedArea: '244,095 ha',
-  averageYield: '1.99 t/ha',
+  averageYield: formatYield(nationalYieldReference.value),
   inputUse: 'Not yet available',
   yieldGapPct: 0,
   interventionSignal: defaultInterventionSignal,

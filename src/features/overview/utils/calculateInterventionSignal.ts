@@ -16,15 +16,7 @@ export function calculateInterventionSignal({
       ? ((districtYield - referenceYield) / referenceYield) * 100
       : 0
 
-  let level: InterventionSignal['level']
-
-  if (yieldGapPct <= -20) {
-    level = 'attention'
-  } else if (yieldGapPct <= -10) {
-    level = 'moderate'
-  } else {
-    level = 'near-reference'
-  }
+  const level = getInterventionSignalLevel(yieldGapPct)
 
   const historicalChangePct =
     historicalYield !== undefined && historicalYield > 0
@@ -39,4 +31,19 @@ export function calculateInterventionSignal({
     historicalYield,
     historicalChangePct,
   }
+}
+
+/** Shared yield-gap boundaries for intervention signals and map colors. */
+export function getInterventionSignalLevel(
+  yieldGapPct: number,
+): InterventionSignal['level'] {
+  if (yieldGapPct <= -20) {
+    return 'attention'
+  }
+
+  if (yieldGapPct <= -10) {
+    return 'moderate'
+  }
+
+  return 'near-reference'
 }

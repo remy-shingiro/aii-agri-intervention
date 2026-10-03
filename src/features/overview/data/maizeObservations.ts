@@ -8,8 +8,6 @@ export interface MaizeObservation {
   readonly source: 'MOCK development data'
 }
 
-export const MAIZE_NATIONAL_YIELD_KG_PER_HA = 1985
-
 export const maizeObservations: readonly MaizeObservation[] = [
   {
     district: 'Nyarugenge',

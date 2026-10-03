@@ -29,6 +29,18 @@ export type AgriculturalObservationSource =
 
 export type AgriculturalSeason = 'A' | 'B' | 'C'
 export type AgriculturalGeographyLevel = 'district' | 'province' | 'national'
+export type AgriculturalYieldUnit = 'Kg/Ha'
+
+/** A sourced benchmark used to compare agricultural observations. */
+export interface AgriculturalYieldReference {
+  readonly value: number
+  readonly unit: AgriculturalYieldUnit
+  readonly crop: string
+  readonly season: AgriculturalSeason
+  readonly agriculturalYear: string
+  readonly geographyLevel: 'national'
+  readonly source: Extract<AgriculturalObservationSource, { readonly kind: 'nisr' }>
+}
 
 /**
  * App-facing district observation; raw source records map into this model.

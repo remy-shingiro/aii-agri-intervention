@@ -9,6 +9,7 @@ import type {
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 import { districtInsights } from '../data/districtInsights'
+import { getInterventionSignalLevel } from '../utils/calculateInterventionSignal'
 import { AttentionLegend } from './AttentionLegend'
 import { RwandaMapControls } from './RwandaMapControls'
 import { RwandaMapNorthIndicator } from './RwandaMapNorthIndicator'
@@ -79,15 +80,14 @@ function getYearLabel(value: string): string {
 }
 
 function getDistrictAttentionColor(yieldGapPct: number): string {
-  if (yieldGapPct <= -20) {
-    return '#ef6a4a'
+  switch (getInterventionSignalLevel(yieldGapPct)) {
+    case 'attention':
+      return '#ef6a4a'
+    case 'moderate':
+      return '#f3a35c'
+    case 'near-reference':
+      return '#63b36b'
   }
-
-  if (yieldGapPct <= -10) {
-    return '#f3a35c'
-  }
-
-  return '#63b36b'
 }
 
 function createDistrictFillColorExpression(
