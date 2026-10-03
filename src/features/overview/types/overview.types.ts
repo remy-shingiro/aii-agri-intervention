@@ -1,3 +1,5 @@
+import type { DataSourceMetadata } from '../../../types/data-contract'
+
 export type AttentionLevel = 'high' | 'medium' | 'low' | 'unavailable'
 
 export interface DistrictEvidence {
@@ -22,9 +24,5 @@ export interface DistrictEvidence {
     erosionControl?: number
   }
 
-  source?: {
-    dataset: string
-    table?: string
-    page?: number
-  }
+  source?: DataSourceMetadata
 }

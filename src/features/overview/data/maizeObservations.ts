@@ -1,16 +1,16 @@
 export interface MaizeObservation {
-  district: string
-  season: 'A'
-  agriculturalYear: '2024/25'
-  cultivatedAreaHa: number
-  productionTonnes: number
-  yieldKgPerHa: number
-  source: 'NISR SAS 2025'
+  readonly district: string
+  readonly season: 'A'
+  readonly agriculturalYear: '2024/25'
+  readonly cultivatedAreaHa: number
+  readonly productionTonnes: number
+  readonly yieldKgPerHa: number
+  readonly source: 'MOCK development data'
 }
 
 export const MAIZE_NATIONAL_YIELD_KG_PER_HA = 1985
 
-export const maizeObservations: MaizeObservation[] = [
+export const maizeObservations: readonly MaizeObservation[] = [
   {
     district: 'Nyarugenge',
     season: 'A',
@@ -18,7 +18,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 679,
     productionTonnes: 909,
     yieldKgPerHa: 1338,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Gasabo',
@@ -27,7 +27,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 3298,
     productionTonnes: 5216,
     yieldKgPerHa: 1582,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Kicukiro',
@@ -36,7 +36,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 1168,
     productionTonnes: 1821,
     yieldKgPerHa: 1559,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Nyanza',
@@ -45,7 +45,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 5698,
     productionTonnes: 10568,
     yieldKgPerHa: 1868,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Gisagara',
@@ -54,7 +54,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 6832,
     productionTonnes: 13087,
     yieldKgPerHa: 1932,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Nyaruguru',
@@ -63,7 +63,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 4235,
     productionTonnes: 7636,
     yieldKgPerHa: 1839,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Huye',
@@ -72,7 +72,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 4607,
     productionTonnes: 8042,
     yieldKgPerHa: 1833,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Nyamagabe',
@@ -81,7 +81,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 6188,
     productionTonnes: 8119,
     yieldKgPerHa: 1567,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Ruhango',
@@ -90,7 +90,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 4093,
     productionTonnes: 5456,
     yieldKgPerHa: 1402,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Muhanga',
@@ -99,7 +99,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 2162,
     productionTonnes: 4381,
     yieldKgPerHa: 2047,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Kamonyi',
@@ -108,7 +108,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 5532,
     productionTonnes: 9419,
     yieldKgPerHa: 1702,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Karongi',
@@ -117,7 +117,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 6945,
     productionTonnes: 10252,
     yieldKgPerHa: 1486,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Rutsiro',
@@ -126,7 +126,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 6120,
     productionTonnes: 9003,
     yieldKgPerHa: 1471,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Rubavu',
@@ -135,7 +135,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 2304,
     productionTonnes: 3890,
     yieldKgPerHa: 1741,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Nyabihu',
@@ -144,7 +144,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 3148,
     productionTonnes: 5225,
     yieldKgPerHa: 1692,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Ngororero',
@@ -153,7 +153,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 3581,
     productionTonnes: 4838,
     yieldKgPerHa: 1351,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Rusizi',
@@ -162,7 +162,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 7740,
     productionTonnes: 15312,
     yieldKgPerHa: 1978,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Nyamasheke',
@@ -171,7 +171,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 5698,
     productionTonnes: 9553,
     yieldKgPerHa: 1677,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Rulindo',
@@ -180,7 +180,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 4592,
     productionTonnes: 8930,
     yieldKgPerHa: 1962,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Gakenke',
@@ -189,7 +189,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 8533,
     productionTonnes: 14068,
     yieldKgPerHa: 1656,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Musanze',
@@ -198,7 +198,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 5884,
     productionTonnes: 11208,
     yieldKgPerHa: 1905,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Burera',
@@ -207,7 +207,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 9651,
     productionTonnes: 20130,
     yieldKgPerHa: 2097,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Gicumbi',
@@ -216,7 +216,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 5842,
     productionTonnes: 8634,
     yieldKgPerHa: 1480,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Rwamagana',
@@ -225,7 +225,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 10449,
     productionTonnes: 17832,
     yieldKgPerHa: 1701,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Nyagatare',
@@ -234,7 +234,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 30096,
     productionTonnes: 85407,
     yieldKgPerHa: 2834,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Gatsibo',
@@ -243,7 +243,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 22199,
     productionTonnes: 41037,
     yieldKgPerHa: 1841,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Kayonza',
@@ -252,7 +252,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 17773,
     productionTonnes: 34261,
     yieldKgPerHa: 1925,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Kirehe',
@@ -261,7 +261,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 23652,
     productionTonnes: 60970,
     yieldKgPerHa: 2571,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Ngoma',
@@ -270,7 +270,7 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 15801,
     productionTonnes: 30531,
     yieldKgPerHa: 1932,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
   {
     district: 'Bugesera',
@@ -279,6 +279,6 @@ export const maizeObservations: MaizeObservation[] = [
     cultivatedAreaHa: 9597,
     productionTonnes: 15513,
     yieldKgPerHa: 1611,
-    source: 'NISR SAS 2025',
+    source: 'MOCK development data',
   },
 ]

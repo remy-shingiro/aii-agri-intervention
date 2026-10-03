@@ -1,13 +1,15 @@
-import {
-  MAIZE_NATIONAL_YIELD_KG_PER_HA,
-  maizeObservations,
-} from './maizeObservations'
 import type { InterventionSignal } from '../types/interventionSignal.types'
+import type { AgriculturalObservationSource } from '../../../types/data-contract'
 import { calculateInterventionSignal } from '../utils/calculateInterventionSignal'
+import {
+  getAgriculturalObservations,
+  MAIZE_NATIONAL_YIELD_KG_PER_HA,
+} from './agriculturalData'
 
 export interface DistrictInsight {
   district: string
   crop: string
+  source: AgriculturalObservationSource
   season: string
   year: string
   insight: string
@@ -59,23 +61,24 @@ function createInsight(
   return `Maize yield in ${district} is close to the national reference for Season A 2024/25.`
 }
 
-const districtInsights: DistrictInsight[] = maizeObservations.map(
+const districtInsights: DistrictInsight[] = getAgriculturalObservations().map(
   (observation) => {
     const yieldGapPct = calculateYieldGapPct(
-      observation.yieldKgPerHa,
+      observation.yieldKilogramsPerHectare,
     )
 
     const interventionSignal =
       calculateInterventionSignal({
-        yield: observation.yieldKgPerHa,
+        yield: observation.yieldKilogramsPerHectare,
         referenceYield: MAIZE_NATIONAL_YIELD_KG_PER_HA,
       })
 
     return {
       district: observation.district,
-      crop: 'Maize',
-      season: 'Season A',
-      year: '2024/25',
+      crop: observation.crop,
+      season: `Season ${observation.season}`,
+      year: observation.agriculturalYear,
+      source: observation.source,
       insight: createInsight(
         observation.district,
         yieldGapPct,
@@ -85,10 +88,10 @@ const districtInsights: DistrictInsight[] = maizeObservations.map(
         observation.productionTonnes,
       ),
       cultivatedArea: formatArea(
-        observation.cultivatedAreaHa,
+        observation.cultivatedAreaHectares,
       ),
       averageYield: formatYield(
-        observation.yieldKgPerHa,
+        observation.yieldKilogramsPerHectare,
       ),
       inputUse: 'Not yet available',
       yieldGapPct,
@@ -108,6 +111,10 @@ const defaultInterventionSignal =
 const defaultInsight: DistrictInsight = {
   district: 'Rwanda',
   crop: 'Maize',
+  source: {
+    kind: 'mock',
+    dataset: 'Mock national maize summary',
+  },
   season: 'Season A',
   year: '2024/25',
   insight:
@@ -136,7 +143,7 @@ export function getDistrictInsight(
     ) ?? {
       ...defaultInsight,
       district: districtName,
-      insight: `NISR maize productivity data for ${districtName} is not available in the current dataset.`,
+      insight: `Maize productivity data for ${districtName} is not available in the current development dataset.`,
     }
   )
 }
