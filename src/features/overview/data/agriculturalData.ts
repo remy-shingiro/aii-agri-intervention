@@ -8,8 +8,8 @@ const agriculturalObservationsBySource = {
   nisr: adaptNisrAgriculturalObservations(nisrMaizeSas2025Source),
 } satisfies Record<'mock' | 'nisr', readonly AgriculturalObservation[]>
 
-// Keep the mock active; this is the only source selection point for the layer.
-const activeDataSource: keyof typeof agriculturalObservationsBySource = 'mock'
+// This is the only source selection point for the agricultural data layer.
+const activeDataSource: keyof typeof agriculturalObservationsBySource = 'nisr'
 const activeAgriculturalObservations =
   agriculturalObservationsBySource[activeDataSource]
 
