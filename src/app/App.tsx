@@ -9,11 +9,9 @@ import { DistrictProfilePage } from '../features/district-profile/pages/District
 import { OverviewPage } from '../features/overview/pages/OverviewPage'
 
 export function App() {
-  const [activePage, setActivePage] =
-    useState<NavigationItem>('Overview')
+  const [activePage, setActivePage] = useState<NavigationItem>('Overview')
 
-  const [selectedDistrict, setSelectedDistrict] =
-    useState<string>()
+  const [selectedDistrict, setSelectedDistrict] = useState<string>()
 
   return (
     <AppShell

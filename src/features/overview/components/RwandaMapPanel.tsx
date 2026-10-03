@@ -34,11 +34,7 @@ interface RwandaMapPanelProps {
   onDistrictSelect?: (districtName: string) => void
 }
 
-function getInsightFilters(
-  crop: string,
-  season: string,
-  year: string,
-) {
+function getInsightFilters(crop: string, season: string, year: string) {
   const cropLabel = getCropLabel(crop)
   const seasonLabel = getSeasonLabel(season)
   const yearLabel = getYearLabel(year)
@@ -117,10 +113,7 @@ function createDistrictFillColorExpression(
       ? getDistrictAttentionColor(yieldGapPct)
       : '#dbe5df'
 
-    expression.push(
-      district.district.toLowerCase(),
-      color,
-    )
+    expression.push(district.district.toLowerCase(), color)
   }
 
   expression.push('#dbe5df')
@@ -197,11 +190,7 @@ export function RwandaMapPanel({
           type: 'fill',
           source: SOURCE_ID,
           paint: {
-            'fill-color': createDistrictFillColorExpression(
-              crop,
-              season,
-              year,
-            ),
+            'fill-color': createDistrictFillColorExpression(crop, season, year),
             'fill-opacity': [
               'case',
               ['boolean', ['feature-state', 'selected'], false],
@@ -223,14 +212,9 @@ export function RwandaMapPanel({
 
         setMapReady(true)
       } catch (error) {
-        console.error(
-          'Failed to initialize Rwanda district map:',
-          error,
-        )
+        console.error('Failed to initialize Rwanda district map:', error)
 
-        setMapError(
-          'The Rwanda district map could not be initialized.',
-        )
+        setMapError('The Rwanda district map could not be initialized.')
       }
     }
 
@@ -253,9 +237,7 @@ export function RwandaMapPanel({
         return
       }
 
-      const districtName = String(
-        feature.properties?.district ?? '',
-      )
+      const districtName = String(feature.properties?.district ?? '')
 
       if (districtName) {
         onDistrictSelectRef.current?.(districtName)
@@ -301,57 +283,54 @@ export function RwandaMapPanel({
     )
   }, [crop, season, year, mapReady])
 
-useEffect(() => {
-  const map = mapRef.current
+  useEffect(() => {
+    const map = mapRef.current
 
-  if (!map || !mapReady) {
-    return
-  }
+    if (!map || !mapReady) {
+      return
+    }
 
-  if (
-    !map.getLayer(FILL_LAYER_ID) ||
-    !map.getLayer(OUTLINE_LAYER_ID)
-  ) {
-    return
-  }
+    if (!map.getLayer(FILL_LAYER_ID) || !map.getLayer(OUTLINE_LAYER_ID)) {
+      return
+    }
 
-  const searchTerm = districtSearch.trim().toLowerCase()
+    const searchTerm = districtSearch.trim().toLowerCase()
 
-  if (!searchTerm) {
-    map.setFilter(FILL_LAYER_ID, null)
-    map.setFilter(OUTLINE_LAYER_ID, null)
-    return
-  }
+    if (!searchTerm) {
+      map.setFilter(FILL_LAYER_ID, null)
+      map.setFilter(OUTLINE_LAYER_ID, null)
+      return
+    }
 
-  const features = map.querySourceFeatures(SOURCE_ID)
+    const features = map.querySourceFeatures(SOURCE_ID)
 
-  const hasMatch = features.some((feature) => {
-    const districtName = String(
-      feature.properties?.district ?? '',
-    ).toLowerCase()
+    const hasMatch = features.some((feature) => {
+      const districtName = String(
+        feature.properties?.district ?? '',
+      ).toLowerCase()
 
-    return districtName.includes(searchTerm)
-  })
+      return districtName.includes(searchTerm)
+    })
 
-  if (!hasMatch) {
-    map.setFilter(FILL_LAYER_ID, null)
-    map.setFilter(OUTLINE_LAYER_ID, null)
-    return
-  }
+    if (!hasMatch) {
+      map.setFilter(FILL_LAYER_ID, null)
+      map.setFilter(OUTLINE_LAYER_ID, null)
+      return
+    }
 
-  const partialMatchFilter: FilterSpecification = [
-    '>=',
-    [
-      'index-of',
-      searchTerm,
-      ['downcase', ['to-string', ['get', 'district']]],
-    ],
-    0,
-  ]
+    const partialMatchFilter: FilterSpecification = [
+      '>=',
+      [
+        'index-of',
+        searchTerm,
+        ['downcase', ['to-string', ['get', 'district']]],
+      ],
+      0,
+    ]
 
-  map.setFilter(FILL_LAYER_ID, partialMatchFilter)
-  map.setFilter(OUTLINE_LAYER_ID, partialMatchFilter)
-}, [districtSearch, mapReady])
+    map.setFilter(FILL_LAYER_ID, partialMatchFilter)
+    map.setFilter(OUTLINE_LAYER_ID, partialMatchFilter)
+  }, [districtSearch, mapReady])
 
   useEffect(() => {
     const map = mapRef.current
@@ -393,14 +372,9 @@ useEffect(() => {
     const features = map.querySourceFeatures(SOURCE_ID)
 
     const selectedFeature = features.find((feature) => {
-      const districtName = String(
-        feature.properties?.district ?? '',
-      )
+      const districtName = String(feature.properties?.district ?? '')
 
-      return (
-        districtName.toLowerCase() ===
-        selectedDistrict.toLowerCase()
-      )
+      return districtName.toLowerCase() === selectedDistrict.toLowerCase()
     })
 
     if (selectedFeature?.id === undefined) {
@@ -458,9 +432,7 @@ useEffect(() => {
 
       {!mapReady && !mapError && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-50">
-          <p className="text-sm text-slate-500">
-            Loading Rwanda district map…
-          </p>
+          <p className="text-sm text-slate-500">Loading Rwanda district map…</p>
         </div>
       )}
 
@@ -472,8 +444,7 @@ useEffect(() => {
             </p>
 
             <p className="mt-1 text-sm text-slate-500">
-              Check the district boundary source connection and try
-              again.
+              Check the district boundary source connection and try again.
             </p>
           </div>
         </div>

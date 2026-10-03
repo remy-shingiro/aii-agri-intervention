@@ -21,9 +21,7 @@ describe('agricultural data boundary', () => {
       new Set(observations.map((observation) => observation.district)).size,
     ).toBe(30)
     expect(
-      observations.every(
-        (observation) => observation.source.kind === 'nisr',
-      ),
+      observations.every((observation) => observation.source.kind === 'nisr'),
     ).toBe(true)
     expect(
       observations.every(
@@ -36,8 +34,7 @@ describe('agricultural data boundary', () => {
     ).toBe(true)
     expect(
       observations.every(
-        (observation) =>
-          !/^(national|ssf|lsf)$/i.test(observation.district),
+        (observation) => !/^(national|ssf|lsf)$/i.test(observation.district),
       ),
     ).toBe(true)
     expect(

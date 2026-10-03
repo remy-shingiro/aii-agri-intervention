@@ -19,8 +19,7 @@ export function DistrictProfilePage({
   const evidence = getDistrictEvidence(selectedDistrict)
 
   const districtName = metadata?.district ?? insight.district
-  const provinceName =
-    metadata?.province ?? 'Province not available'
+  const provinceName = metadata?.province ?? 'Province not available'
 
   const signalLevel =
     insight.interventionSignal.level === 'attention'
@@ -39,10 +38,7 @@ export function DistrictProfilePage({
             onClick={() => onDistrictSelect(undefined)}
             type="button"
           >
-            <ArrowLeft
-              aria-hidden="true"
-              className="size-4"
-            />
+            <ArrowLeft aria-hidden="true" className="size-4" />
             <span>Overview</span>
           </button>
 
@@ -50,9 +46,7 @@ export function DistrictProfilePage({
             /
           </span>
 
-          <span className="font-medium text-slate-700">
-            District Profile
-          </span>
+          <span className="font-medium text-slate-700">District Profile</span>
         </div>
 
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -67,10 +61,7 @@ export function DistrictProfilePage({
               </h1>
 
               <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
-                <MapPin
-                  aria-hidden="true"
-                  className="size-3.5"
-                />
+                <MapPin aria-hidden="true" className="size-3.5" />
                 {provinceName}
               </span>
             </div>
@@ -80,9 +71,8 @@ export function DistrictProfilePage({
             </p>
 
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-              District-level agricultural productivity and evidence
-              to support further investigation and agricultural
-              planning.
+              District-level agricultural productivity and evidence to support
+              further investigation and agricultural planning.
             </p>
           </div>
 
@@ -111,9 +101,8 @@ export function DistrictProfilePage({
             </div>
 
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-              The signal compares district maize yield with the
-              national reference and identifies areas that warrant
-              further investigation.
+              The signal compares district maize yield with the national
+              reference and identifies areas that warrant further investigation.
             </p>
           </div>
 
@@ -124,9 +113,7 @@ export function DistrictProfilePage({
               </p>
 
               <p className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
-                {insight.interventionSignal.yieldGapPct > 0
-                  ? '+'
-                  : ''}
+                {insight.interventionSignal.yieldGapPct > 0 ? '+' : ''}
                 {insight.interventionSignal.yieldGapPct.toFixed(1)}%
               </p>
             </div>
@@ -136,9 +123,7 @@ export function DistrictProfilePage({
                 Evidence confidence
               </p>
 
-              <p className="mt-1 text-sm font-bold text-slate-900">
-                Moderate
-              </p>
+              <p className="mt-1 text-sm font-bold text-slate-900">Moderate</p>
             </div>
           </div>
         </div>
@@ -160,18 +145,14 @@ export function DistrictProfilePage({
             </p>
 
             <p className="mt-1 text-xl font-bold text-slate-900">
-              {(insight.interventionSignal.referenceYield / 1000).toFixed(
-                2,
-              )}{' '}
+              {(insight.interventionSignal.referenceYield / 1000).toFixed(2)}{' '}
               t/ha
             </p>
           </div>
         </div>
 
         <div className="mt-4 border-t border-slate-100 pt-4">
-          <p className="text-sm leading-6 text-slate-600">
-            {insight.insight}
-          </p>
+          <p className="text-sm leading-6 text-slate-600">{insight.insight}</p>
         </div>
       </section>
 
@@ -183,16 +164,14 @@ export function DistrictProfilePage({
           </h2>
 
           <p className="mt-1 text-xs text-slate-500">
-            Key agricultural productivity indicators for the selected
-            district and period.
+            Key agricultural productivity indicators for the selected district
+            and period.
           </p>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-medium text-slate-500">
-              District Yield
-            </p>
+            <p className="text-xs font-medium text-slate-500">District Yield</p>
 
             <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
               {insight.averageYield}
@@ -205,22 +184,16 @@ export function DistrictProfilePage({
             </p>
 
             <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-              {(insight.interventionSignal.referenceYield / 1000).toFixed(
-                2,
-              )}{' '}
+              {(insight.interventionSignal.referenceYield / 1000).toFixed(2)}{' '}
               t/ha
             </p>
           </article>
 
           <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-medium text-slate-500">
-              Yield Gap
-            </p>
+            <p className="text-xs font-medium text-slate-500">Yield Gap</p>
 
             <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-              {insight.interventionSignal.yieldGapPct > 0
-                ? '+'
-                : ''}
+              {insight.interventionSignal.yieldGapPct > 0 ? '+' : ''}
               {insight.interventionSignal.yieldGapPct.toFixed(1)}%
             </p>
           </article>
@@ -245,9 +218,9 @@ export function DistrictProfilePage({
           </h2>
 
           <p className="mt-1 max-w-3xl text-xs leading-5 text-slate-500">
-            Agricultural indicators associated with the selected
-            district that provide context for further investigation
-            of the productivity signal.
+            Agricultural indicators associated with the selected district that
+            provide context for further investigation of the productivity
+            signal.
           </p>
         </div>
 
@@ -296,30 +269,27 @@ export function DistrictProfilePage({
             </p>
 
             <p className="mt-1 text-sm leading-6 text-slate-500">
-              Evidence indicators for {districtName} are not available
-              in the current development dataset.
+              Evidence indicators for {districtName} are not available in the
+              current development dataset.
             </p>
           </div>
         )}
 
         <p className="mt-4 text-xs leading-5 text-slate-400">
-          Development data only. These indicators are presented for
-          UI development and do not represent verified NISR
-          statistics.
+          Development data only. These indicators are presented for UI
+          development and do not represent verified NISR statistics.
         </p>
       </section>
 
       {/* Coming analytical section */}
       <section>
         <article className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6">
-          <h2 className="text-sm font-semibold text-slate-900">
-            Yield Trend
-          </h2>
+          <h2 className="text-sm font-semibold text-slate-900">Yield Trend</h2>
 
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            Historical district performance and comparison with the
-            national reference will appear here once the historical
-            observations are connected.
+            Historical district performance and comparison with the national
+            reference will appear here once the historical observations are
+            connected.
           </p>
         </article>
       </section>

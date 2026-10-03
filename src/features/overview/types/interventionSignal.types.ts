@@ -1,7 +1,5 @@
 export type InterventionSignalLevel =
-  | 'attention'
-  | 'moderate'
-  | 'near-reference'
+  'attention' | 'moderate' | 'near-reference'
 
 export interface InterventionSignal {
   level: InterventionSignalLevel

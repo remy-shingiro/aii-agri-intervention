@@ -66,7 +66,6 @@ export function getDistrictEvidence(
 
   return districtEvidence.find(
     (evidence) =>
-      evidence.district.toLowerCase() ===
-      districtName.toLowerCase(),
+      evidence.district.toLowerCase() === districtName.toLowerCase(),
   )
 }

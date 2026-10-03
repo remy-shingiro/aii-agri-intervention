@@ -59,9 +59,7 @@ function getSignalLabel(level: InterventionSignalLevel): string {
   }
 }
 
-function getSignalDescription(
-  level: InterventionSignalLevel,
-): string {
+function getSignalDescription(level: InterventionSignalLevel): string {
   switch (level) {
     case 'attention':
       return 'Yield is substantially below the national reference and warrants further investigation.'

@@ -1,9 +1,4 @@
-import {
-  ChevronDown,
-  MapPin,
-  Search,
-  X,
-} from 'lucide-react'
+import { ChevronDown, MapPin, Search, X } from 'lucide-react'
 import {
   useEffect,
   useId,
@@ -45,9 +40,7 @@ export function DistrictSearchInput({
     }
 
     return districts
-      .filter((district) =>
-        district.toLowerCase().includes(searchTerm),
-      )
+      .filter((district) => district.toLowerCase().includes(searchTerm))
       .slice(0, 8)
   }, [districts, searchTerm])
 
@@ -70,10 +63,7 @@ export function DistrictSearchInput({
     document.addEventListener('mousedown', handlePointerDown)
 
     return () => {
-      document.removeEventListener(
-        'mousedown',
-        handlePointerDown,
-      )
+      document.removeEventListener('mousedown', handlePointerDown)
     }
   }, [])
 
@@ -88,9 +78,7 @@ export function DistrictSearchInput({
     })
   }
 
-  const handleInputChange = (
-    event: ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     const nextValue = event.target.value
 
     onChange(nextValue)
@@ -98,9 +86,7 @@ export function DistrictSearchInput({
     setHighlightedIndex(-1)
   }
 
-  const handleKeyDown = (
-    event: KeyboardEvent<HTMLInputElement>,
-  ) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Escape') {
       event.preventDefault()
       setIsOpen(false)
@@ -115,10 +101,7 @@ export function DistrictSearchInput({
         setHighlightedIndex(0)
       }
 
-      if (
-        event.key === 'Enter' &&
-        matchingDistricts.length === 1
-      ) {
+      if (event.key === 'Enter' && matchingDistricts.length === 1) {
         event.preventDefault()
         selectDistrict(matchingDistricts[0])
       }
@@ -131,9 +114,7 @@ export function DistrictSearchInput({
         event.preventDefault()
 
         setHighlightedIndex((currentIndex) => {
-          if (
-            currentIndex < matchingDistricts.length - 1
-          ) {
+          if (currentIndex < matchingDistricts.length - 1) {
             return currentIndex + 1
           }
 
@@ -157,9 +138,7 @@ export function DistrictSearchInput({
         event.preventDefault()
 
         if (highlightedIndex >= 0) {
-          selectDistrict(
-            matchingDistricts[highlightedIndex],
-          )
+          selectDistrict(matchingDistricts[highlightedIndex])
           return
         }
 
@@ -198,14 +177,8 @@ export function DistrictSearchInput({
       : undefined
 
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full"
-    >
-      <label
-        className="sr-only"
-        htmlFor={inputId}
-      >
+    <div ref={containerRef} className="relative w-full">
+      <label className="sr-only" htmlFor={inputId}>
         Search district
       </label>
 
@@ -242,10 +215,7 @@ export function DistrictSearchInput({
             onClick={handleClear}
             type="button"
           >
-            <X
-              aria-hidden="true"
-              className="size-4"
-            />
+            <X aria-hidden="true" className="size-4" />
           </button>
         )}
 
@@ -266,8 +236,7 @@ export function DistrictSearchInput({
           {matchingDistricts.length > 0 ? (
             <div className="max-h-64 overflow-y-auto py-1">
               {matchingDistricts.map((district, index) => {
-                const isHighlighted =
-                  index === highlightedIndex
+                const isHighlighted = index === highlightedIndex
 
                 return (
                   <button
@@ -294,15 +263,11 @@ export function DistrictSearchInput({
                     <MapPin
                       aria-hidden="true"
                       className={`size-4 shrink-0 ${
-                        isHighlighted
-                          ? 'text-green-600'
-                          : 'text-slate-400'
+                        isHighlighted ? 'text-green-600' : 'text-slate-400'
                       }`}
                     />
 
-                    <span className="truncate">
-                      {district}
-                    </span>
+                    <span className="truncate">{district}</span>
                   </button>
                 )
               })}

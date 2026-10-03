@@ -27,10 +27,7 @@ export function OverviewPage({
     year: '2024-25',
   })
 
-  const handleFilterChange = (
-    filter: keyof OverviewFilters,
-    value: string,
-  ) => {
+  const handleFilterChange = (filter: keyof OverviewFilters, value: string) => {
     setFilters((current) => ({
       ...current,
       [filter]: value,
@@ -74,9 +71,7 @@ export function OverviewPage({
         </div>
       </main>
 
-      <AgriculturalInsightPanel
-        selectedDistrict={selectedDistrict}
-      />
+      <AgriculturalInsightPanel selectedDistrict={selectedDistrict} />
     </div>
   )
 }

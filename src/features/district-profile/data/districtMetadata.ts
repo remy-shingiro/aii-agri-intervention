@@ -144,7 +144,6 @@ export function getDistrictMetadata(
 
   return districtMetadata.find(
     (district) =>
-      district.district.toLowerCase() ===
-      districtName.toLowerCase(),
+      district.district.toLowerCase() === districtName.toLowerCase(),
   )
 }

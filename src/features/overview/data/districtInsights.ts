@@ -42,10 +42,7 @@ function calculateYieldGapPct(yieldKgPerHa: number): number {
   )
 }
 
-function createInsight(
-  district: string,
-  yieldGapPct: number,
-): string {
+function createInsight(district: string, yieldGapPct: number): string {
   if (yieldGapPct <= -20) {
     return `Maize yield is ${Math.abs(yieldGapPct).toFixed(1)}% below the national reference, indicating a significant productivity gap that warrants further investigation.`
   }
@@ -67,11 +64,10 @@ const districtInsights: DistrictInsight[] = getAgriculturalObservations().map(
       observation.yieldKilogramsPerHectare,
     )
 
-    const interventionSignal =
-      calculateInterventionSignal({
-        yield: observation.yieldKilogramsPerHectare,
-        referenceYield: MAIZE_NATIONAL_YIELD_KG_PER_HA,
-      })
+    const interventionSignal = calculateInterventionSignal({
+      yield: observation.yieldKilogramsPerHectare,
+      referenceYield: MAIZE_NATIONAL_YIELD_KG_PER_HA,
+    })
 
     return {
       district: observation.district,
@@ -79,20 +75,11 @@ const districtInsights: DistrictInsight[] = getAgriculturalObservations().map(
       season: `Season ${observation.season}`,
       year: observation.agriculturalYear,
       source: observation.source,
-      insight: createInsight(
-        observation.district,
-        yieldGapPct,
-      ),
+      insight: createInsight(observation.district, yieldGapPct),
       evidenceLabel: 'View evidence',
-      totalProduction: formatTonnes(
-        observation.productionTonnes,
-      ),
-      cultivatedArea: formatArea(
-        observation.cultivatedAreaHectares,
-      ),
-      averageYield: formatYield(
-        observation.yieldKilogramsPerHectare,
-      ),
+      totalProduction: formatTonnes(observation.productionTonnes),
+      cultivatedArea: formatArea(observation.cultivatedAreaHectares),
+      averageYield: formatYield(observation.yieldKilogramsPerHectare),
       inputUse: 'Not yet available',
       yieldGapPct,
       interventionSignal,
@@ -102,11 +89,10 @@ const districtInsights: DistrictInsight[] = getAgriculturalObservations().map(
 
 export { districtInsights }
 
-const defaultInterventionSignal =
-  calculateInterventionSignal({
-    yield: MAIZE_NATIONAL_YIELD_KG_PER_HA,
-    referenceYield: MAIZE_NATIONAL_YIELD_KG_PER_HA,
-  })
+const defaultInterventionSignal = calculateInterventionSignal({
+  yield: MAIZE_NATIONAL_YIELD_KG_PER_HA,
+  referenceYield: MAIZE_NATIONAL_YIELD_KG_PER_HA,
+})
 
 const defaultInsight: DistrictInsight = {
   district: 'Rwanda',
@@ -128,9 +114,7 @@ const defaultInsight: DistrictInsight = {
   interventionSignal: defaultInterventionSignal,
 }
 
-export function getDistrictInsight(
-  districtName?: string,
-): DistrictInsight {
+export function getDistrictInsight(districtName?: string): DistrictInsight {
   if (!districtName) {
     return defaultInsight
   }
@@ -138,8 +122,7 @@ export function getDistrictInsight(
   return (
     districtInsights.find(
       (district) =>
-        district.district.toLowerCase() ===
-        districtName.toLowerCase(),
+        district.district.toLowerCase() === districtName.toLowerCase(),
     ) ?? {
       ...defaultInsight,
       district: districtName,

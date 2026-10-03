@@ -15,9 +15,7 @@ export function AttentionLegend() {
             style={{ backgroundColor: '#ef6a4a' }}
           />
 
-          <span className="text-xs font-medium text-slate-700">
-            ≤ −20%
-          </span>
+          <span className="text-xs font-medium text-slate-700">≤ −20%</span>
 
           <span className="hidden text-xs text-slate-400 sm:inline">
             Significant gap
@@ -47,9 +45,7 @@ export function AttentionLegend() {
             style={{ backgroundColor: '#63b36b' }}
           />
 
-          <span className="text-xs font-medium text-slate-700">
-            &gt; −10%
-          </span>
+          <span className="text-xs font-medium text-slate-700">&gt; −10%</span>
 
           <span className="hidden text-xs text-slate-400 sm:inline">
             Near reference
@@ -62,9 +58,7 @@ export function AttentionLegend() {
             className="size-3 shrink-0 rounded-sm border border-slate-300 bg-[#dbe5df]"
           />
 
-          <span className="text-xs font-medium text-slate-700">
-            No data
-          </span>
+          <span className="text-xs font-medium text-slate-700">No data</span>
         </div>
       </div>
     </div>

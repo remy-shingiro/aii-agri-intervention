@@ -6,11 +6,7 @@ interface NavigationProps {
   onNavigate: (page: NavigationItem) => void
 }
 
-export function Navigation({
-  activePage,
-  items,
-  onNavigate,
-}: NavigationProps) {
+export function Navigation({ activePage, items, onNavigate }: NavigationProps) {
   return (
     <nav
       aria-label="Primary"

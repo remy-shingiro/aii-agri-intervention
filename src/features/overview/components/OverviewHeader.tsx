@@ -1,8 +1,4 @@
-import {
-  CalendarDays,
-  ChevronDown,
-  Leaf,
-} from 'lucide-react'
+import { CalendarDays, ChevronDown, Leaf } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { DistrictSearchInput } from './DistrictSearchInput'
@@ -18,10 +14,7 @@ interface OverviewHeaderProps {
   filters: OverviewFilters
   onApply: () => void
   onDistrictSearchChange: (value: string) => void
-  onFilterChange: (
-    filter: keyof OverviewFilters,
-    value: string,
-  ) => void
+  onFilterChange: (filter: keyof OverviewFilters, value: string) => void
 }
 
 interface FilterOption {
@@ -80,32 +73,21 @@ export function OverviewHeader({
           )
         }
 
-        const geoJson =
-          (await response.json()) as DistrictGeoJson
+        const geoJson = (await response.json()) as DistrictGeoJson
 
         const districtNames = Array.from(
           new Set(
             (geoJson.features ?? [])
-              .map((feature) =>
-                feature.properties?.district?.trim(),
-              )
-              .filter(
-                (district): district is string =>
-                  Boolean(district),
-              ),
+              .map((feature) => feature.properties?.district?.trim())
+              .filter((district): district is string => Boolean(district)),
           ),
-        ).sort((first, second) =>
-          first.localeCompare(second),
-        )
+        ).sort((first, second) => first.localeCompare(second))
 
         if (!cancelled) {
           setDistricts(districtNames)
         }
       } catch (error) {
-        console.error(
-          'Failed to load Rwanda district names:',
-          error,
-        )
+        console.error('Failed to load Rwanda district names:', error)
       }
     }
 
@@ -129,9 +111,8 @@ export function OverviewHeader({
           </h2>
 
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500 sm:text-base">
-            Explore agricultural productivity patterns across
-            Rwanda&apos;s districts and identify areas requiring
-            attention.
+            Explore agricultural productivity patterns across Rwanda&apos;s
+            districts and identify areas requiring attention.
           </p>
         </div>
       </div>
@@ -170,16 +151,11 @@ export function OverviewHeader({
                 className="h-11 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-9 pr-9 text-sm font-medium text-slate-700 outline-none transition-colors hover:border-slate-300 focus:border-green-600 focus:ring-2 focus:ring-green-600/10"
                 id="crop-filter"
                 name="crop"
-                onChange={(event) =>
-                  onFilterChange('crop', event.target.value)
-                }
+                onChange={(event) => onFilterChange('crop', event.target.value)}
                 value={filters.crop}
               >
                 {cropOptions.map((option) => (
-                  <option
-                    key={option.value}
-                    value={option.value}
-                  >
+                  <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
                 ))}
@@ -211,10 +187,7 @@ export function OverviewHeader({
                 value={filters.season}
               >
                 {seasonOptions.map((option) => (
-                  <option
-                    key={option.value}
-                    value={option.value}
-                  >
+                  <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
                 ))}
@@ -245,16 +218,11 @@ export function OverviewHeader({
                 className="h-11 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-9 pr-9 text-sm font-medium text-slate-700 outline-none transition-colors hover:border-slate-300 focus:border-green-600 focus:ring-2 focus:ring-green-600/10"
                 id="year-filter"
                 name="year"
-                onChange={(event) =>
-                  onFilterChange('year', event.target.value)
-                }
+                onChange={(event) => onFilterChange('year', event.target.value)}
                 value={filters.year}
               >
                 {yearOptions.map((option) => (
-                  <option
-                    key={option.value}
-                    value={option.value}
-                  >
+                  <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
                 ))}

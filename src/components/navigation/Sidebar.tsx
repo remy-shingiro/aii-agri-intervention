@@ -1,9 +1,4 @@
-import {
-  BarChart3,
-  BookOpen,
-  ClipboardList,
-  Map,
-} from 'lucide-react'
+import { BarChart3, BookOpen, ClipboardList, Map } from 'lucide-react'
 
 import { SidebarNavItem } from './SidebarNavItem'
 import type { NavigationItem } from './navigation.types'
@@ -21,11 +16,7 @@ const navigationIcons: Record<NavigationItem, typeof Map> = {
   'Data & Methodology': BookOpen,
 }
 
-export function Sidebar({
-  activePage,
-  items,
-  onNavigate,
-}: SidebarProps) {
+export function Sidebar({ activePage, items, onNavigate }: SidebarProps) {
   return (
     <aside className="border-b border-slate-200 bg-white lg:fixed lg:left-0 lg:top-20 lg:h-[calc(100vh-5rem)] lg:w-56 lg:border-b-0 lg:border-r">
       <nav

@@ -6,7 +6,11 @@ describe('application shell', () => {
   it('shows the verified-data waiting state', () => {
     render(<App />)
 
-    expect(screen.getByRole('heading', { name: /see where agricultural productivity/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', {
+        name: /see where agricultural productivity/i,
+      }),
+    ).toBeInTheDocument()
     expect(screen.getByText('AHS 2024')).toBeInTheDocument()
     expect(screen.getByText('No observations loaded')).toBeInTheDocument()
   })
@@ -16,7 +20,11 @@ describe('application shell', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /evidence/i }))
 
-    expect(screen.getByRole('heading', { name: /inspect the evidence/i })).toBeInTheDocument()
-    expect(screen.getAllByText('Source structure not yet inspected')).toHaveLength(3)
+    expect(
+      screen.getByRole('heading', { name: /inspect the evidence/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getAllByText('Source structure not yet inspected'),
+    ).toHaveLength(3)
   })
 })

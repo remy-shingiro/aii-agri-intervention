@@ -1,7 +1,5 @@
 /** Inspection status for the source datasets; the active source can remain mock. */
-export type DataReadiness =
-  | 'awaiting-source-inspection'
-  | 'source-inspected'
+export type DataReadiness = 'awaiting-source-inspection' | 'source-inspected'
 
 export interface AgriculturalDataSourceReference {
   readonly table: string
