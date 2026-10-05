@@ -187,7 +187,7 @@ export function RwandaMapPanel({
         map.addSource(SOURCE_ID, {
           type: 'geojson',
           data: DISTRICT_SOURCE_URL,
-          promoteId: 'district_i',
+          promoteId: 'district',
         })
 
         map.addLayer({
