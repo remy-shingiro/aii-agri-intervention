@@ -1,297 +1,272 @@
 import { ArrowLeft, MapPin } from 'lucide-react'
 
-import { EvidenceCard } from '../components/EvidenceCard'
-import { getDistrictEvidence } from '../data/districtEvidence'
 import { getDistrictMetadata } from '../data/districtMetadata'
 import { getDistrictInsight } from '../../overview/data/districtInsights'
+import type { InterventionSignalLevel } from '../../overview/types/interventionSignal.types'
 
 interface DistrictProfilePageProps {
   selectedDistrict?: string
-  onDistrictSelect: (district: string | undefined) => void
+  onNavigateOverview: () => void
+}
+
+function getSignalLabel(level: InterventionSignalLevel): string {
+  switch (level) {
+    case 'attention':
+      return 'Attention'
+    case 'moderate':
+      return 'Moderate'
+    case 'near-reference':
+      return 'Near reference'
+  }
+}
+
+function getSignalClasses(level: InterventionSignalLevel): string {
+  switch (level) {
+    case 'attention':
+      return 'bg-red-50 text-red-800 ring-1 ring-red-200'
+    case 'moderate':
+      return 'bg-amber-50 text-amber-900 ring-1 ring-amber-200'
+    case 'near-reference':
+      return 'bg-green-50 text-green-800 ring-1 ring-green-200'
+  }
 }
 
 export function DistrictProfilePage({
   selectedDistrict,
-  onDistrictSelect,
+  onNavigateOverview,
 }: DistrictProfilePageProps) {
-  const insight = getDistrictInsight(selectedDistrict)
+  const candidate = selectedDistrict
+    ? getDistrictInsight(selectedDistrict)
+    : undefined
+  const insight = candidate?.source.kind === 'nisr' ? candidate : undefined
+
+  if (!insight) {
+    return (
+      <section className="mx-auto max-w-2xl border-l-2 border-green-700 py-2 pl-5 sm:pl-6">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-green-800">
+          District profile
+        </p>
+        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+          Select a district to review its evidence
+        </h1>
+        <p className="mt-3 text-sm leading-6 text-slate-600">
+          Choose a district from the Overview map or district search, then open
+          its profile. The profile displays only district observations in the
+          connected NISR source.
+        </p>
+      </section>
+    )
+  }
+
   const metadata = getDistrictMetadata(insight.district)
-  const evidence = getDistrictEvidence(selectedDistrict)
+  const source = insight.source
+  const signal = insight.interventionSignal
 
-  const districtName = metadata?.district ?? insight.district
-  const provinceName = metadata?.province ?? 'Province not available'
-
-  const signalLevel =
-    insight.interventionSignal.level === 'attention'
-      ? 'Attention'
-      : insight.interventionSignal.level === 'moderate'
-        ? 'Moderate'
-        : 'Near reference'
+  if (source.kind !== 'nisr') {
+    return null
+  }
 
   return (
     <div className="space-y-8">
-      {/* Page header */}
-      <section className="space-y-5">
-        <div className="flex items-center gap-2 text-sm">
-          <button
-            className="inline-flex items-center gap-1.5 font-medium text-slate-500 transition-colors hover:text-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2"
-            onClick={() => onDistrictSelect(undefined)}
-            type="button"
-          >
-            <ArrowLeft aria-hidden="true" className="size-4" />
-            <span>Overview</span>
-          </button>
+      <header className="space-y-4">
+        <button
+          className="inline-flex min-h-10 items-center gap-2 rounded-md text-sm font-medium text-slate-600 transition-colors hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+          onClick={onNavigateOverview}
+          type="button"
+        >
+          <ArrowLeft aria-hidden="true" className="size-4" />
+          Back to Overview
+        </button>
 
-          <span aria-hidden="true" className="text-slate-300">
-            /
-          </span>
-
-          <span className="font-medium text-slate-700">District Profile</span>
-        </div>
-
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wider text-green-700">
-              District profile
-            </p>
-
-            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-2">
-              <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                {districtName}
-              </h1>
-
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
-                <MapPin aria-hidden="true" className="size-3.5" />
-                {provinceName}
+        <div className="border-b border-slate-200 pb-5">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-green-800">
+            District profile
+          </p>
+          <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-2">
+            <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+              {insight.district}
+            </h1>
+            {metadata && (
+              <span className="inline-flex items-center gap-1.5 text-sm text-slate-600">
+                <MapPin aria-hidden="true" className="size-4" />
+                {metadata.province}
               </span>
-            </div>
-
-            <p className="mt-2 text-sm text-slate-500">
-              {insight.crop} · {insight.season} · {insight.year}
-            </p>
-
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-              District-level agricultural productivity and evidence to support
-              further investigation and agricultural planning.
-            </p>
+            )}
           </div>
-
-          <button
-            className="inline-flex h-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2"
-            onClick={() => onDistrictSelect(undefined)}
-            type="button"
-          >
-            Change district
-          </button>
+          <p className="mt-2 text-sm text-slate-600">
+            {insight.crop} · {insight.season} · Agricultural year {insight.year}
+          </p>
         </div>
-      </section>
+      </header>
 
-      {/* Intervention signal */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+      <section
+        aria-labelledby="district-signal-heading"
+        className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6"
+      >
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_230px] lg:items-center">
           <div>
-            <div className="flex items-center gap-3">
-              <h2 className="text-sm font-semibold text-slate-900">
-                Intervention Signal
+            <div className="flex flex-wrap items-center gap-3">
+              <h2
+                id="district-signal-heading"
+                className="text-base font-semibold text-slate-900"
+              >
+                Intervention signal
               </h2>
-
-              <span className="rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">
-                {signalLevel}
+              <span
+                className={`inline-flex min-h-7 items-center rounded-md px-2.5 py-1 text-xs font-semibold ${getSignalClasses(signal.level)}`}
+              >
+                {getSignalLabel(signal.level)}
               </span>
             </div>
-
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-              The signal compares district maize yield with the national
-              reference and identifies areas that warrant further investigation.
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+              The signal compares district maize yield with the NISR national
+              reference. It indicates where further investigation may be useful;
+              it does not identify a cause.
             </p>
           </div>
 
-          <div className="flex items-end gap-8">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                Yield gap
-              </p>
-
-              <p className="mt-1 text-3xl font-bold tracking-tight text-slate-900">
-                {insight.interventionSignal.yieldGapPct > 0 ? '+' : ''}
-                {insight.interventionSignal.yieldGapPct.toFixed(1)}%
-              </p>
-            </div>
-
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                Evidence confidence
-              </p>
-
-              <p className="mt-1 text-sm font-bold text-slate-900">Moderate</p>
-            </div>
+          <div className="border-t border-slate-200 pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+            <p className="text-xs font-medium text-slate-600">
+              Yield gap relative to national reference
+            </p>
+            <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900 tabular-nums">
+              {signal.yieldGapPct > 0 ? '+' : ''}
+              {signal.yieldGapPct.toFixed(1)}%
+            </p>
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-xl bg-slate-50 p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-              District yield
-            </p>
-
-            <p className="mt-1 text-xl font-bold text-slate-900">
+        <dl className="mt-5 grid border-y border-slate-200 sm:grid-cols-2 sm:divide-x sm:divide-slate-200">
+          <div className="py-3 sm:pr-4">
+            <dt className="text-xs text-slate-500">District average yield</dt>
+            <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
               {insight.averageYield}
-            </p>
+            </dd>
           </div>
-
-          <div className="rounded-xl bg-slate-50 p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-              National reference
-            </p>
-
-            <p className="mt-1 text-xl font-bold text-slate-900">
-              {(insight.interventionSignal.referenceYield / 1000).toFixed(2)}{' '}
-              t/ha
-            </p>
+          <div className="border-t border-slate-200 py-3 sm:border-t-0 sm:pl-5">
+            <dt className="text-xs text-slate-500">National yield reference</dt>
+            <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
+              {(signal.referenceYield / 1000).toFixed(3)} t/ha
+            </dd>
           </div>
-        </div>
-
-        <div className="mt-4 border-t border-slate-100 pt-4">
-          <p className="text-sm leading-6 text-slate-600">{insight.insight}</p>
-        </div>
+        </dl>
       </section>
 
-      {/* Productivity overview */}
-      <section>
-        <div className="mb-4">
-          <h2 className="text-sm font-semibold text-slate-900">
-            Productivity Overview
+      <section aria-labelledby="productivity-heading">
+        <div className="mb-3">
+          <h2
+            id="productivity-heading"
+            className="text-base font-semibold text-slate-900"
+          >
+            Productivity overview
           </h2>
-
-          <p className="mt-1 text-xs text-slate-500">
-            Key agricultural productivity indicators for the selected district
-            and period.
+          <p className="mt-1 text-sm text-slate-600">
+            Observed district production and cultivated area for this period.
           </p>
         </div>
-
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-medium text-slate-500">District Yield</p>
-
-            <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-              {insight.averageYield}
-            </p>
-          </article>
-
-          <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-medium text-slate-500">
-              National Reference
-            </p>
-
-            <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-              {(insight.interventionSignal.referenceYield / 1000).toFixed(2)}{' '}
-              t/ha
-            </p>
-          </article>
-
-          <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-medium text-slate-500">Yield Gap</p>
-
-            <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
-              {insight.interventionSignal.yieldGapPct > 0 ? '+' : ''}
-              {insight.interventionSignal.yieldGapPct.toFixed(1)}%
-            </p>
-          </article>
-
-          <article className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-            <p className="text-xs font-medium text-slate-500">
-              Cultivated Area
-            </p>
-
-            <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
+        <dl className="grid border-y border-slate-200 sm:grid-cols-2 sm:divide-x sm:divide-slate-200">
+          <div className="py-3 sm:pr-5">
+            <dt className="text-xs text-slate-500">Production</dt>
+            <dd className="mt-1 text-xl font-semibold text-slate-900 tabular-nums">
+              {insight.totalProduction}
+            </dd>
+          </div>
+          <div className="border-t border-slate-200 py-3 sm:border-t-0 sm:pl-5">
+            <dt className="text-xs text-slate-500">Cultivated area</dt>
+            <dd className="mt-1 text-xl font-semibold text-slate-900 tabular-nums">
               {insight.cultivatedArea}
-            </p>
-          </article>
-        </div>
-      </section>
-
-      {/* Evidence behind the signal */}
-      <section>
-        <div className="mb-4">
-          <h2 className="text-sm font-semibold text-slate-900">
-            Evidence Behind the Signal
-          </h2>
-
-          <p className="mt-1 max-w-3xl text-xs leading-5 text-slate-500">
-            Agricultural indicators associated with the selected district that
-            provide context for further investigation of the productivity
-            signal.
-          </p>
-        </div>
-
-        {evidence ? (
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            <EvidenceCard
-              label="Improved seed use"
-              value={evidence.improvedSeedUsePct}
-              description="Share of agricultural activity using improved seed."
-            />
-
-            <EvidenceCard
-              label="Fertilizer use"
-              value={evidence.fertilizerUsePct}
-              description="Observed use of fertilizer inputs."
-            />
-
-            <EvidenceCard
-              label="Irrigation use"
-              value={evidence.irrigationUsePct}
-              description="Observed use or access to irrigation."
-            />
-
-            <EvidenceCard
-              label="Extension access"
-              value={evidence.extensionAccessPct}
-              description="Farmers reporting access to extension services."
-            />
-
-            <EvidenceCard
-              label="Soil management"
-              value={evidence.soilManagementPct}
-              description="Observed soil and land management practices."
-            />
-
-            <EvidenceCard
-              label="Mechanization use"
-              value={evidence.mechanizationUsePct}
-              description="Observed use of agricultural mechanization."
-            />
+            </dd>
           </div>
-        ) : (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6">
-            <p className="text-sm font-medium text-slate-700">
-              Evidence not available
-            </p>
-
-            <p className="mt-1 text-sm leading-6 text-slate-500">
-              Evidence indicators for {districtName} are not available in the
-              current development dataset.
-            </p>
-          </div>
-        )}
-
-        <p className="mt-4 text-xs leading-5 text-slate-400">
-          Development data only. These indicators are presented for UI
-          development and do not represent verified NISR statistics.
+        </dl>
+        <p className="mt-2 text-xs leading-5 text-slate-500">
+          NISR SAS 2025 Annual Report · Production: Table 24, p. 61 · Area:
+          Table 13, p. 50.
         </p>
       </section>
 
-      {/* Coming analytical section */}
-      <section>
-        <article className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6">
-          <h2 className="text-sm font-semibold text-slate-900">Yield Trend</h2>
+      <section aria-labelledby="yield-trend-heading">
+        <div className="mb-3">
+          <h2
+            id="yield-trend-heading"
+            className="text-base font-semibold text-slate-900"
+          >
+            Yield trend
+          </h2>
+        </div>
+        <p className="border-l-2 border-slate-300 py-1 pl-4 text-sm leading-6 text-slate-600">
+          Historical district yield observations are not connected, so a trend
+          cannot be shown for this district.
+        </p>
+      </section>
 
-          <p className="mt-2 text-sm leading-6 text-slate-500">
-            Historical district performance and comparison with the national
-            reference will appear here once the historical observations are
-            connected.
+      <section aria-labelledby="signal-evidence-heading">
+        <div className="mb-3">
+          <h2
+            id="signal-evidence-heading"
+            className="text-base font-semibold text-slate-900"
+          >
+            Evidence behind the signal
+          </h2>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
+            The yield gap is calculated from the district average maize yield
+            and the NISR national maize yield reference for the same period.
           </p>
-        </article>
+        </div>
+        <div className="border-y border-slate-200 py-3 text-sm leading-6 text-slate-700">
+          Yield gap (%) = (district yield − national reference) ÷ national
+          reference × 100.
+          <p className="mt-2 text-xs text-slate-500">
+            Both yield values are reported in SAS 2025 Annual Report Table 19,
+            p. 56.
+          </p>
+        </div>
+      </section>
+
+      <section aria-labelledby="intervention-areas-heading">
+        <div className="mb-3">
+          <h2
+            id="intervention-areas-heading"
+            className="text-base font-semibold text-slate-900"
+          >
+            Potential intervention areas
+          </h2>
+        </div>
+        <p className="border-l-2 border-amber-500 py-1 pl-4 text-sm leading-6 text-slate-600">
+          Verified input-use, irrigation, and extension indicators are not
+          connected for this district and period. The yield gap alone does not
+          show which intervention would address it.
+        </p>
+      </section>
+
+      <section
+        aria-labelledby="source-methodology-heading"
+        className="border-t border-slate-200 pt-5"
+      >
+        <h2
+          id="source-methodology-heading"
+          className="text-base font-semibold text-slate-900"
+        >
+          Source and methodology
+        </h2>
+        <a
+          className="mt-2 inline-block text-sm font-medium text-green-800 underline decoration-green-300 underline-offset-2 hover:text-green-950"
+          href={source.sourceUrl}
+          rel="noreferrer"
+          target="_blank"
+        >
+          {source.report}
+        </a>
+        <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-600">
+          {source.references.map((reference) => (
+            <li key={reference.table}>
+              {reference.table} · p. {reference.page}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-xs leading-5 text-slate-500">
+          Yield gap uses the district yield and national yield reference from
+          Table 19. Source values and units are displayed as reported.
+        </p>
       </section>
     </div>
   )

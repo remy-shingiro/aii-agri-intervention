@@ -30,9 +30,31 @@ export function DistrictSearchInput({
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [isOpen, setIsOpen] = useState(false)
-  const [highlightedIndex, setHighlightedIndex] = useState(-1)
+  const [highlightedState, setHighlightedState] = useState({
+    searchTerm: '',
+    index: -1,
+  })
 
   const searchTerm = value.trim().toLowerCase()
+  const highlightedIndex =
+    highlightedState.searchTerm === searchTerm ? highlightedState.index : -1
+
+  const setHighlightedIndex = (
+    nextIndex: number | ((currentIndex: number) => number),
+  ) => {
+    setHighlightedState((current) => {
+      const currentIndex =
+        current.searchTerm === searchTerm ? current.index : -1
+
+      return {
+        searchTerm,
+        index:
+          typeof nextIndex === 'function'
+            ? nextIndex(currentIndex)
+            : nextIndex,
+      }
+    })
+  }
 
   const matchingDistricts = useMemo(() => {
     if (!searchTerm) {
@@ -45,10 +67,6 @@ export function DistrictSearchInput({
   }, [districts, searchTerm])
 
   useEffect(() => {
-    setHighlightedIndex(-1)
-  }, [searchTerm])
-
-  useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
       if (!containerRef.current) {
         return
@@ -56,7 +74,7 @@ export function DistrictSearchInput({
 
       if (!containerRef.current.contains(event.target as Node)) {
         setIsOpen(false)
-        setHighlightedIndex(-1)
+        setHighlightedState({ searchTerm: '', index: -1 })
       }
     }
 
@@ -211,7 +229,7 @@ export function DistrictSearchInput({
         {value && (
           <button
             aria-label="Clear district search"
-            className="absolute right-9 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
+            className="absolute right-9 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700"
             onClick={handleClear}
             type="button"
           >
@@ -245,7 +263,7 @@ export function DistrictSearchInput({
                     type="button"
                     role="option"
                     aria-selected={isHighlighted}
-                    className={`flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors ${
+                    className={`flex min-h-11 w-full items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors ${
                       isHighlighted
                         ? 'bg-green-50 text-green-800'
                         : 'text-slate-700 hover:bg-slate-50'

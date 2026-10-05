@@ -15,7 +15,7 @@ export function RwandaMapControls({
     <div className="absolute bottom-4 left-4 z-10 flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
       <button
         aria-label="Zoom in"
-        className="flex size-10 items-center justify-center text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
+        className="flex size-11 items-center justify-center text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
         onClick={onZoomIn}
         type="button"
       >
@@ -26,7 +26,7 @@ export function RwandaMapControls({
 
       <button
         aria-label="Zoom out"
-        className="flex size-10 items-center justify-center text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
+        className="flex size-11 items-center justify-center text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
         onClick={onZoomOut}
         type="button"
       >
@@ -37,7 +37,7 @@ export function RwandaMapControls({
 
       <button
         aria-label="Reset map view"
-        className="flex size-10 items-center justify-center text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
+        className="flex size-11 items-center justify-center text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"
         onClick={onResetView}
         type="button"
       >

@@ -1,66 +1,51 @@
-export function AttentionLegend() {
+interface AttentionLegendProps {
+  hasObservations: boolean
+}
+
+const legendItems = [
+  { color: '#ef6a4a', range: '≤ −20%', label: 'Attention' },
+  { color: '#f3a35c', range: '> −20% to ≤ −10%', label: 'Moderate' },
+  { color: '#63b36b', range: '> −10%', label: 'Near reference' },
+]
+
+export function AttentionLegend({ hasObservations }: AttentionLegendProps) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white/95 px-3 py-3 shadow-sm backdrop-blur sm:px-4">
-      <div className="mb-2.5">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-          Yield gap
+    <div className="max-w-[235px] rounded-lg border border-slate-200 bg-white/95 px-3 py-3 shadow-sm sm:px-4">
+      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
+        Yield gap
+      </p>
+
+      {hasObservations ? (
+        <ul aria-label="Yield gap categories" className="space-y-1.5">
+          {legendItems.map((item) => (
+            <li
+              className="flex items-center gap-2"
+              key={item.label}
+            >
+              <span
+                aria-hidden="true"
+                className="size-3 shrink-0 rounded-sm"
+                style={{ backgroundColor: item.color }}
+              />
+              <span className="text-xs font-medium tabular-nums text-slate-800">
+                {item.range}
+              </span>
+              <span className="text-xs text-slate-600">{item.label}</span>
+            </li>
+          ))}
+          <li className="flex items-center gap-2">
+            <span
+              aria-hidden="true"
+              className="size-3 shrink-0 rounded-sm border border-slate-300 bg-[#dbe5df]"
+            />
+            <span className="text-xs text-slate-700">No observation</span>
+          </li>
+        </ul>
+      ) : (
+        <p className="text-xs leading-5 text-slate-700">
+          No district observations are available for the selected filters.
         </p>
-      </div>
-
-      <div className="space-y-2">
-        <div className="flex items-center gap-2.5">
-          <span
-            aria-hidden="true"
-            className="size-3 shrink-0 rounded-sm"
-            style={{ backgroundColor: '#ef6a4a' }}
-          />
-
-          <span className="text-xs font-medium text-slate-700">≤ −20%</span>
-
-          <span className="hidden text-xs text-slate-400 sm:inline">
-            Significant gap
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2.5">
-          <span
-            aria-hidden="true"
-            className="size-3 shrink-0 rounded-sm"
-            style={{ backgroundColor: '#f3a35c' }}
-          />
-
-          <span className="text-xs font-medium text-slate-700">
-            &gt; −20% to ≤ −10%
-          </span>
-
-          <span className="hidden text-xs text-slate-400 sm:inline">
-            Moderate gap
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2.5">
-          <span
-            aria-hidden="true"
-            className="size-3 shrink-0 rounded-sm"
-            style={{ backgroundColor: '#63b36b' }}
-          />
-
-          <span className="text-xs font-medium text-slate-700">&gt; −10%</span>
-
-          <span className="hidden text-xs text-slate-400 sm:inline">
-            Near reference
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2.5">
-          <span
-            aria-hidden="true"
-            className="size-3 shrink-0 rounded-sm border border-slate-300 bg-[#dbe5df]"
-          />
-
-          <span className="text-xs font-medium text-slate-700">No data</span>
-        </div>
-      </div>
+      )}
     </div>
   )
 }

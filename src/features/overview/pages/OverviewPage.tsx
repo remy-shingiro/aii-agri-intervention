@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { AgriculturalInsightPanel } from '../components/AgriculturalInsightPanel'
 import { OverviewHeader } from '../components/OverviewHeader'
 import { RwandaMapPanel } from '../components/RwandaMapPanel'
+import { districtInsights } from '../data/districtInsights'
 
 interface OverviewFilters {
   crop: string
@@ -13,11 +14,13 @@ interface OverviewFilters {
 interface OverviewPageProps {
   selectedDistrict?: string
   onDistrictSelect: (district: string | undefined) => void
+  onOpenDistrictProfile: () => void
 }
 
 export function OverviewPage({
   selectedDistrict,
   onDistrictSelect,
+  onOpenDistrictProfile,
 }: OverviewPageProps) {
   const [districtSearch, setDistrictSearch] = useState('')
 
@@ -44,22 +47,57 @@ export function OverviewPage({
     onDistrictSelect(district)
   }
 
-  const handleApply = () => {
-    onDistrictSelect(undefined)
-  }
+  const hasObservations = districtInsights.some(
+    (district) =>
+      district.crop.toLowerCase() === filters.crop &&
+      district.season.toLowerCase() ===
+        (filters.season === 'season-a'
+          ? 'season a'
+          : filters.season.replace('-', ' ')) &&
+      district.year === filters.year.replace('-', '/'),
+  )
+
+  const cropLabel = filters.crop[0].toUpperCase() + filters.crop.slice(1)
+  const seasonLabel =
+    filters.season === 'season-a'
+      ? 'Season A'
+      : filters.season.replace('-', ' ').replace(/\b\w/g, (letter) =>
+          letter.toUpperCase(),
+        )
+  const yearLabel = filters.year.replace('-', '/')
 
   return (
-    <div className="grid min-h-[calc(100vh-5rem)] gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-      <main className="flex min-w-0 flex-col gap-8">
-        <OverviewHeader
-          districtSearch={districtSearch}
-          filters={filters}
-          onApply={handleApply}
-          onDistrictSearchChange={handleDistrictSearchChange}
-          onFilterChange={handleFilterChange}
-        />
+    <div className="space-y-6">
+      <OverviewHeader
+        districtSearch={districtSearch}
+        filters={filters}
+        onDistrictSelect={handleDistrictSelect}
+        onDistrictSearchChange={handleDistrictSearchChange}
+        onFilterChange={handleFilterChange}
+      />
 
-        <div className="min-h-0 flex-1">
+      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
+        <section aria-labelledby="overview-map-heading" className="min-w-0">
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <h2
+              id="overview-map-heading"
+              className="text-base font-semibold tracking-tight text-slate-900"
+            >
+              {hasObservations
+                ? `${cropLabel} yield gap by district`
+                : 'District map'}
+            </h2>
+
+            <p className="text-xs text-slate-500">
+              Rwanda | {seasonLabel} | {yearLabel}
+            </p>
+          </div>
+
+          <p id="district-map-help" className="sr-only">
+            Use the district search field above to select a district with a
+            keyboard. The map can also be explored with pointer controls.
+          </p>
+
           <RwandaMapPanel
             crop={filters.crop}
             districtSearch={districtSearch}
@@ -68,10 +106,16 @@ export function OverviewPage({
             year={filters.year}
             onDistrictSelect={handleDistrictSelect}
           />
-        </div>
-      </main>
+        </section>
 
-      <AgriculturalInsightPanel selectedDistrict={selectedDistrict} />
+        <AgriculturalInsightPanel
+          crop={filters.crop}
+          season={filters.season}
+          selectedDistrict={selectedDistrict}
+          year={filters.year}
+          onOpenDistrictProfile={onOpenDistrictProfile}
+        />
+      </div>
     </div>
   )
 }

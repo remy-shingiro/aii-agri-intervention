@@ -23,13 +23,14 @@ export function App() {
         <OverviewPage
           selectedDistrict={selectedDistrict}
           onDistrictSelect={setSelectedDistrict}
+          onOpenDistrictProfile={() => setActivePage('District Profile')}
         />
       )}
 
       {activePage === 'District Profile' && (
         <DistrictProfilePage
           selectedDistrict={selectedDistrict}
-          onDistrictSelect={setSelectedDistrict}
+          onNavigateOverview={() => setActivePage('Overview')}
         />
       )}
     </AppShell>

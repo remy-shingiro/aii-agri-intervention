@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Map } from 'maplibre-gl'
 import type {
   DataDrivenPropertyValueSpecification,
-  FilterSpecification,
   MapLayerMouseEvent,
 } from 'maplibre-gl'
 
@@ -132,13 +131,19 @@ export function RwandaMapPanel({
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<Map | null>(null)
   const onDistrictSelectRef = useRef(onDistrictSelect)
+  const filtersRef = useRef({ crop, season, year })
 
   const [mapReady, setMapReady] = useState(false)
   const [mapError, setMapError] = useState<string | null>(null)
+  const hasObservations = getInsightFilters(crop, season, year).length > 0
 
   useEffect(() => {
     onDistrictSelectRef.current = onDistrictSelect
   }, [onDistrictSelect])
+
+  useEffect(() => {
+    filtersRef.current = { crop, season, year }
+  }, [crop, season, year])
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) {
@@ -190,12 +195,26 @@ export function RwandaMapPanel({
           type: 'fill',
           source: SOURCE_ID,
           paint: {
-            'fill-color': createDistrictFillColorExpression(crop, season, year),
+            'fill-color': createDistrictFillColorExpression(
+              filtersRef.current.crop,
+              filtersRef.current.season,
+              filtersRef.current.year,
+            ),
             'fill-opacity': [
               'case',
               ['boolean', ['feature-state', 'selected'], false],
-              0.95,
-              0.78,
+              0.98,
+              [
+                'case',
+                ['boolean', ['feature-state', 'search-active'], false],
+                [
+                  'case',
+                  ['boolean', ['feature-state', 'search-match'], false],
+                  0.9,
+                  0.18,
+                ],
+                0.78,
+              ],
             ],
           },
         })
@@ -205,10 +224,25 @@ export function RwandaMapPanel({
           type: 'line',
           source: SOURCE_ID,
           paint: {
-            'line-color': '#ffffff',
-            'line-width': 1.2,
+            'line-color': [
+              'case',
+              ['boolean', ['feature-state', 'selected'], false],
+              '#14532d',
+              '#ffffff',
+            ],
+            'line-width': [
+              'case',
+              ['boolean', ['feature-state', 'selected'], false],
+              2.6,
+              1.1,
+            ],
           },
         })
+
+        map.getCanvas().setAttribute(
+          'aria-label',
+          'Interactive Rwanda district map. Use district search above for keyboard-accessible selection.',
+        )
 
         setMapReady(true)
       } catch (error) {
@@ -290,46 +324,31 @@ export function RwandaMapPanel({
       return
     }
 
-    if (!map.getLayer(FILL_LAYER_ID) || !map.getLayer(OUTLINE_LAYER_ID)) {
+    if (!map.getLayer(FILL_LAYER_ID)) {
       return
     }
 
     const searchTerm = districtSearch.trim().toLowerCase()
-
-    if (!searchTerm) {
-      map.setFilter(FILL_LAYER_ID, null)
-      map.setFilter(OUTLINE_LAYER_ID, null)
-      return
-    }
-
     const features = map.querySourceFeatures(SOURCE_ID)
 
-    const hasMatch = features.some((feature) => {
-      const districtName = String(
-        feature.properties?.district ?? '',
-      ).toLowerCase()
+    for (const feature of features) {
+      if (feature.id === undefined) {
+        continue
+      }
 
-      return districtName.includes(searchTerm)
-    })
+      const districtName = String(feature.properties?.district ?? '').toLowerCase()
 
-    if (!hasMatch) {
-      map.setFilter(FILL_LAYER_ID, null)
-      map.setFilter(OUTLINE_LAYER_ID, null)
-      return
+      map.setFeatureState(
+        {
+          source: SOURCE_ID,
+          id: feature.id,
+        },
+        {
+          'search-active': Boolean(searchTerm),
+          'search-match': Boolean(searchTerm) && districtName.includes(searchTerm),
+        },
+      )
     }
-
-    const partialMatchFilter: FilterSpecification = [
-      '>=',
-      [
-        'index-of',
-        searchTerm,
-        ['downcase', ['to-string', ['get', 'district']]],
-      ],
-      0,
-    ]
-
-    map.setFilter(FILL_LAYER_ID, partialMatchFilter)
-    map.setFilter(OUTLINE_LAYER_ID, partialMatchFilter)
   }, [districtSearch, mapReady])
 
   useEffect(() => {
@@ -410,7 +429,8 @@ export function RwandaMapPanel({
   return (
     <section
       aria-label="Rwanda district agricultural attention map"
-      className="relative h-[520px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 sm:h-[600px] lg:h-[680px]"
+      aria-describedby="district-map-help"
+      className="relative h-[clamp(380px,58vh,620px)] min-w-0 overflow-hidden rounded-xl border border-slate-300 bg-slate-50 sm:h-[min(68vh,680px)]"
     >
       <div
         ref={mapContainerRef}
@@ -419,7 +439,7 @@ export function RwandaMapPanel({
       />
 
       <div className="absolute left-3 top-3 z-10 sm:left-4 sm:top-4">
-        <AttentionLegend />
+        <AttentionLegend hasObservations={hasObservations} />
       </div>
 
       <RwandaMapControls
@@ -449,6 +469,10 @@ export function RwandaMapPanel({
           </div>
         </div>
       )}
+
+      <p aria-live="polite" className="sr-only">
+        {selectedDistrict ? `${selectedDistrict} selected` : ''}
+      </p>
     </section>
   )
 }

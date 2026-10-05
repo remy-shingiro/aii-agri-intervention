@@ -12,7 +12,7 @@ interface OverviewFilters {
 interface OverviewHeaderProps {
   districtSearch: string
   filters: OverviewFilters
-  onApply: () => void
+  onDistrictSelect: (district: string) => void
   onDistrictSearchChange: (value: string) => void
   onFilterChange: (filter: keyof OverviewFilters, value: string) => void
 }
@@ -54,7 +54,7 @@ const yearOptions: FilterOption[] = [
 export function OverviewHeader({
   districtSearch,
   filters,
-  onApply,
+  onDistrictSelect,
   onDistrictSearchChange,
   onFilterChange,
 }: OverviewHeaderProps) {
@@ -106,19 +106,23 @@ export function OverviewHeader({
         </p>
 
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl lg:text-4xl">
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl lg:text-4xl">
             Rwanda Agricultural Overview
-          </h2>
+          </h1>
 
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500 sm:text-base">
-            Explore agricultural productivity patterns across Rwanda&apos;s
-            districts and identify areas requiring attention.
+            Review available district observations and identify where further
+            investigation may be warranted.
           </p>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-        <div className="grid gap-4 lg:grid-cols-[minmax(240px,1.4fr)_repeat(3,minmax(150px,1fr))_auto] lg:items-end">
+      <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+        <div
+          role="group"
+          aria-label="Agricultural observation filters"
+          className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(200px,1.4fr)_repeat(3,minmax(120px,1fr))] xl:items-end"
+        >
           <div className="min-w-0">
             <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
               District
@@ -127,7 +131,7 @@ export function OverviewHeader({
             <DistrictSearchInput
               districts={districts}
               onChange={onDistrictSearchChange}
-              onSelect={onDistrictSearchChange}
+              onSelect={onDistrictSelect}
               placeholder="Search district"
               value={districtSearch}
             />
@@ -235,14 +239,11 @@ export function OverviewHeader({
             </div>
           </div>
 
-          <button
-            className="h-11 rounded-lg bg-green-700 px-5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2"
-            onClick={onApply}
-            type="button"
-          >
-            Apply
-          </button>
         </div>
+        <p className="mt-3 text-xs leading-5 text-slate-500">
+          Filters update the map immediately. Verified district yields are
+          currently available for maize, Season A, 2024/25.
+        </p>
       </div>
     </section>
   )
