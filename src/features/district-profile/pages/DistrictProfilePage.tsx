@@ -3,7 +3,10 @@ import { ArrowLeft, ArrowRight, MapPin } from 'lucide-react'
 import { EvidenceStatusBadge } from '../../evidence/components/EvidenceStatusBadge'
 import { evidenceRecords } from '../../evidence/data/evidenceRecords'
 import type { AgriculturalSeason } from '../../../types/data-contract'
-import type { InterventionSignal, InterventionType } from '../../../types/intervention'
+import type {
+  InterventionSignal,
+  InterventionType,
+} from '../../../types/intervention'
 import { getDistrictInsight } from '../../overview/data/districtInsights'
 import type { InterventionSignalLevel } from '../../overview/types/interventionSignal.types'
 import { calculateInterventionSignals } from '../../overview/utils/calculateCandidateIntervention'
@@ -86,19 +89,21 @@ function InterventionAreas({
                 </span>
               </div>
 
-              <ul className="mt-3 space-y-1.5 text-sm leading-6 text-slate-700">
-                {signal.rationale.map((reason) => (
-                  <li className="flex gap-2" key={reason}>
-                    <span
-                      aria-hidden="true"
-                      className={`mt-2 size-1.5 shrink-0 rounded-full ${
-                        supported ? 'bg-green-700' : 'bg-slate-400'
-                      }`}
-                    />
-                    <span className="min-w-0 break-words">{reason}</span>
-                  </li>
-                ))}
-              </ul>
+              {(supported || signal.intervention === 'irrigation') && (
+                <ul className="mt-3 space-y-1.5 text-sm leading-6 text-slate-700">
+                  {signal.rationale.map((reason) => (
+                    <li className="flex gap-2" key={reason}>
+                      <span
+                        aria-hidden="true"
+                        className={`mt-2 size-1.5 shrink-0 rounded-full ${
+                          supported ? 'bg-green-700' : 'bg-slate-400'
+                        }`}
+                      />
+                      <span className="min-w-0 break-words">{reason}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
 
               {supported ? (
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-green-200 pt-3">
@@ -115,12 +120,12 @@ function InterventionAreas({
                     <ArrowRight aria-hidden="true" className="size-3.5" />
                   </button>
                 </div>
-              ) : (
+              ) : signal.intervention !== 'irrigation' ? (
                 <p className="mt-4 border-t border-slate-200 pt-3 text-xs leading-5 text-slate-500">
                   No connected evidence currently supports a district-specific
                   intervention signal.
                 </p>
-              )}
+              ) : null}
             </article>
           )
         })}
@@ -161,7 +166,9 @@ export function DistrictProfilePage({
 }: DistrictProfilePageProps) {
   const hasConnectedPeriod =
     crop === 'maize' && season === 'season-a' && year === '2024-25'
-  const candidate = selectedDistrict ? getDistrictInsight(selectedDistrict) : undefined
+  const candidate = selectedDistrict
+    ? getDistrictInsight(selectedDistrict)
+    : undefined
   const insight =
     hasConnectedPeriod && candidate?.source.kind === 'nisr'
       ? candidate

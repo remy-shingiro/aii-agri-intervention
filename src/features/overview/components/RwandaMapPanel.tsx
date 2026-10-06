@@ -14,6 +14,11 @@ import {
   createDistrictMapEvidenceLookup,
   type DistrictMapEvidenceSummary,
 } from '../data/districtMapEvidence'
+import {
+  createDistrictLabelAnchors,
+  type DistrictLabelAnchor,
+  type DistrictLabelFeature,
+} from '../data/districtLabelAnchors'
 import { districtInsights } from '../data/districtInsights'
 import { getInterventionSignalLevel } from '../utils/calculateInterventionSignal'
 import { AttentionLegend } from './AttentionLegend'
@@ -26,14 +31,15 @@ const RWANDA_BOUNDS: [[number, number], [number, number]] = [
   [28.8, -2.9],
   [31.0, -1.0],
 ]
+const NARROW_MAP_BOUNDS: [[number, number], [number, number]] = [
+  [28.1, -3.55],
+  [31.65, -0.3],
+]
 
 const DISTRICT_SOURCE_URL = '/data/rwanda-districts.geojson'
 const SOURCE_ID = 'rwanda-districts'
 const FILL_LAYER_ID = 'rwanda-district-fills'
 const OUTLINE_LAYER_ID = 'rwanda-district-outlines'
-const DISTRICT_LABEL_LAYER_ID = 'rwanda-district-labels'
-const COUNTRY_LABEL_SOURCE_ID = 'neighboring-country-labels'
-const COUNTRY_LABEL_LAYER_ID = 'neighboring-country-labels-layer'
 
 const PROVINCE_LABELS: Readonly<Record<string, string>> = {
   East: 'Eastern Province',
@@ -43,6 +49,45 @@ const PROVINCE_LABELS: Readonly<Record<string, string>> = {
   South: 'Southern Province',
   West: 'Western Province',
 }
+
+interface NeighborCountryLabel {
+  readonly id: string
+  readonly lines: readonly string[]
+  readonly coordinates: readonly [number, number]
+  readonly horizontalAnchor: 'left' | 'center' | 'right'
+  readonly verticalAnchor: 'above' | 'center' | 'below'
+}
+
+const NEIGHBOR_COUNTRY_LABELS: readonly NeighborCountryLabel[] = [
+  {
+    id: 'uganda',
+    lines: ['UGANDA'],
+    coordinates: [30.85, -1.04],
+    horizontalAnchor: 'center',
+    verticalAnchor: 'above',
+  },
+  {
+    id: 'drc',
+    lines: ['DEMOCRATIC', 'REPUBLIC OF', 'THE CONGO'],
+    coordinates: [29.15, -1.9],
+    horizontalAnchor: 'right',
+    verticalAnchor: 'center',
+  },
+  {
+    id: 'tanzania',
+    lines: ['TANZANIA'],
+    coordinates: [30.85, -2.15],
+    horizontalAnchor: 'right',
+    verticalAnchor: 'center',
+  },
+  {
+    id: 'burundi',
+    lines: ['BURUNDI'],
+    coordinates: [29.8, -2.82],
+    horizontalAnchor: 'center',
+    verticalAnchor: 'below',
+  },
+]
 
 interface RwandaMapPanelProps {
   crop: string
@@ -104,7 +149,9 @@ function getSeasonCode(value: string): AgriculturalSeason | undefined {
   return undefined
 }
 
-function getObservedValue(record: EvidenceRecord | undefined): number | undefined {
+function getObservedValue(
+  record: EvidenceRecord | undefined,
+): number | undefined {
   return record?.status === 'observed' && record.value !== null
     ? record.value
     : undefined
@@ -174,9 +221,19 @@ export function RwandaMapPanel({
   const onDistrictSelectRef = useRef(onDistrictSelect)
   const filtersRef = useRef({ crop, season, year })
   const hoveredFeatureIdRef = useRef<string | number | undefined>(undefined)
+  const districtLabelElementsRef = useRef(
+    new globalThis.Map<string, HTMLSpanElement>(),
+  )
+  const countryLabelElementsRef = useRef(
+    new globalThis.Map<string, HTMLSpanElement>(),
+  )
+  const labelSourceLoadedRef = useRef(false)
 
   const [mapReady, setMapReady] = useState(false)
   const [mapError, setMapError] = useState<string | null>(null)
+  const [districtLabelAnchors, setDistrictLabelAnchors] = useState<
+    readonly DistrictLabelAnchor[]
+  >([])
   const [hoveredDistrict, setHoveredDistrict] = useState<{
     district: string
     province: string
@@ -222,6 +279,8 @@ export function RwandaMapPanel({
 
     setMapError(null)
     setMapReady(false)
+    labelSourceLoadedRef.current = false
+    setDistrictLabelAnchors([])
 
     const map = new Map({
       container: mapContainerRef.current,
@@ -233,7 +292,6 @@ export function RwandaMapPanel({
       attributionControl: {},
       style: {
         version: 8,
-        glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
         sources: {},
         layers: [
           {
@@ -248,6 +306,19 @@ export function RwandaMapPanel({
     })
 
     mapRef.current = map
+    const mapResizeObserver = new ResizeObserver((entries) => {
+      const width = entries[0]?.contentRect.width
+      if (!width) return
+
+      map.setMaxBounds(width < 600 ? NARROW_MAP_BOUNDS : RWANDA_BOUNDS)
+      map.resize()
+      if (width < 600 && map.getZoom() > 6.5) {
+        map.setZoom(6.5)
+      } else if (width >= 600 && map.getZoom() <= 6.5) {
+        map.setZoom(7.5)
+      }
+    })
+    mapResizeObserver.observe(mapContainerRef.current)
 
     const handleMapLoad = () => {
       if (mapRef.current !== map) {
@@ -259,38 +330,6 @@ export function RwandaMapPanel({
           type: 'geojson',
           data: DISTRICT_SOURCE_URL,
           promoteId: 'code_dist',
-        })
-
-        map.addSource(COUNTRY_LABEL_SOURCE_ID, {
-          type: 'geojson',
-          data: {
-            type: 'FeatureCollection',
-            features: [
-              {
-                type: 'Feature',
-                properties: { label: 'UGANDA', anchor: 'bottom' },
-                geometry: { type: 'Point', coordinates: [30.04, -1.04] },
-              },
-              {
-                type: 'Feature',
-                properties: {
-                  label: 'DEMOCRATIC REPUBLIC OF THE CONGO',
-                  anchor: 'right',
-                },
-                geometry: { type: 'Point', coordinates: [29.15, -1.9] },
-              },
-              {
-                type: 'Feature',
-                properties: { label: 'TANZANIA', anchor: 'right' },
-                geometry: { type: 'Point', coordinates: [30.98, -2.15] },
-              },
-              {
-                type: 'Feature',
-                properties: { label: 'BURUNDI', anchor: 'top' },
-                geometry: { type: 'Point', coordinates: [29.8, -2.82] },
-              },
-            ],
-          },
         })
 
         map.addLayer({
@@ -319,38 +358,6 @@ export function RwandaMapPanel({
                 0.78,
               ],
             ],
-          },
-        })
-
-        map.addLayer({
-          id: COUNTRY_LABEL_LAYER_ID,
-          type: 'symbol',
-          source: COUNTRY_LABEL_SOURCE_ID,
-          layout: {
-            'text-field': ['get', 'label'],
-            'text-font': ['Open Sans Semibold'],
-            'text-size': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              6.5,
-              9,
-              8.5,
-              10,
-              10.5,
-              11,
-            ],
-            'text-max-width': 10,
-            'text-line-height': 1.15,
-            'text-padding': 8,
-            'text-allow-overlap': false,
-            'text-ignore-placement': false,
-          },
-          paint: {
-            'text-color': '#526158',
-            'text-halo-color': '#f8faf9',
-            'text-halo-width': 1.5,
-            'text-opacity': 0.82,
           },
         })
 
@@ -384,42 +391,12 @@ export function RwandaMapPanel({
           },
         })
 
-        map.addLayer({
-          id: DISTRICT_LABEL_LAYER_ID,
-          type: 'symbol',
-          source: SOURCE_ID,
-          minzoom: 7,
-          layout: {
-            'text-field': ['to-string', ['get', 'district']],
-            'text-font': ['Open Sans Semibold'],
-            'text-size': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              7,
-              9,
-              8.5,
-              11,
-              10.5,
-              13,
-            ],
-            'text-anchor': ['get', 'anchor'],
-            'text-max-width': 8,
-            'text-padding': 2,
-            'text-allow-overlap': false,
-            'text-ignore-placement': false,
-          },
-          paint: {
-            'text-color': '#24372e',
-            'text-halo-color': '#ffffff',
-            'text-halo-width': 1.6,
-          },
-        })
-
-        map.getCanvas().setAttribute(
-          'aria-label',
-          'Interactive Rwanda district map. Use district search above for keyboard-accessible selection.',
-        )
+        map
+          .getCanvas()
+          .setAttribute(
+            'aria-label',
+            'Interactive Rwanda district map with district labels and neighboring country context. Use district search above for keyboard-accessible selection.',
+          )
 
         setMapReady(true)
       } catch (error) {
@@ -438,6 +415,52 @@ export function RwandaMapPanel({
 
       if (message) {
         console.error('MapLibre error:', message)
+      }
+    }
+
+    const handleDistrictSourceData = (event: {
+      sourceId?: string
+      isSourceLoaded?: boolean
+    }) => {
+      if (
+        event.sourceId !== SOURCE_ID ||
+        !event.isSourceLoaded ||
+        labelSourceLoadedRef.current
+      ) {
+        return
+      }
+
+      const labelFeatures: DistrictLabelFeature[] = map
+        .querySourceFeatures(SOURCE_ID)
+        .flatMap((feature) => {
+          const name = String(feature.properties?.district ?? '')
+          const id = String(feature.properties?.code_dist ?? feature.id ?? '')
+          const geometry = feature.geometry
+
+          if (
+            !id ||
+            !name ||
+            (geometry.type !== 'Polygon' && geometry.type !== 'MultiPolygon')
+          ) {
+            return []
+          }
+
+          return [
+            {
+              id,
+              name,
+              geometry: {
+                type: geometry.type,
+                coordinates: geometry.coordinates,
+              } as DistrictLabelFeature['geometry'],
+            },
+          ]
+        })
+
+      const anchors = createDistrictLabelAnchors(labelFeatures)
+      if (anchors.length > 0) {
+        labelSourceLoadedRef.current = true
+        setDistrictLabelAnchors(anchors)
       }
     }
 
@@ -514,6 +537,7 @@ export function RwandaMapPanel({
     }
 
     map.on('load', handleMapLoad)
+    map.on('sourcedata', handleDistrictSourceData)
     map.on('error', handleMapError)
     map.on('click', FILL_LAYER_ID, handleDistrictClick)
     map.on('mouseenter', FILL_LAYER_ID, handleMouseEnter)
@@ -522,10 +546,138 @@ export function RwandaMapPanel({
 
     return () => {
       setMapReady(false)
+      mapResizeObserver.disconnect()
       map.remove()
       mapRef.current = null
     }
   }, [])
+
+  useEffect(() => {
+    const map = mapRef.current
+    const labelOverlay = mapContainerRef.current?.parentElement
+    if (!map || !mapReady || !labelOverlay) return
+
+    const positionLabels = () => {
+      const canvasRect = map.getCanvas().getBoundingClientRect()
+      const overlayRect = labelOverlay.getBoundingClientRect()
+      const width = overlayRect.width
+      const height = overlayRect.height
+      const project = (coordinates: readonly [number, number]) => {
+        const point = map.project([coordinates[0], coordinates[1]])
+        return {
+          x: point.x + canvasRect.left - overlayRect.left,
+          y: point.y + canvasRect.top - overlayRect.top,
+        }
+      }
+
+      const reserved: {
+        left: number
+        top: number
+        right: number
+        bottom: number
+      }[] = []
+      for (const label of NEIGHBOR_COUNTRY_LABELS) {
+        const element = countryLabelElementsRef.current.get(label.id)
+        if (!element) continue
+
+        const point = project(label.coordinates)
+        const labelWidth = element.offsetWidth
+        const labelHeight = element.offsetHeight
+        const desiredLeft =
+          label.horizontalAnchor === 'left'
+            ? point.x
+            : label.horizontalAnchor === 'right'
+              ? point.x - labelWidth
+              : point.x - labelWidth / 2
+        const desiredTop =
+          label.verticalAnchor === 'above'
+            ? point.y - labelHeight
+            : label.verticalAnchor === 'below'
+              ? point.y
+              : point.y - labelHeight / 2
+        const left = Math.max(6, Math.min(width - labelWidth - 6, desiredLeft))
+        const top = Math.max(6, Math.min(height - labelHeight - 6, desiredTop))
+        element.style.left = `${left}px`
+        element.style.top = `${top}px`
+        element.style.visibility =
+          point.x < -labelWidth ||
+          point.x > width + labelWidth ||
+          point.y < -labelHeight ||
+          point.y > height + labelHeight
+            ? 'hidden'
+            : 'visible'
+        reserved.push({
+          left,
+          top,
+          right: left + labelWidth,
+          bottom: top + labelHeight,
+        })
+      }
+
+      const zoom = map.getZoom()
+      const selectedKey = selectedDistrict?.trim().toLowerCase()
+      const orderedAnchors = [...districtLabelAnchors].sort((first, second) => {
+        const firstSelected = first.name.trim().toLowerCase() === selectedKey
+        const secondSelected = second.name.trim().toLowerCase() === selectedKey
+        if (firstSelected !== secondSelected) return firstSelected ? -1 : 1
+        return second.area - first.area
+      })
+
+      for (const anchor of orderedAnchors) {
+        const element = districtLabelElementsRef.current.get(anchor.id)
+        if (!element) continue
+        if (zoom < 6.5) {
+          element.style.visibility = 'hidden'
+          continue
+        }
+
+        const point = project(anchor.coordinates)
+        element.style.fontSize = `${Math.min(12, 9 + Math.max(0, zoom - 7.2) * 1.15)}px`
+        const labelWidth = element.offsetWidth
+        const labelHeight = element.offsetHeight
+        const left = point.x - labelWidth / 2
+        const top = point.y - labelHeight / 2
+        const bounds = {
+          left: left - 3,
+          top: top - 2,
+          right: left + labelWidth + 3,
+          bottom: top + labelHeight + 2,
+        }
+        const onMap =
+          point.x >= 0 && point.x <= width && point.y >= 0 && point.y <= height
+        const collides = reserved.some(
+          (other) =>
+            bounds.left < other.right &&
+            bounds.right > other.left &&
+            bounds.top < other.bottom &&
+            bounds.bottom > other.top,
+        )
+
+        if (
+          !onMap ||
+          (collides && anchor.name.trim().toLowerCase() !== selectedKey)
+        ) {
+          element.style.visibility = 'hidden'
+          continue
+        }
+
+        element.style.left = `${point.x}px`
+        element.style.top = `${point.y}px`
+        element.style.visibility = 'visible'
+        reserved.push(bounds)
+      }
+    }
+
+    positionLabels()
+    map.on('move', positionLabels)
+    map.on('resize', positionLabels)
+    map.on('idle', positionLabels)
+    return () => {
+      map.off('move', positionLabels)
+      map.off('resize', positionLabels)
+      map.off('idle', positionLabels)
+    }
+  }, [districtLabelAnchors, mapReady, selectedDistrict])
 
   useEffect(() => {
     const map = mapRef.current
@@ -564,7 +716,9 @@ export function RwandaMapPanel({
         continue
       }
 
-      const districtName = String(feature.properties?.district ?? '').toLowerCase()
+      const districtName = String(
+        feature.properties?.district ?? '',
+      ).toLowerCase()
 
       map.setFeatureState(
         {
@@ -573,7 +727,8 @@ export function RwandaMapPanel({
         },
         {
           'search-active': Boolean(searchTerm),
-          'search-match': Boolean(searchTerm) && districtName.includes(searchTerm),
+          'search-match':
+            Boolean(searchTerm) && districtName.includes(searchTerm),
         },
       )
     }
@@ -666,6 +821,54 @@ export function RwandaMapPanel({
         style={{ position: 'absolute' }}
       />
 
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-[1] select-none"
+      >
+        {NEIGHBOR_COUNTRY_LABELS.map((label) => (
+          <span
+            key={label.id}
+            ref={(element) => {
+              if (element)
+                countryLabelElementsRef.current.set(label.id, element)
+              else countryLabelElementsRef.current.delete(label.id)
+            }}
+            className="absolute whitespace-nowrap text-center text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-600/90"
+            style={{
+              lineHeight: 1.2,
+              textShadow: '0 1px 4px #f8faf9, 0 0 2px #f8faf9',
+              visibility: 'hidden',
+            }}
+          >
+            {label.lines.map((line) => (
+              <span key={line} className="block">
+                {line}
+              </span>
+            ))}
+          </span>
+        ))}
+
+        {districtLabelAnchors.map((anchor) => (
+          <span
+            key={anchor.id}
+            ref={(element) => {
+              if (element)
+                districtLabelElementsRef.current.set(anchor.id, element)
+              else districtLabelElementsRef.current.delete(anchor.id)
+            }}
+            className="absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-sm px-0.5 font-semibold text-slate-800"
+            style={{
+              fontSize: '9px',
+              lineHeight: 1.15,
+              textShadow: '0 1px 3px #ffffff, 0 0 2px #ffffff',
+              visibility: 'hidden',
+            }}
+          >
+            {anchor.name}
+          </span>
+        ))}
+      </div>
+
       {hoveredDistrict && (
         <aside
           aria-label={`Map preview for ${hoveredDistrict.district}`}
@@ -709,7 +912,11 @@ export function RwandaMapPanel({
             {hoveredSummary?.districtYield && (
               <p className="mt-2 text-[10px] leading-4 text-slate-500">
                 {hoveredSummary.districtYield.dataset} ·{' '}
-                {hoveredSummary.districtYield.sourceReference.table.split(':')[0]}{' '}
+                {
+                  hoveredSummary.districtYield.sourceReference.table.split(
+                    ':',
+                  )[0]
+                }{' '}
                 · observed
               </p>
             )}
@@ -745,7 +952,8 @@ export function RwandaMapPanel({
             </dl>
             {hoveredSummary?.districtIrrigation && (
               <p className="mt-2 text-[10px] leading-4 text-slate-500">
-                {hoveredSummary.districtIrrigation.dataset} · Table 64 · observed
+                {hoveredSummary.districtIrrigation.dataset} · Table 64 ·
+                observed
               </p>
             )}
           </section>
