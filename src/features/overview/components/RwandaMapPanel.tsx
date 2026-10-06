@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Map } from 'maplibre-gl'
 import type {
   DataDrivenPropertyValueSpecification,
@@ -7,6 +7,13 @@ import type {
 
 import 'maplibre-gl/dist/maplibre-gl.css'
 
+import { evidenceRecords } from '../../evidence/data/evidenceRecords'
+import type { EvidenceRecord } from '../../evidence/types/evidence.types'
+import type { AgriculturalSeason } from '../../../types/data-contract'
+import {
+  createDistrictMapEvidenceLookup,
+  type DistrictMapEvidenceSummary,
+} from '../data/districtMapEvidence'
 import { districtInsights } from '../data/districtInsights'
 import { getInterventionSignalLevel } from '../utils/calculateInterventionSignal'
 import { AttentionLegend } from './AttentionLegend'
@@ -24,6 +31,9 @@ const DISTRICT_SOURCE_URL = '/data/rwanda-districts.geojson'
 const SOURCE_ID = 'rwanda-districts'
 const FILL_LAYER_ID = 'rwanda-district-fills'
 const OUTLINE_LAYER_ID = 'rwanda-district-outlines'
+const DISTRICT_LABEL_LAYER_ID = 'rwanda-district-labels'
+const COUNTRY_LABEL_SOURCE_ID = 'neighboring-country-labels'
+const COUNTRY_LABEL_LAYER_ID = 'neighboring-country-labels-layer'
 
 interface RwandaMapPanelProps {
   crop: string
@@ -76,6 +86,28 @@ function getYearLabel(value: string): string {
   }
 
   return labels[value] ?? value
+}
+
+function getSeasonCode(value: string): AgriculturalSeason | undefined {
+  if (value === 'season-a') return 'A'
+  if (value === 'season-b') return 'B'
+  if (value === 'season-c') return 'C'
+  return undefined
+}
+
+function getObservedValue(record: EvidenceRecord | undefined): number | undefined {
+  return record?.status === 'observed' && record.value !== null
+    ? record.value
+    : undefined
+}
+
+function formatYield(value: number): string {
+  return `${(value / 1000).toFixed(2)} t/ha`
+}
+
+function formatSigned(value: number, fractionDigits = 1): string {
+  const sign = value < 0 ? '−' : value > 0 ? '+' : ''
+  return `${sign}${Math.abs(value).toFixed(fractionDigits)}`
 }
 
 function getDistrictAttentionColor(yieldGapPct: number): string {
@@ -132,10 +164,39 @@ export function RwandaMapPanel({
   const mapRef = useRef<Map | null>(null)
   const onDistrictSelectRef = useRef(onDistrictSelect)
   const filtersRef = useRef({ crop, season, year })
+  const hoveredFeatureIdRef = useRef<string | number | undefined>(undefined)
 
   const [mapReady, setMapReady] = useState(false)
   const [mapError, setMapError] = useState<string | null>(null)
+  const [hoveredDistrict, setHoveredDistrict] = useState<{
+    district: string
+    province: string
+  } | null>(null)
   const hasObservations = getInsightFilters(crop, season, year).length > 0
+  const seasonCode = getSeasonCode(season)
+  const summaryLookup = useMemo(
+    () =>
+      seasonCode
+        ? createDistrictMapEvidenceLookup(evidenceRecords, {
+            crop: getCropLabel(crop),
+            year: getYearLabel(year),
+            season: seasonCode,
+          })
+        : new globalThis.Map<string, DistrictMapEvidenceSummary>(),
+    [crop, seasonCode, year],
+  )
+  const hoveredSummary = hoveredDistrict
+    ? summaryLookup.get(hoveredDistrict.district.trim().toLowerCase())
+    : undefined
+
+  const districtYield = getObservedValue(hoveredSummary?.districtYield)
+  const nationalYield = getObservedValue(hoveredSummary?.nationalYield)
+  const districtIrrigation = getObservedValue(
+    hoveredSummary?.districtIrrigation,
+  )
+  const nationalIrrigation = getObservedValue(
+    hoveredSummary?.nationalIrrigation,
+  )
 
   useEffect(() => {
     onDistrictSelectRef.current = onDistrictSelect
@@ -163,6 +224,7 @@ export function RwandaMapPanel({
       attributionControl: {},
       style: {
         version: 8,
+        glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
         sources: {},
         layers: [
           {
@@ -187,7 +249,36 @@ export function RwandaMapPanel({
         map.addSource(SOURCE_ID, {
           type: 'geojson',
           data: DISTRICT_SOURCE_URL,
-          promoteId: 'district',
+          promoteId: 'code_dist',
+        })
+
+        map.addSource(COUNTRY_LABEL_SOURCE_ID, {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: [
+              {
+                type: 'Feature',
+                properties: { label: 'UGANDA' },
+                geometry: { type: 'Point', coordinates: [30.04, -1.04] },
+              },
+              {
+                type: 'Feature',
+                properties: { label: 'DEMOCRATIC REPUBLIC OF THE CONGO' },
+                geometry: { type: 'Point', coordinates: [28.88, -1.9] },
+              },
+              {
+                type: 'Feature',
+                properties: { label: 'TANZANIA' },
+                geometry: { type: 'Point', coordinates: [30.98, -2.15] },
+              },
+              {
+                type: 'Feature',
+                properties: { label: 'BURUNDI' },
+                geometry: { type: 'Point', coordinates: [29.8, -2.82] },
+              },
+            ],
+          },
         })
 
         map.addLayer({
@@ -220,6 +311,38 @@ export function RwandaMapPanel({
         })
 
         map.addLayer({
+          id: COUNTRY_LABEL_LAYER_ID,
+          type: 'symbol',
+          source: COUNTRY_LABEL_SOURCE_ID,
+          layout: {
+            'text-field': ['get', 'label'],
+            'text-font': ['Open Sans Semibold'],
+            'text-size': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              6.5,
+              9,
+              8.5,
+              10,
+              10.5,
+              11,
+            ],
+            'text-max-width': 10,
+            'text-line-height': 1.15,
+            'text-padding': 8,
+            'text-allow-overlap': false,
+            'text-ignore-placement': false,
+          },
+          paint: {
+            'text-color': '#526158',
+            'text-halo-color': '#f8faf9',
+            'text-halo-width': 1.5,
+            'text-opacity': 0.82,
+          },
+        })
+
+        map.addLayer({
           id: OUTLINE_LAYER_ID,
           type: 'line',
           source: SOURCE_ID,
@@ -228,14 +351,56 @@ export function RwandaMapPanel({
               'case',
               ['boolean', ['feature-state', 'selected'], false],
               '#14532d',
-              '#ffffff',
+              [
+                'case',
+                ['boolean', ['feature-state', 'hovered'], false],
+                '#b45309',
+                '#ffffff',
+              ],
             ],
             'line-width': [
               'case',
               ['boolean', ['feature-state', 'selected'], false],
-              2.6,
-              1.1,
+              3,
+              [
+                'case',
+                ['boolean', ['feature-state', 'hovered'], false],
+                2.2,
+                1.1,
+              ],
             ],
+          },
+        })
+
+        map.addLayer({
+          id: DISTRICT_LABEL_LAYER_ID,
+          type: 'symbol',
+          source: SOURCE_ID,
+          minzoom: 7,
+          layout: {
+            'text-field': ['to-string', ['get', 'district']],
+            'text-font': ['Open Sans Semibold'],
+            'text-size': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              7,
+              9,
+              8.5,
+              11,
+              10.5,
+              13,
+            ],
+            'text-anchor': 'center',
+            'text-max-width': 8,
+            'text-padding': 2,
+            'text-allow-overlap': false,
+            'text-ignore-placement': false,
+          },
+          paint: {
+            'text-color': '#24372e',
+            'text-halo-color': '#ffffff',
+            'text-halo-width': 1.6,
           },
         })
 
@@ -264,6 +429,9 @@ export function RwandaMapPanel({
       }
     }
 
+    const supportsHover =
+      window.matchMedia?.('(hover: hover) and (pointer: fine)').matches ?? false
+
     const handleDistrictClick = (event: MapLayerMouseEvent) => {
       const feature = event.features?.[0]
 
@@ -282,15 +450,65 @@ export function RwandaMapPanel({
       map.getCanvas().style.cursor = 'pointer'
     }
 
-    const handleMouseLeave = () => {
+    const clearDistrictHover = () => {
+      const featureId = hoveredFeatureIdRef.current
+      if (featureId !== undefined) {
+        map.setFeatureState(
+          { source: SOURCE_ID, id: featureId },
+          { hovered: false },
+        )
+      }
+      hoveredFeatureIdRef.current = undefined
+      setHoveredDistrict(null)
       map.getCanvas().style.cursor = ''
+    }
+
+    const handleDistrictHover = (event: MapLayerMouseEvent) => {
+      if (!supportsHover) {
+        return
+      }
+
+      const feature = event.features?.[0]
+      const districtName = String(feature?.properties?.district ?? '')
+      const featureId = feature?.id
+
+      if (!feature || !districtName || featureId === undefined) {
+        return
+      }
+
+      if (hoveredFeatureIdRef.current === featureId) {
+        return
+      }
+
+      const previousFeatureId = hoveredFeatureIdRef.current
+      if (previousFeatureId !== undefined) {
+        map.setFeatureState(
+          { source: SOURCE_ID, id: previousFeatureId },
+          { hovered: false },
+        )
+      }
+
+      map.setFeatureState(
+        { source: SOURCE_ID, id: featureId },
+        { hovered: true },
+      )
+      hoveredFeatureIdRef.current = featureId
+      setHoveredDistrict({
+        district: districtName,
+        province: String(
+          feature.properties?.prov_engl ??
+            feature.properties?.province ??
+            'Province unavailable',
+        ),
+      })
     }
 
     map.on('load', handleMapLoad)
     map.on('error', handleMapError)
     map.on('click', FILL_LAYER_ID, handleDistrictClick)
     map.on('mouseenter', FILL_LAYER_ID, handleMouseEnter)
-    map.on('mouseleave', FILL_LAYER_ID, handleMouseLeave)
+    map.on('mousemove', FILL_LAYER_ID, handleDistrictHover)
+    map.on('mouseleave', FILL_LAYER_ID, clearDistrictHover)
 
     return () => {
       setMapReady(false)
@@ -437,6 +655,92 @@ export function RwandaMapPanel({
         className="absolute inset-0"
         style={{ position: 'absolute' }}
       />
+
+      {hoveredDistrict && (
+        <aside
+          aria-label={`Map preview for ${hoveredDistrict.district}`}
+          className="pointer-events-none absolute right-3 top-3 z-10 max-h-[calc(100%-1.5rem)] w-[min(19rem,calc(100%-1.5rem))] overflow-y-auto rounded-xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur-sm sm:right-4 sm:top-4"
+          role="tooltip"
+        >
+          <header className="border-b border-slate-200 pb-3">
+            <h3 className="text-base font-semibold text-slate-900">
+              {hoveredDistrict.district}
+            </h3>
+            <p className="mt-0.5 text-xs text-slate-600">
+              {hoveredDistrict.province} · {getCropLabel(crop)} ·{' '}
+              {getSeasonLabel(season)} {getYearLabel(year)}
+            </p>
+          </header>
+
+          <section className="border-b border-slate-200 py-3">
+            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-green-800">
+              {getCropLabel(crop)} yield
+            </h4>
+            <dl className="mt-2 grid grid-cols-[1fr_auto] gap-x-3 gap-y-1 text-xs">
+              <dt className="text-slate-500">District</dt>
+              <dd className="font-semibold tabular-nums text-slate-900">
+                {districtYield !== undefined
+                  ? formatYield(districtYield)
+                  : 'Data unavailable'}
+              </dd>
+              <dt className="text-slate-500">National</dt>
+              <dd className="font-medium tabular-nums text-slate-700">
+                {nationalYield !== undefined
+                  ? formatYield(nationalYield)
+                  : 'Data unavailable'}
+              </dd>
+              <dt className="text-slate-500">Yield gap · derived</dt>
+              <dd className="font-medium tabular-nums text-slate-700">
+                {districtYield !== undefined && nationalYield !== undefined
+                  ? `${formatSigned((districtYield - nationalYield) / 1000, 2)} t/ha`
+                  : 'Data unavailable'}
+              </dd>
+            </dl>
+            {hoveredSummary?.districtYield && (
+              <p className="mt-2 text-[10px] leading-4 text-slate-500">
+                {hoveredSummary.districtYield.dataset} ·{' '}
+                {hoveredSummary.districtYield.sourceReference.table.split(':')[0]}{' '}
+                · observed
+              </p>
+            )}
+          </section>
+
+          <section className="pt-3">
+            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-green-800">
+              Irrigation practice
+            </h4>
+            <p className="mt-0.5 text-[10px] leading-4 text-slate-500">
+              District-wide estimate across crop activity
+            </p>
+            <dl className="mt-2 grid grid-cols-[1fr_auto] gap-x-3 gap-y-1 text-xs">
+              <dt className="text-slate-500">District</dt>
+              <dd className="font-semibold tabular-nums text-slate-900">
+                {districtIrrigation !== undefined
+                  ? `${districtIrrigation.toFixed(1)}%`
+                  : 'Data unavailable'}
+              </dd>
+              <dt className="text-slate-500">National</dt>
+              <dd className="font-medium tabular-nums text-slate-700">
+                {nationalIrrigation !== undefined
+                  ? `${nationalIrrigation.toFixed(1)}%`
+                  : 'Data unavailable'}
+              </dd>
+              <dt className="text-slate-500">Difference · derived</dt>
+              <dd className="font-medium tabular-nums text-slate-700">
+                {districtIrrigation !== undefined &&
+                nationalIrrigation !== undefined
+                  ? `${formatSigned(districtIrrigation - nationalIrrigation)} pp`
+                  : 'Data unavailable'}
+              </dd>
+            </dl>
+            {hoveredSummary?.districtIrrigation && (
+              <p className="mt-2 text-[10px] leading-4 text-slate-500">
+                {hoveredSummary.districtIrrigation.dataset} · Table 64 · observed
+              </p>
+            )}
+          </section>
+        </aside>
+      )}
 
       <div className="absolute left-3 top-3 z-10 sm:left-4 sm:top-4">
         <AttentionLegend hasObservations={hasObservations} />

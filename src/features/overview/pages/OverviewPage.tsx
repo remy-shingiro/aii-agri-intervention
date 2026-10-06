@@ -4,38 +4,24 @@ import { AgriculturalInsightPanel } from '../components/AgriculturalInsightPanel
 import { OverviewHeader } from '../components/OverviewHeader'
 import { RwandaMapPanel } from '../components/RwandaMapPanel'
 import { districtInsights } from '../data/districtInsights'
-
-interface OverviewFilters {
-  crop: string
-  season: string
-  year: string
-}
+import type { OverviewFilters } from '../types/overview.types'
 
 interface OverviewPageProps {
+  filters: OverviewFilters
   selectedDistrict?: string
+  onFilterChange: (filter: keyof OverviewFilters, value: string) => void
   onDistrictSelect: (district: string | undefined) => void
   onOpenDistrictProfile: () => void
 }
 
 export function OverviewPage({
+  filters,
   selectedDistrict,
+  onFilterChange,
   onDistrictSelect,
   onOpenDistrictProfile,
 }: OverviewPageProps) {
   const [districtSearch, setDistrictSearch] = useState('')
-
-  const [filters, setFilters] = useState<OverviewFilters>({
-    crop: 'maize',
-    season: 'season-a',
-    year: '2024-25',
-  })
-
-  const handleFilterChange = (filter: keyof OverviewFilters, value: string) => {
-    setFilters((current) => ({
-      ...current,
-      [filter]: value,
-    }))
-  }
 
   const handleDistrictSearchChange = (value: string) => {
     setDistrictSearch(value)
@@ -73,7 +59,7 @@ export function OverviewPage({
         filters={filters}
         onDistrictSelect={handleDistrictSelect}
         onDistrictSearchChange={handleDistrictSearchChange}
-        onFilterChange={handleFilterChange}
+        onFilterChange={onFilterChange}
       />
 
       <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">

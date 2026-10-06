@@ -2,6 +2,12 @@ import type { DataSourceMetadata } from '../../../types/data-contract'
 
 export type AttentionLevel = 'high' | 'medium' | 'low' | 'unavailable'
 
+export interface OverviewFilters {
+  readonly crop: string
+  readonly season: string
+  readonly year: string
+}
+
 export interface DistrictEvidence {
   districtId: string
   districtName: string

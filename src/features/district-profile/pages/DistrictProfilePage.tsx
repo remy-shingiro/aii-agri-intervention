@@ -1,16 +1,132 @@
 import { ArrowLeft, ArrowRight, MapPin } from 'lucide-react'
 
 import { EvidenceStatusBadge } from '../../evidence/components/EvidenceStatusBadge'
+import { evidenceRecords } from '../../evidence/data/evidenceRecords'
+import type { AgriculturalSeason } from '../../../types/data-contract'
+import type { InterventionSignal, InterventionType } from '../../../types/intervention'
 import { getDistrictInsight } from '../../overview/data/districtInsights'
-import { nisrSeasonA2025DistrictPractices } from '../../overview/data/nisrSeasonA2025DistrictPractices'
 import type { InterventionSignalLevel } from '../../overview/types/interventionSignal.types'
-import { calculateCandidateIntervention } from '../../overview/utils/calculateCandidateIntervention'
+import { calculateInterventionSignals } from '../../overview/utils/calculateCandidateIntervention'
 import { getDistrictMetadata } from '../data/districtMetadata'
 
 interface DistrictProfilePageProps {
+  crop: string
+  season: string
   selectedDistrict?: string
-  onOpenEvidence: () => void
+  year: string
+  onOpenEvidence: (signal?: InterventionSignal) => void
   onNavigateOverview: () => void
+}
+
+const interventionLabels: Record<InterventionType, string> = {
+  irrigation: 'Irrigation',
+  soil_fertility: 'Soil fertility',
+  post_harvest: 'Post-harvest collection and storage',
+  processing: 'Processing and value addition',
+  export: 'Export opportunities',
+}
+
+function getCropLabel(value: string): string {
+  return value.replace(/\b\w/g, (letter) => letter.toUpperCase())
+}
+
+function getSeasonCode(value: string): AgriculturalSeason {
+  if (value === 'season-b') return 'B'
+  if (value === 'season-c') return 'C'
+  return 'A'
+}
+
+function InterventionAreas({
+  signals,
+  onOpenEvidence,
+}: {
+  signals: readonly InterventionSignal[]
+  onOpenEvidence: (signal?: InterventionSignal) => void
+}) {
+  return (
+    <section aria-labelledby="intervention-areas-heading">
+      <div className="mb-3">
+        <h2
+          className="text-base font-semibold text-slate-900"
+          id="intervention-areas-heading"
+        >
+          Potential Intervention Areas
+        </h2>
+        <p className="mt-1 text-sm leading-6 text-slate-600">
+          These deterministic evidence screens identify areas for further
+          investigation. They do not establish causes or recommend investment.
+        </p>
+      </div>
+
+      <div className="grid min-w-0 gap-3 md:grid-cols-2">
+        {signals.map((signal) => {
+          const supported = signal.status === 'supported'
+
+          return (
+            <article
+              className={`min-w-0 rounded-xl border p-4 sm:p-5 ${
+                supported
+                  ? 'border-green-200 bg-green-50/70'
+                  : 'border-slate-200 bg-white'
+              }`}
+              key={signal.intervention}
+            >
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <h3 className="min-w-0 text-sm font-semibold text-slate-900">
+                  {signal.title || interventionLabels[signal.intervention]}
+                </h3>
+                <span
+                  className={`inline-flex min-h-7 shrink-0 items-center rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ${
+                    supported
+                      ? 'bg-white text-green-800 ring-green-200'
+                      : 'bg-slate-100 text-slate-700 ring-slate-200'
+                  }`}
+                >
+                  {supported ? 'Investigation signal' : 'Evidence insufficient'}
+                </span>
+              </div>
+
+              <ul className="mt-3 space-y-1.5 text-sm leading-6 text-slate-700">
+                {signal.rationale.map((reason) => (
+                  <li className="flex gap-2" key={reason}>
+                    <span
+                      aria-hidden="true"
+                      className={`mt-2 size-1.5 shrink-0 rounded-full ${
+                        supported ? 'bg-green-700' : 'bg-slate-400'
+                      }`}
+                    />
+                    <span className="min-w-0 break-words">{reason}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {supported ? (
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-green-200 pt-3">
+                  <p className="text-xs text-slate-600">
+                    Evidence · {signal.evidenceIds.length} supporting
+                    observations
+                  </p>
+                  <button
+                    className="inline-flex min-h-10 items-center gap-1 rounded-md px-2 text-xs font-semibold text-green-800 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+                    onClick={() => onOpenEvidence(signal)}
+                    type="button"
+                  >
+                    View supporting evidence
+                    <ArrowRight aria-hidden="true" className="size-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <p className="mt-4 border-t border-slate-200 pt-3 text-xs leading-5 text-slate-500">
+                  No connected evidence currently supports a district-specific
+                  intervention signal.
+                </p>
+              )}
+            </article>
+          )
+        })}
+      </div>
+    </section>
+  )
 }
 
 function getSignalLabel(level: InterventionSignalLevel): string {
@@ -36,16 +152,22 @@ function getSignalClasses(level: InterventionSignalLevel): string {
 }
 
 export function DistrictProfilePage({
+  crop,
+  season,
   selectedDistrict,
+  year,
   onOpenEvidence,
   onNavigateOverview,
 }: DistrictProfilePageProps) {
-  const candidate = selectedDistrict
-    ? getDistrictInsight(selectedDistrict)
-    : undefined
-  const insight = candidate?.source.kind === 'nisr' ? candidate : undefined
+  const hasConnectedPeriod =
+    crop === 'maize' && season === 'season-a' && year === '2024-25'
+  const candidate = selectedDistrict ? getDistrictInsight(selectedDistrict) : undefined
+  const insight =
+    hasConnectedPeriod && candidate?.source.kind === 'nisr'
+      ? candidate
+      : undefined
 
-  if (!insight || insight.source.kind !== 'nisr') {
+  if (!selectedDistrict) {
     return (
       <section className="mx-auto max-w-2xl border-l-2 border-green-700 py-2 pl-5 sm:pl-6">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-green-800">
@@ -71,22 +193,89 @@ export function DistrictProfilePage({
     )
   }
 
+  const period = {
+    district: selectedDistrict,
+    crop: getCropLabel(crop),
+    year: year.replace('-', '/'),
+    season: getSeasonCode(season),
+  }
+  const interventionSignals = calculateInterventionSignals(
+    evidenceRecords,
+    period,
+  )
+
+  if (!insight || insight.source.kind !== 'nisr') {
+    const metadata = getDistrictMetadata(selectedDistrict)
+
+    return (
+      <div className="space-y-8">
+        <header className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <button
+              className="inline-flex min-h-10 items-center gap-2 rounded-md text-sm font-medium text-slate-600 transition-colors hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+              onClick={onNavigateOverview}
+              type="button"
+            >
+              <ArrowLeft aria-hidden="true" className="size-4" />
+              Back to Overview
+            </button>
+            <button
+              className="inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+              onClick={() => onOpenEvidence()}
+              type="button"
+            >
+              Explore evidence
+              <ArrowRight aria-hidden="true" className="size-4" />
+            </button>
+          </div>
+          <div className="border-b border-slate-200 pb-5">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-green-800">
+              District profile
+            </p>
+            <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-2">
+              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+                {selectedDistrict}
+              </h1>
+              {metadata && (
+                <span className="inline-flex items-center gap-1.5 text-sm text-slate-600">
+                  <MapPin aria-hidden="true" className="size-4" />
+                  {metadata.province}
+                </span>
+              )}
+            </div>
+            <p className="mt-2 text-sm text-slate-600">
+              {period.crop} · Season {period.season} · Agricultural year{' '}
+              {period.year}
+            </p>
+          </div>
+        </header>
+
+        <section
+          aria-label="District observations unavailable"
+          className="rounded-xl border border-dashed border-slate-300 bg-white p-5 sm:p-6"
+        >
+          <EvidenceStatusBadge status="unavailable" />
+          <h2 className="mt-3 text-base font-semibold text-slate-900">
+            No connected district observations for this period
+          </h2>
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
+            AII currently connects district maize observations for Season A,
+            2024/25. No value is carried forward from another year, season, or
+            crop.
+          </p>
+        </section>
+
+        <InterventionAreas
+          onOpenEvidence={onOpenEvidence}
+          signals={interventionSignals}
+        />
+      </div>
+    )
+  }
+
   const metadata = getDistrictMetadata(insight.district)
   const source = insight.source
   const signal = insight.interventionSignal
-  const irrigationObservation = nisrSeasonA2025DistrictPractices.records.find(
-    (record) =>
-      record.district.toLowerCase() === insight.district.toLowerCase(),
-  )
-  const districtId = insight.district.toLowerCase().replaceAll(' ', '-')
-  const irrigationSignal = calculateCandidateIntervention({
-    yieldGapPct: signal.yieldGapPct,
-    irrigationPracticePct: irrigationObservation?.irrigationPracticePct,
-    nationalIrrigationPracticePct:
-      nisrSeasonA2025DistrictPractices.nationalReference,
-    yieldEvidenceId: `sas-2025-season-a-${districtId}-average_yield`,
-    irrigationEvidenceId: `sas-2025-season-a-${districtId}-irrigation_practice`,
-  })
 
   return (
     <div className="space-y-8">
@@ -102,7 +291,7 @@ export function DistrictProfilePage({
           </button>
           <button
             className="inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
-            onClick={onOpenEvidence}
+            onClick={() => onOpenEvidence()}
             type="button"
           >
             Explore evidence
@@ -251,7 +440,7 @@ export function DistrictProfilePage({
         </div>
         <button
           className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
-          onClick={onOpenEvidence}
+          onClick={() => onOpenEvidence()}
           type="button"
         >
           View district evidence records
@@ -259,56 +448,10 @@ export function DistrictProfilePage({
         </button>
       </section>
 
-      <section aria-labelledby="intervention-areas-heading">
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2
-              className="text-base font-semibold text-slate-900"
-              id="intervention-areas-heading"
-            >
-              Potential intervention to investigate
-            </h2>
-            <p className="mt-1 text-sm leading-6 text-slate-600">
-              Screening evidence for field investigation, not a causal finding
-              or investment recommendation.
-            </p>
-          </div>
-          <span
-            className={`inline-flex min-h-7 items-center rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ${
-              irrigationSignal.status === 'supported'
-                ? 'bg-green-50 text-green-800 ring-green-200'
-                : 'bg-slate-100 text-slate-700 ring-slate-200'
-            }`}
-          >
-            {irrigationSignal.status === 'supported'
-              ? 'Evidence available'
-              : 'Insufficient evidence'}
-          </span>
-        </div>
-        {irrigationSignal.status === 'supported' ? (
-          <article className="rounded-lg border border-green-200 bg-green-50/70 p-4">
-            <h3 className="text-sm font-semibold text-slate-900">
-              {irrigationSignal.intervention}
-            </h3>
-            <ul className="mt-2 space-y-1.5 text-sm leading-6 text-slate-700">
-              {irrigationSignal.rationale.map((reason) => (
-                <li className="flex gap-2" key={reason}>
-                  <span
-                    aria-hidden="true"
-                    className="mt-2 size-1.5 shrink-0 rounded-full bg-green-700"
-                  />
-                  <span>{reason}</span>
-                </li>
-              ))}
-            </ul>
-          </article>
-        ) : (
-          <p className="border-l-2 border-slate-300 py-1 pl-4 text-sm leading-6 text-slate-600">
-            {irrigationSignal.rationale[0]} The yield gap by itself does not
-            identify which intervention would address it.
-          </p>
-        )}
-      </section>
+      <InterventionAreas
+        onOpenEvidence={onOpenEvidence}
+        signals={interventionSignals}
+      />
 
       <p className="border-t border-slate-200 pt-4 text-xs leading-5 text-slate-500">
         Source:{' '}

@@ -2,6 +2,7 @@ import { ArrowRight } from 'lucide-react'
 
 import { getNationalMaizeYieldReference } from '../data/agriculturalData'
 import { getDistrictInsight } from '../data/districtInsights'
+import { evidenceRecords } from '../../evidence/data/evidenceRecords'
 import type { InterventionSignalLevel } from '../types/interventionSignal.types'
 
 interface AgriculturalInsightPanelProps {
@@ -52,6 +53,25 @@ export function AgriculturalInsightPanel({
       ? getDistrictInsight(selectedDistrict)
       : undefined
   const insight = candidate?.source.kind === 'nisr' ? candidate : undefined
+  const districtIrrigation =
+    supportsSelectedPeriod && selectedDistrict
+      ? evidenceRecords.find(
+          (record) =>
+            record.indicator === 'irrigation_practice' &&
+            record.geography.level === 'district' &&
+            record.geography.name.toLowerCase() ===
+              selectedDistrict.toLowerCase() &&
+            record.period.year === '2024/25' &&
+            record.period.season === 'A',
+        )
+      : undefined
+  const nationalIrrigation = evidenceRecords.find(
+    (record) =>
+      record.indicator === 'irrigation_practice' &&
+      record.geography.level === 'national' &&
+      record.period.year === '2024/25' &&
+      record.period.season === 'A',
+  )
   const reference = getNationalMaizeYieldReference()
   const yieldTable = reference.source.references.find((item) =>
     item.table.includes('Table 19'),
@@ -125,6 +145,50 @@ export function AgriculturalInsightPanel({
               </div>
             </dl>
 
+            <dl className="grid grid-cols-2 gap-x-3 gap-y-4 border-t border-slate-200 py-4">
+              <div className="min-w-0">
+                <dt className="text-xs text-slate-500">
+                  District-wide irrigation practice
+                </dt>
+                <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
+                  {districtIrrigation?.status === 'observed' &&
+                  districtIrrigation.value !== null
+                    ? `${districtIrrigation.value.toFixed(1)}%`
+                    : 'Data unavailable'}
+                </dd>
+                <dd className="mt-1 text-[11px] leading-4 text-slate-500">
+                  SAS 2025 · Table 64 · observed
+                </dd>
+              </div>
+              <div className="min-w-0">
+                <dt className="text-xs text-slate-500">
+                  National irrigation reference
+                </dt>
+                <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
+                  {nationalIrrigation?.status === 'observed' &&
+                  nationalIrrigation.value !== null
+                    ? `${nationalIrrigation.value.toFixed(1)}%`
+                    : 'Data unavailable'}
+                </dd>
+                <dd className="mt-1 text-[11px] leading-4 text-slate-500">
+                  SAS 2025 · Table 64 · observed
+                </dd>
+              </div>
+              <div className="col-span-2 min-w-0 border-t border-slate-100 pt-3">
+                <dt className="text-xs text-slate-500">
+                  Difference · calculated percentage points
+                </dt>
+                <dd className="mt-1 text-sm font-semibold text-slate-800 tabular-nums">
+                  {districtIrrigation?.status === 'observed' &&
+                  districtIrrigation.value !== null &&
+                  nationalIrrigation?.status === 'observed' &&
+                  nationalIrrigation.value !== null
+                    ? `${((districtIrrigation.value - nationalIrrigation.value) > 0 ? '+' : '') + (districtIrrigation.value - nationalIrrigation.value).toFixed(1)} pp`
+                    : 'Data unavailable'}
+                </dd>
+              </div>
+            </dl>
+
             <button
               className="mt-1 inline-flex min-h-11 w-full items-center justify-between rounded-lg border border-slate-300 px-3.5 text-sm font-semibold text-slate-800 transition-colors hover:border-green-700 hover:bg-green-50 hover:text-green-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
               onClick={onOpenDistrictProfile}
@@ -165,6 +229,7 @@ export function AgriculturalInsightPanel({
           <p className="mt-1 text-xs leading-5 text-slate-500">
             Season A · Agricultural year 2024/25
             {yieldTable && ` · ${yieldTable.table.split(':')[0]}, p. ${yieldTable.page}`}
+            {' · Table 64 for district-wide irrigation practice'}
           </p>
         </div>
       </section>

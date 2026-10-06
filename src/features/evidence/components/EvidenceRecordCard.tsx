@@ -46,7 +46,11 @@ export function EvidenceRecordCard({
             {record.geography.name}
           </h2>
           <p className="mt-1 text-xs text-slate-500">
-            {record.crop ? `${record.crop} · ` : 'All crop activity · '}
+            {record.geography.level === 'national'
+              ? 'National reference · '
+              : record.crop
+                ? `${record.crop} · `
+                : 'All crop activity · '}
             Season {record.period.season} · {record.period.year}
           </p>
         </div>
@@ -85,6 +89,15 @@ export function EvidenceRecordCard({
         )}
       </dl>
 
+      {record.derivedFromEvidenceIds && (
+        <p className="mt-3 break-words text-xs leading-5 text-slate-500">
+          Derived from evidence records:{' '}
+          <span className="font-medium text-slate-700">
+            {record.derivedFromEvidenceIds.join(', ')}
+          </span>
+        </p>
+      )}
+
       <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-medium text-slate-700">{record.dataset}</p>
@@ -99,14 +112,16 @@ export function EvidenceRecordCard({
             <ArrowUpRight aria-hidden="true" className="size-3.5 shrink-0" />
           </a>
         </div>
-        <button
-          className="inline-flex min-h-10 items-center gap-1 rounded-md px-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-green-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
-          onClick={() => onOpenDistrictProfile(record.geography.name)}
-          type="button"
-        >
-          Open profile
-          <ArrowUpRight aria-hidden="true" className="size-3.5" />
-        </button>
+        {record.geography.level === 'district' && (
+          <button
+            className="inline-flex min-h-10 items-center gap-1 rounded-md px-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-green-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+            onClick={() => onOpenDistrictProfile(record.geography.name)}
+            type="button"
+          >
+            Open profile
+            <ArrowUpRight aria-hidden="true" className="size-3.5" />
+          </button>
+        )}
       </div>
     </article>
   )

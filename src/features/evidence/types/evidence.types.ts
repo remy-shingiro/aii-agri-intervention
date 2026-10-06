@@ -4,6 +4,8 @@ import type {
   AgriculturalSeason,
 } from '../../../types/data-contract'
 
+import type { InterventionType } from '../../../types/intervention'
+
 export type EvidenceStatus = 'observed' | 'derived' | 'unavailable'
 
 export type EvidenceIndicator =
@@ -21,7 +23,7 @@ export interface EvidenceRecord {
   readonly value: number | null
   readonly unit: string
   readonly geography: {
-    readonly level: 'district'
+    readonly level: 'district' | 'national'
     readonly id: string
     readonly name: string
   }
@@ -41,4 +43,14 @@ export interface EvidenceRecord {
   readonly difference?: number
   readonly differenceUnit?: string
   readonly comparisonStatus?: 'derived'
+  readonly derivedFromEvidenceIds?: readonly string[]
+}
+
+export interface EvidenceNavigationContext {
+  readonly district: string
+  readonly crop: string
+  readonly year: string
+  readonly season: AgriculturalSeason
+  readonly intervention?: InterventionType
+  readonly evidenceIds?: readonly string[]
 }

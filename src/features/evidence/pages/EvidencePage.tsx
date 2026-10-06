@@ -2,11 +2,15 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { evidenceRecords } from '../data/evidenceRecords'
-import type { EvidenceIndicator } from '../types/evidence.types'
+import type {
+  EvidenceIndicator,
+  EvidenceNavigationContext,
+} from '../types/evidence.types'
 import { EvidenceRecordCard } from '../components/EvidenceRecordCard'
 import { EvidenceStatusBadge } from '../components/EvidenceStatusBadge'
 
 interface EvidencePageProps {
+  context?: EvidenceNavigationContext
   selectedDistrict?: string
   onOpenDistrictProfile: (district: string) => void
 }
@@ -27,7 +31,11 @@ const selectClassName =
   'h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none focus:border-green-700 focus:ring-2 focus:ring-green-700/10'
 
 const districts = Array.from(
-  new Set(evidenceRecords.map((record) => record.geography.name)),
+  new Set(
+    evidenceRecords
+      .filter((record) => record.geography.level === 'district')
+      .map((record) => record.geography.name),
+  ),
 ).sort((first, second) => first.localeCompare(second))
 
 function FilterSelect({
@@ -64,36 +72,54 @@ function FilterSelect({
 }
 
 export function EvidencePage({
+  context,
   selectedDistrict,
   onOpenDistrictProfile,
 }: EvidencePageProps) {
-  const [district, setDistrict] = useState(selectedDistrict ?? 'all')
-  const [crop, setCrop] = useState('all')
-  const [season, setSeason] = useState('A')
-  const [year, setYear] = useState('2024/25')
+  const [signalContext, setSignalContext] = useState(context)
+  const [district, setDistrict] = useState(context?.district ?? selectedDistrict ?? 'all')
+  const [crop, setCrop] = useState(
+    context?.intervention ? 'all' : context?.crop.toLowerCase() ?? 'all',
+  )
+  const [season, setSeason] = useState<string>(context?.season ?? 'A')
+  const [year, setYear] = useState(context?.year ?? '2024/25')
   const [indicator, setIndicator] = useState<'all' | EvidenceIndicator>(
-    'average_yield',
+    context?.intervention ? 'all' : 'average_yield',
   )
 
   const filteredRecords = evidenceRecords.filter((record) => {
     const districtMatches =
-      district === 'all' || record.geography.name === district
-    const cropMatches = crop === 'all' || record.crop === 'Maize'
+      district === 'all' ||
+      record.geography.name === district ||
+      (Boolean(signalContext?.intervention) &&
+        record.geography.level === 'national')
+    const cropMatches =
+      crop === 'all' ||
+      record.crop?.toLowerCase() === crop ||
+      record.indicator === 'irrigation_practice'
     const seasonMatches = record.period.season === season
     const yearMatches = record.period.year === year
     const indicatorMatches =
       indicator === 'all' || record.indicator === indicator
+    const signalMatches =
+      !signalContext?.intervention ||
+      signalContext.evidenceIds?.includes(record.id) === true
 
     return (
       districtMatches &&
       cropMatches &&
       seasonMatches &&
       yearMatches &&
-      indicatorMatches
+      indicatorMatches &&
+      signalMatches
     )
   })
 
   const isHistoricalPeriod = year === '2023/24'
+  const signalLabel =
+    signalContext?.intervention === 'irrigation'
+      ? 'Irrigation investigation signal'
+      : signalContext?.intervention
 
   return (
     <div className="space-y-7">
@@ -109,6 +135,42 @@ export function EvidencePage({
           difference, and source behind each connected signal.
         </p>
       </header>
+
+      {signalContext?.intervention && (
+        <section
+          aria-label="Intervention evidence context"
+          className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-green-200 bg-green-50/70 p-4 sm:p-5"
+        >
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-wider text-green-800">
+              Supporting evidence · {signalLabel}
+            </p>
+            <h2 className="mt-1 text-sm font-semibold text-slate-900">
+              {signalContext.district} · {signalContext.crop} · Season{' '}
+              {signalContext.season} · {signalContext.year}
+            </h2>
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
+              These records show the same-period district and national
+              observations used by the signal. The comparison identifies an
+              area for investigation; it does not establish cause or impact.
+            </p>
+          </div>
+          <button
+            className="inline-flex min-h-10 shrink-0 items-center rounded-md px-2 text-xs font-semibold text-green-800 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+            onClick={() => {
+              setSignalContext(undefined)
+              setDistrict('all')
+              setCrop('all')
+              setSeason('A')
+              setYear('2024/25')
+              setIndicator('average_yield')
+            }}
+            type="button"
+          >
+            Clear signal context
+          </button>
+        </section>
+      )}
 
       <section
         aria-label="Evidence filters"

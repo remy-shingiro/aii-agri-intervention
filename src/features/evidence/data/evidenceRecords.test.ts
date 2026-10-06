@@ -27,12 +27,18 @@ describe('connected evidence records', () => {
       status: 'derived',
       unit: '%',
       value: expect.closeTo(((1582 - 1985) / 1985) * 100, 6),
+      derivedFromEvidenceIds: [
+        'sas-2025-season-a-gasabo-average_yield',
+        'sas-2025-season-a-rwanda-average_yield',
+      ],
     })
   })
 
   it('keeps all 30 SAS district irrigation values at district geography', () => {
     const irrigationRecords = evidenceRecords.filter(
-      (record) => record.indicator === 'irrigation_practice',
+      (record) =>
+        record.indicator === 'irrigation_practice' &&
+        record.geography.level === 'district',
     )
     const rubavuRecord = irrigationRecords.find(
       (record) => record.geography.name === 'Rubavu',
@@ -44,6 +50,36 @@ describe('connected evidence records', () => {
       referenceValue: 13.4,
       difference: -12.3,
       differenceUnit: 'percentage points',
+      sourceReference: { table: expect.stringContaining('Table 64') },
+    })
+  })
+
+  it('records the national yield and irrigation references as observed evidence', () => {
+    expect(
+      evidenceRecords.find(
+        (record) =>
+          record.geography.level === 'national' &&
+          record.indicator === 'average_yield',
+      ),
+    ).toMatchObject({
+      geography: { level: 'national', name: 'Rwanda' },
+      period: { year: '2024/25', season: 'A' },
+      value: 1985,
+      status: 'observed',
+      sourceReference: { table: expect.stringContaining('Table 19') },
+    })
+
+    expect(
+      evidenceRecords.find(
+        (record) =>
+          record.geography.level === 'national' &&
+          record.indicator === 'irrigation_practice',
+      ),
+    ).toMatchObject({
+      geography: { level: 'national', name: 'Rwanda' },
+      period: { year: '2024/25', season: 'A' },
+      value: 13.4,
+      status: 'observed',
       sourceReference: { table: expect.stringContaining('Table 64') },
     })
   })

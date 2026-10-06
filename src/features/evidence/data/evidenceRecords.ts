@@ -92,6 +92,10 @@ const cropEvidenceRecords: readonly EvidenceRecord[] =
         value: signal.yieldGapPct,
         unit: '%',
         status: 'derived',
+        derivedFromEvidenceIds: [
+          createId(observation.district, 'average_yield'),
+          createId('Rwanda', 'average_yield'),
+        ],
         sourceReference: yieldReference,
         referenceValue: 0,
         referenceLabel: 'National parity (0% gap)',
@@ -120,6 +124,28 @@ const cropEvidenceRecords: readonly EvidenceRecord[] =
       },
     ]
   })
+
+const nationalYieldEvidenceRecord: EvidenceRecord = {
+  id: createId('Rwanda', 'average_yield'),
+  indicator: 'average_yield',
+  label: 'National average maize yield',
+  crop: nationalYieldReference.crop,
+  value: nationalYieldReference.value,
+  unit: nationalYieldReference.unit,
+  geography: {
+    level: 'national',
+    id: 'rwanda',
+    name: 'Rwanda',
+  },
+  period: {
+    year: nationalYieldReference.agriculturalYear,
+    season: nationalYieldReference.season,
+  },
+  dataset: nationalYieldReference.source.dataset,
+  source: nationalYieldReference.source,
+  sourceReference: yieldReference,
+  status: 'observed',
+}
 
 const irrigationEvidenceRecords: readonly EvidenceRecord[] =
   nisrSeasonA2025DistrictPractices.records.map((observation) => ({
@@ -153,7 +179,33 @@ const irrigationEvidenceRecords: readonly EvidenceRecord[] =
     comparisonStatus: 'derived',
   }))
 
+const nationalIrrigationEvidenceRecord: EvidenceRecord = {
+  id: createId('Rwanda', 'irrigation_practice'),
+  indicator: 'irrigation_practice',
+  label: 'National farmers practicing irrigation',
+  value: nisrSeasonA2025DistrictPractices.nationalReference,
+  unit: nisrSeasonA2025DistrictPractices.unit,
+  geography: {
+    level: 'national',
+    id: 'rwanda',
+    name: 'Rwanda',
+  },
+  period: {
+    year: nisrSeasonA2025DistrictPractices.agriculturalYear,
+    season: nisrSeasonA2025DistrictPractices.season,
+  },
+  dataset: nisrSeasonA2025DistrictPractices.source.dataset,
+  source: nisrSeasonA2025DistrictPractices.source,
+  sourceReference: sourceReference(
+    nisrSeasonA2025DistrictPractices.source,
+    'Table 64',
+  ),
+  status: 'observed',
+}
+
 export const evidenceRecords: readonly EvidenceRecord[] = [
+  nationalYieldEvidenceRecord,
   ...cropEvidenceRecords,
+  nationalIrrigationEvidenceRecord,
   ...irrigationEvidenceRecords,
 ]

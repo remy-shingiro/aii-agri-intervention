@@ -75,7 +75,7 @@ describe('application shell', () => {
     expect(screen.queryByText('Improved seed use')).not.toBeInTheDocument()
     expect(
       screen.getByRole('heading', {
-        name: 'Potential intervention to investigate',
+        name: 'Potential Intervention Areas',
       }),
     ).toBeInTheDocument()
   })
@@ -88,7 +88,7 @@ describe('application shell', () => {
     expect(
       screen.getByRole('heading', { name: 'Evidence explorer' }),
     ).toBeInTheDocument()
-    expect(screen.getByText('30 records')).toBeInTheDocument()
+    expect(screen.getByText('31 records')).toBeInTheDocument()
 
     fireEvent.change(screen.getByLabelText('Agricultural year'), {
       target: { value: '2023/24' },
@@ -133,17 +133,20 @@ describe('application shell', () => {
       screen.getByRole('button', { name: 'Open district profile' }),
     )
 
-    expect(screen.getByText('Irrigation access assessment')).toBeInTheDocument()
-    expect(screen.getByText('Evidence available')).toBeInTheDocument()
+    expect(screen.getByText('Irrigation')).toBeInTheDocument()
+    expect(screen.getByText('Investigation signal')).toBeInTheDocument()
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'View district evidence records' }),
+      screen.getByRole('button', { name: 'View supporting evidence' }),
     )
 
     expect(
       screen.getByRole('heading', { name: 'Evidence explorer' }),
     ).toBeInTheDocument()
     expect(screen.getByLabelText('District')).toHaveValue('Nyarugenge')
-    expect(screen.getByText('1 record')).toBeInTheDocument()
+    expect(screen.getByText('4 records')).toBeInTheDocument()
+    expect(
+      screen.getByText(/Supporting evidence · Irrigation investigation signal/),
+    ).toBeInTheDocument()
   })
 })
