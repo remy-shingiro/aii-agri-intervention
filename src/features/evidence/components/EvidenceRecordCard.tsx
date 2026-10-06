@@ -97,6 +97,14 @@ export function EvidenceRecordCard({
           </span>
         </p>
       )}
+      {record.referenceEvidenceId && (
+        <p className="mt-3 break-words text-xs leading-5 text-slate-500">
+          Comparison reference record:{' '}
+          <span className="font-medium text-slate-700">
+            {record.referenceEvidenceId}
+          </span>
+        </p>
+      )}
 
       <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">

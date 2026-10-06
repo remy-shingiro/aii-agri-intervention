@@ -59,6 +59,7 @@ function createFixtureRecords({
       indicator: 'average_yield',
       value: districtYield,
       referenceValue: nationalYield,
+      referenceEvidenceId: 'fixture-national-yield',
     }),
     fixtureRecord({
       id: 'fixture-national-yield',
@@ -71,6 +72,7 @@ function createFixtureRecords({
       indicator: 'irrigation_practice',
       value: districtIrrigation,
       referenceValue: nationalIrrigation,
+      referenceEvidenceId: 'fixture-national-irrigation',
     }),
     fixtureRecord({
       id: 'fixture-national-irrigation',
@@ -98,7 +100,9 @@ describe('evidence-backed intervention screening', () => {
       'fixture-district-irrigation',
       'fixture-national-irrigation',
     ])
-    expect(signal.rationale.join(' ')).not.toMatch(/cause|caused/)
+    expect(signal.rationale.join(' ')).toContain(
+      'does not establish that lower irrigation caused the yield gap',
+    )
   })
 
   it('does not support irrigation when yield is below reference but irrigation is not', () => {

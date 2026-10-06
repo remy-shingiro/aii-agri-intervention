@@ -36,11 +36,11 @@ describe('district map evidence lookup', () => {
       season: 'A',
     })
 
-    expect(lookup.get('kayonza')).toMatchObject({
-      districtYield: undefined,
-      nationalYield: undefined,
-      districtIrrigation: { value: 16.1 },
-      nationalIrrigation: { value: 13.4 },
-    })
+    const summary = lookup.get('kayonza')
+
+    expect(summary?.districtYield).toBeUndefined()
+    expect(summary?.nationalYield).toBeUndefined()
+    expect(summary?.districtIrrigation?.value).toBe(16.1)
+    expect(summary?.nationalIrrigation?.value).toBe(13.4)
   })
 })

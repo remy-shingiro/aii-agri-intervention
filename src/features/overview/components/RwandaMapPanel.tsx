@@ -35,6 +35,15 @@ const DISTRICT_LABEL_LAYER_ID = 'rwanda-district-labels'
 const COUNTRY_LABEL_SOURCE_ID = 'neighboring-country-labels'
 const COUNTRY_LABEL_LAYER_ID = 'neighboring-country-labels-layer'
 
+const PROVINCE_LABELS: Readonly<Record<string, string>> = {
+  East: 'Eastern Province',
+  Kigali: 'Kigali City',
+  'Kigali City': 'Kigali City',
+  North: 'Northern Province',
+  South: 'Southern Province',
+  West: 'Western Province',
+}
+
 interface RwandaMapPanelProps {
   crop: string
   districtSearch: string
@@ -259,22 +268,25 @@ export function RwandaMapPanel({
             features: [
               {
                 type: 'Feature',
-                properties: { label: 'UGANDA' },
+                properties: { label: 'UGANDA', anchor: 'bottom' },
                 geometry: { type: 'Point', coordinates: [30.04, -1.04] },
               },
               {
                 type: 'Feature',
-                properties: { label: 'DEMOCRATIC REPUBLIC OF THE CONGO' },
-                geometry: { type: 'Point', coordinates: [28.88, -1.9] },
+                properties: {
+                  label: 'DEMOCRATIC REPUBLIC OF THE CONGO',
+                  anchor: 'right',
+                },
+                geometry: { type: 'Point', coordinates: [29.15, -1.9] },
               },
               {
                 type: 'Feature',
-                properties: { label: 'TANZANIA' },
+                properties: { label: 'TANZANIA', anchor: 'right' },
                 geometry: { type: 'Point', coordinates: [30.98, -2.15] },
               },
               {
                 type: 'Feature',
-                properties: { label: 'BURUNDI' },
+                properties: { label: 'BURUNDI', anchor: 'top' },
                 geometry: { type: 'Point', coordinates: [29.8, -2.82] },
               },
             ],
@@ -391,7 +403,7 @@ export function RwandaMapPanel({
               10.5,
               13,
             ],
-            'text-anchor': 'center',
+            'text-anchor': ['get', 'anchor'],
             'text-max-width': 8,
             'text-padding': 2,
             'text-allow-overlap': false,
@@ -495,11 +507,9 @@ export function RwandaMapPanel({
       hoveredFeatureIdRef.current = featureId
       setHoveredDistrict({
         district: districtName,
-        province: String(
-          feature.properties?.prov_engl ??
-            feature.properties?.province ??
-            'Province unavailable',
-        ),
+        province:
+          PROVINCE_LABELS[String(feature.properties?.prov_engl ?? '')] ??
+          String(feature.properties?.prov_engl ?? 'Province unavailable'),
       })
     }
 

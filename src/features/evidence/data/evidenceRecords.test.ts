@@ -21,6 +21,7 @@ describe('connected evidence records', () => {
       difference: -403,
       status: 'observed',
       comparisonStatus: 'derived',
+      referenceEvidenceId: 'sas-2025-season-a-rwanda-average_yield',
       sourceReference: { page: 56 },
     })
     expect(yieldGapRecord).toMatchObject({

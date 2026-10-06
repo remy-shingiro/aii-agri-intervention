@@ -133,12 +133,14 @@ export function calculateInterventionSignals(
     isObservedValue(districtYield) &&
     isObservedValue(nationalYield) &&
     districtYield.unit === nationalYield.unit &&
-    districtYield.referenceValue === nationalYield.value
+    districtYield.referenceValue === nationalYield.value &&
+    districtYield.referenceEvidenceId === nationalYield.id
   const validIrrigationPair =
     isObservedValue(districtIrrigation) &&
     isObservedValue(nationalIrrigation) &&
     districtIrrigation.unit === nationalIrrigation.unit &&
-    districtIrrigation.referenceValue === nationalIrrigation.value
+    districtIrrigation.referenceValue === nationalIrrigation.value &&
+    districtIrrigation.referenceEvidenceId === nationalIrrigation.id
   const isMaizeContext = normalize(context.crop) === 'maize'
 
   const irrigationRationale: string[] = []

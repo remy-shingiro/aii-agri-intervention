@@ -44,6 +44,7 @@ export interface EvidenceRecord {
   readonly differenceUnit?: string
   readonly comparisonStatus?: 'derived'
   readonly derivedFromEvidenceIds?: readonly string[]
+  readonly referenceEvidenceId?: string
 }
 
 export interface EvidenceNavigationContext {

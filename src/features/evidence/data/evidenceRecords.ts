@@ -83,6 +83,7 @@ const cropEvidenceRecords: readonly EvidenceRecord[] =
           observation.yieldKilogramsPerHectare - nationalYieldReference.value,
         differenceUnit: 'Kg/Ha',
         comparisonStatus: 'derived',
+        referenceEvidenceId: createId('Rwanda', 'average_yield'),
       },
       {
         ...common,
@@ -177,6 +178,7 @@ const irrigationEvidenceRecords: readonly EvidenceRecord[] =
       nisrSeasonA2025DistrictPractices.nationalReference,
     differenceUnit: 'percentage points',
     comparisonStatus: 'derived',
+    referenceEvidenceId: createId('Rwanda', 'irrigation_practice'),
   }))
 
 const nationalIrrigationEvidenceRecord: EvidenceRecord = {
