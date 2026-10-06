@@ -133,13 +133,27 @@ describe('application shell', () => {
       screen.getByRole('button', { name: 'Open district profile' }),
     )
 
-    expect(screen.getByText('Irrigation')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Irrigation' })).toBeInTheDocument()
     expect(screen.getByText('Investigation signal')).toBeInTheDocument()
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'View supporting evidence' }),
+      screen.getByRole('button', { name: 'Why this signal?' }),
     )
 
+    expect(
+      screen.getByRole('heading', { name: 'Irrigation investigation signal' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/1,338 Kg\/Ha/)).toBeInTheDocument()
+    expect(screen.getByText(/1,985 Kg\/Ha/)).toBeInTheDocument()
+    expect(screen.getByText(/-647 Kg\/Ha/)).toBeInTheDocument()
+    expect(screen.getByText(/8\.5 %/)).toBeInTheDocument()
+    expect(screen.getByText(/13\.4 %/)).toBeInTheDocument()
+    expect(screen.getByText(/-4\.9 percentage points/)).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'Open NISR source' })).toHaveLength(4)
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Open Evidence Explorer' }),
+    )
     expect(
       screen.getByRole('heading', { name: 'Evidence explorer' }),
     ).toBeInTheDocument()
@@ -147,6 +161,15 @@ describe('application shell', () => {
     expect(screen.getByText('4 records')).toBeInTheDocument()
     expect(
       screen.getByText(/Supporting evidence · Irrigation investigation signal/),
+    ).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'District Profile' }))
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Why this signal?' }),
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'View Methodology' }))
+    expect(
+      screen.getByRole('heading', { name: 'Data & Methodology' }),
     ).toBeInTheDocument()
   })
 })

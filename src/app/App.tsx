@@ -79,6 +79,10 @@ export function App() {
           year={overviewFilters.year}
           onOpenEvidence={openProfileEvidence}
           onNavigateOverview={() => setActivePage('Overview')}
+          onNavigateMethodology={() => {
+            setEvidenceContext(undefined)
+            setActivePage('Data & Methodology')
+          }}
         />
       )}
 
