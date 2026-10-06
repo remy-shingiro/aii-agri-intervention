@@ -3,7 +3,7 @@ export type DataReadiness = 'awaiting-source-inspection' | 'source-inspected'
 
 export interface AgriculturalDataSourceReference {
   readonly table: string
-  readonly page: number
+  readonly page?: number
 }
 
 export interface DataSourceMetadata {
@@ -39,7 +39,10 @@ export interface AgriculturalYieldReference {
   readonly season: AgriculturalSeason
   readonly agriculturalYear: string
   readonly geographyLevel: 'national'
-  readonly source: Extract<AgriculturalObservationSource, { readonly kind: 'nisr' }>
+  readonly source: Extract<
+    AgriculturalObservationSource,
+    { readonly kind: 'nisr' }
+  >
 }
 
 /**

@@ -1,0 +1,231 @@
+import { useState } from 'react'
+import type { ReactNode } from 'react'
+
+import { evidenceRecords } from '../data/evidenceRecords'
+import type { EvidenceIndicator } from '../types/evidence.types'
+import { EvidenceRecordCard } from '../components/EvidenceRecordCard'
+import { EvidenceStatusBadge } from '../components/EvidenceStatusBadge'
+
+interface EvidencePageProps {
+  selectedDistrict?: string
+  onOpenDistrictProfile: (district: string) => void
+}
+
+const indicatorOptions: readonly {
+  label: string
+  value: 'all' | EvidenceIndicator
+}[] = [
+  { label: 'All indicators', value: 'all' },
+  { label: 'Average maize yield', value: 'average_yield' },
+  { label: 'Yield gap', value: 'yield_gap' },
+  { label: 'Cultivated maize area', value: 'cultivated_area' },
+  { label: 'Maize production', value: 'crop_production' },
+  { label: 'Irrigation practice', value: 'irrigation_practice' },
+]
+
+const selectClassName =
+  'h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none focus:border-green-700 focus:ring-2 focus:ring-green-700/10'
+
+const districts = Array.from(
+  new Set(evidenceRecords.map((record) => record.geography.name)),
+).sort((first, second) => first.localeCompare(second))
+
+function FilterSelect({
+  id,
+  label,
+  value,
+  onChange,
+  children,
+}: {
+  id: string
+  label: string
+  value: string
+  onChange: (value: string) => void
+  children: ReactNode
+}) {
+  return (
+    <div className="min-w-0">
+      <label
+        className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500"
+        htmlFor={id}
+      >
+        {label}
+      </label>
+      <select
+        className={selectClassName}
+        id={id}
+        onChange={(event) => onChange(event.target.value)}
+        value={value}
+      >
+        {children}
+      </select>
+    </div>
+  )
+}
+
+export function EvidencePage({
+  selectedDistrict,
+  onOpenDistrictProfile,
+}: EvidencePageProps) {
+  const [district, setDistrict] = useState(selectedDistrict ?? 'all')
+  const [crop, setCrop] = useState('all')
+  const [season, setSeason] = useState('A')
+  const [year, setYear] = useState('2024/25')
+  const [indicator, setIndicator] = useState<'all' | EvidenceIndicator>(
+    'average_yield',
+  )
+
+  const filteredRecords = evidenceRecords.filter((record) => {
+    const districtMatches =
+      district === 'all' || record.geography.name === district
+    const cropMatches = crop === 'all' || record.crop === 'Maize'
+    const seasonMatches = record.period.season === season
+    const yearMatches = record.period.year === year
+    const indicatorMatches =
+      indicator === 'all' || record.indicator === indicator
+
+    return (
+      districtMatches &&
+      cropMatches &&
+      seasonMatches &&
+      yearMatches &&
+      indicatorMatches
+    )
+  })
+
+  const isHistoricalPeriod = year === '2023/24'
+
+  return (
+    <div className="space-y-7">
+      <header className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-green-800">
+          Agricultural evidence
+        </p>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+          Evidence explorer
+        </h1>
+        <p className="max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+          Inspect the NISR observation, national comparison, calculated
+          difference, and source behind each connected signal.
+        </p>
+      </header>
+
+      <section
+        aria-label="Evidence filters"
+        className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-5"
+      >
+        <FilterSelect
+          id="evidence-district"
+          label="District"
+          onChange={setDistrict}
+          value={district}
+        >
+          <option value="all">All districts</option>
+          {districts.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </FilterSelect>
+        <FilterSelect
+          id="evidence-crop"
+          label="Crop"
+          onChange={setCrop}
+          value={crop}
+        >
+          <option value="all">All crops and practices</option>
+          <option value="maize">Maize</option>
+        </FilterSelect>
+        <FilterSelect
+          id="evidence-season"
+          label="Season"
+          onChange={setSeason}
+          value={season}
+        >
+          <option value="A">Season A</option>
+          <option value="B">Season B</option>
+          <option value="C">Season C</option>
+        </FilterSelect>
+        <FilterSelect
+          id="evidence-year"
+          label="Agricultural year"
+          onChange={setYear}
+          value={year}
+        >
+          <option value="2024/25">2024/25</option>
+          <option value="2023/24">2023/24</option>
+        </FilterSelect>
+        <FilterSelect
+          id="evidence-indicator"
+          label="Indicator"
+          onChange={(value) => setIndicator(value as 'all' | EvidenceIndicator)}
+          value={indicator}
+        >
+          {indicatorOptions.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </FilterSelect>
+      </section>
+
+      <section aria-labelledby="evidence-results-heading" className="space-y-3">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2
+              className="text-base font-semibold text-slate-900"
+              id="evidence-results-heading"
+            >
+              Source-backed observations
+            </h2>
+            <p className="mt-1 text-xs text-slate-500" aria-live="polite">
+              {filteredRecords.length}{' '}
+              {filteredRecords.length === 1 ? 'record' : 'records'}
+            </p>
+          </div>
+          <div
+            className="flex flex-wrap gap-2"
+            aria-label="Evidence status legend"
+          >
+            <EvidenceStatusBadge status="observed" />
+            <EvidenceStatusBadge status="derived" />
+          </div>
+        </div>
+
+        {filteredRecords.length > 0 ? (
+          <div className="grid gap-3 lg:grid-cols-2">
+            {filteredRecords.map((record) => (
+              <EvidenceRecordCard
+                key={record.id}
+                onOpenDistrictProfile={onOpenDistrictProfile}
+                record={record}
+              />
+            ))}
+          </div>
+        ) : (
+          <div
+            aria-live="polite"
+            className="rounded-xl border border-dashed border-slate-300 bg-white p-5 sm:p-6"
+            role="status"
+          >
+            <EvidenceStatusBadge status="unavailable" />
+            <h3 className="mt-3 text-base font-semibold text-slate-900">
+              No connected observation for these filters
+            </h3>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
+              {isHistoricalPeriod
+                ? 'NISR published SAS 2024 district tables, but those historical records are not connected to this explorer. No value is carried forward or estimated.'
+                : 'The currently connected district evidence covers maize, Season A, 2024/25. Other crops, seasons, and years remain unavailable here until their source records are connected.'}
+            </p>
+          </div>
+        )}
+      </section>
+
+      <p className="text-xs leading-5 text-slate-500">
+        Irrigation practice is a district-wide estimate across crop activity. It
+        is not a maize-specific measure. A calculated difference compares the
+        displayed observation with the cited national reference.
+      </p>
+    </div>
+  )
+}

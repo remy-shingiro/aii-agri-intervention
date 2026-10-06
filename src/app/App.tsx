@@ -6,6 +6,8 @@ import {
   type NavigationItem,
 } from '../components/navigation/navigation.types'
 import { DistrictProfilePage } from '../features/district-profile/pages/DistrictProfilePage'
+import { EvidencePage } from '../features/evidence/pages/EvidencePage'
+import { DataMethodologyPage } from '../features/methodology/pages/DataMethodologyPage'
 import { OverviewPage } from '../features/overview/pages/OverviewPage'
 
 export function App() {
@@ -30,9 +32,22 @@ export function App() {
       {activePage === 'District Profile' && (
         <DistrictProfilePage
           selectedDistrict={selectedDistrict}
+          onOpenEvidence={() => setActivePage('Evidence')}
           onNavigateOverview={() => setActivePage('Overview')}
         />
       )}
+
+      {activePage === 'Evidence' && (
+        <EvidencePage
+          onOpenDistrictProfile={(district) => {
+            setSelectedDistrict(district)
+            setActivePage('District Profile')
+          }}
+          selectedDistrict={selectedDistrict}
+        />
+      )}
+
+      {activePage === 'Data & Methodology' && <DataMethodologyPage />}
     </AppShell>
   )
 }

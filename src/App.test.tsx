@@ -20,7 +20,10 @@ describe('application shell', () => {
       vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({
-          features: [{ properties: { district: 'Kayonza' } }],
+          features: [
+            { properties: { district: 'Kayonza' } },
+            { properties: { district: 'Nyarugenge' } },
+          ],
         }),
       }),
     )
@@ -40,7 +43,9 @@ describe('application shell', () => {
     expect(screen.getByLabelText('Crop')).toHaveValue('maize')
     expect(screen.getByLabelText('Season')).toHaveValue('season-a')
     expect(screen.getByLabelText('Year')).toHaveValue('2024-25')
-    expect(screen.getByRole('region', { name: 'Rwanda district map' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('region', { name: 'Rwanda district map' }),
+    ).toBeInTheDocument()
     expect(screen.queryByText('481,246 tonnes')).not.toBeInTheDocument()
   })
 
@@ -51,7 +56,9 @@ describe('application shell', () => {
     fireEvent.change(search, { target: { value: 'Kayonza' } })
 
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'Kayonza' })).toBeInTheDocument()
+      expect(
+        screen.getByRole('option', { name: 'Kayonza' }),
+      ).toBeInTheDocument()
     })
 
     fireEvent.keyDown(search, { key: 'ArrowDown' })
@@ -60,10 +67,83 @@ describe('application shell', () => {
     expect(
       screen.getByRole('heading', { name: 'Intervention signal' }),
     ).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Open district profile' }))
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Open district profile' }),
+    )
 
     expect(screen.getByRole('heading', { name: 'Kayonza' })).toBeInTheDocument()
     expect(screen.queryByText('Improved seed use')).not.toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Source and methodology' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', {
+        name: 'Potential intervention to investigate',
+      }),
+    ).toBeInTheDocument()
+  })
+
+  it('opens the Evidence explorer and shows an unavailable historical period', () => {
+    render(<App />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Evidence' }))
+
+    expect(
+      screen.getByRole('heading', { name: 'Evidence explorer' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText('30 records')).toBeInTheDocument()
+
+    fireEvent.change(screen.getByLabelText('Agricultural year'), {
+      target: { value: '2023/24' },
+    })
+
+    expect(screen.getByText('Unavailable')).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', {
+        name: 'No connected observation for these filters',
+      }),
+    ).toBeInTheDocument()
+  })
+
+  it('opens the Data & Methodology destination', () => {
+    render(<App />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Data & Methodology' }))
+
+    expect(
+      screen.getByRole('heading', { name: 'Data & Methodology' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        /EICV7 is part of AHS sampling design; it is not the agricultural dataset/,
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('connects a supported intervention signal to its evidence records', async () => {
+    render(<App />)
+
+    const search = screen.getByRole('combobox', { name: 'Search district' })
+    fireEvent.change(search, { target: { value: 'Nyarugenge' } })
+    await waitFor(() => {
+      expect(
+        screen.getByRole('option', { name: 'Nyarugenge' }),
+      ).toBeInTheDocument()
+    })
+    fireEvent.keyDown(search, { key: 'ArrowDown' })
+    fireEvent.keyDown(search, { key: 'Enter' })
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Open district profile' }),
+    )
+
+    expect(screen.getByText('Irrigation access assessment')).toBeInTheDocument()
+    expect(screen.getByText('Evidence available')).toBeInTheDocument()
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'View district evidence records' }),
+    )
+
+    expect(
+      screen.getByRole('heading', { name: 'Evidence explorer' }),
+    ).toBeInTheDocument()
+    expect(screen.getByLabelText('District')).toHaveValue('Nyarugenge')
+    expect(screen.getByText('1 record')).toBeInTheDocument()
   })
 })

@@ -1,11 +1,15 @@
-import { ArrowLeft, MapPin } from 'lucide-react'
+import { ArrowLeft, ArrowRight, MapPin } from 'lucide-react'
 
-import { getDistrictMetadata } from '../data/districtMetadata'
+import { EvidenceStatusBadge } from '../../evidence/components/EvidenceStatusBadge'
 import { getDistrictInsight } from '../../overview/data/districtInsights'
+import { nisrSeasonA2025DistrictPractices } from '../../overview/data/nisrSeasonA2025DistrictPractices'
 import type { InterventionSignalLevel } from '../../overview/types/interventionSignal.types'
+import { calculateCandidateIntervention } from '../../overview/utils/calculateCandidateIntervention'
+import { getDistrictMetadata } from '../data/districtMetadata'
 
 interface DistrictProfilePageProps {
   selectedDistrict?: string
+  onOpenEvidence: () => void
   onNavigateOverview: () => void
 }
 
@@ -33,6 +37,7 @@ function getSignalClasses(level: InterventionSignalLevel): string {
 
 export function DistrictProfilePage({
   selectedDistrict,
+  onOpenEvidence,
   onNavigateOverview,
 }: DistrictProfilePageProps) {
   const candidate = selectedDistrict
@@ -40,7 +45,7 @@ export function DistrictProfilePage({
     : undefined
   const insight = candidate?.source.kind === 'nisr' ? candidate : undefined
 
-  if (!insight) {
+  if (!insight || insight.source.kind !== 'nisr') {
     return (
       <section className="mx-auto max-w-2xl border-l-2 border-green-700 py-2 pl-5 sm:pl-6">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-green-800">
@@ -51,9 +56,17 @@ export function DistrictProfilePage({
         </h1>
         <p className="mt-3 text-sm leading-6 text-slate-600">
           Choose a district from the Overview map or district search, then open
-          its profile. The profile displays only district observations in the
+          its profile. This page displays only district observations in the
           connected NISR source.
         </p>
+        <button
+          className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+          onClick={onNavigateOverview}
+          type="button"
+        >
+          <ArrowLeft aria-hidden="true" className="size-4" />
+          Back to Overview
+        </button>
       </section>
     )
   }
@@ -61,22 +74,41 @@ export function DistrictProfilePage({
   const metadata = getDistrictMetadata(insight.district)
   const source = insight.source
   const signal = insight.interventionSignal
-
-  if (source.kind !== 'nisr') {
-    return null
-  }
+  const irrigationObservation = nisrSeasonA2025DistrictPractices.records.find(
+    (record) =>
+      record.district.toLowerCase() === insight.district.toLowerCase(),
+  )
+  const districtId = insight.district.toLowerCase().replaceAll(' ', '-')
+  const irrigationSignal = calculateCandidateIntervention({
+    yieldGapPct: signal.yieldGapPct,
+    irrigationPracticePct: irrigationObservation?.irrigationPracticePct,
+    nationalIrrigationPracticePct:
+      nisrSeasonA2025DistrictPractices.nationalReference,
+    yieldEvidenceId: `sas-2025-season-a-${districtId}-average_yield`,
+    irrigationEvidenceId: `sas-2025-season-a-${districtId}-irrigation_practice`,
+  })
 
   return (
     <div className="space-y-8">
       <header className="space-y-4">
-        <button
-          className="inline-flex min-h-10 items-center gap-2 rounded-md text-sm font-medium text-slate-600 transition-colors hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
-          onClick={onNavigateOverview}
-          type="button"
-        >
-          <ArrowLeft aria-hidden="true" className="size-4" />
-          Back to Overview
-        </button>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <button
+            className="inline-flex min-h-10 items-center gap-2 rounded-md text-sm font-medium text-slate-600 transition-colors hover:text-green-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+            onClick={onNavigateOverview}
+            type="button"
+          >
+            <ArrowLeft aria-hidden="true" className="size-4" />
+            Back to Overview
+          </button>
+          <button
+            className="inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+            onClick={onOpenEvidence}
+            type="button"
+          >
+            Explore evidence
+            <ArrowRight aria-hidden="true" className="size-4" />
+          </button>
+        </div>
 
         <div className="border-b border-slate-200 pb-5">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-green-800">
@@ -107,10 +139,10 @@ export function DistrictProfilePage({
           <div>
             <div className="flex flex-wrap items-center gap-3">
               <h2
-                id="district-signal-heading"
                 className="text-base font-semibold text-slate-900"
+                id="district-signal-heading"
               >
-                Intervention signal
+                Productivity signal
               </h2>
               <span
                 className={`inline-flex min-h-7 items-center rounded-md px-2.5 py-1 text-xs font-semibold ${getSignalClasses(signal.level)}`}
@@ -155,8 +187,8 @@ export function DistrictProfilePage({
       <section aria-labelledby="productivity-heading">
         <div className="mb-3">
           <h2
-            id="productivity-heading"
             className="text-base font-semibold text-slate-900"
+            id="productivity-heading"
           >
             Productivity overview
           </h2>
@@ -187,87 +219,111 @@ export function DistrictProfilePage({
       <section aria-labelledby="yield-trend-heading">
         <div className="mb-3">
           <h2
-            id="yield-trend-heading"
             className="text-base font-semibold text-slate-900"
+            id="yield-trend-heading"
           >
             Yield trend
           </h2>
         </div>
         <p className="border-l-2 border-slate-300 py-1 pl-4 text-sm leading-6 text-slate-600">
-          Historical district yield observations are not connected, so a trend
-          cannot be shown for this district.
+          Historical SAS 2024 district values are published but are not
+          connected to this profile. A trend is unavailable until comparable
+          source records are added.
         </p>
       </section>
 
       <section aria-labelledby="signal-evidence-heading">
-        <div className="mb-3">
-          <h2
-            id="signal-evidence-heading"
-            className="text-base font-semibold text-slate-900"
-          >
-            Evidence behind the signal
-          </h2>
-          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
-            The yield gap is calculated from the district average maize yield
-            and the NISR national maize yield reference for the same period.
-          </p>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2
+              className="text-base font-semibold text-slate-900"
+              id="signal-evidence-heading"
+            >
+              Evidence behind the signal
+            </h2>
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
+              Yield gap = (district yield − national reference) ÷ national
+              reference × 100. Both input yields are observed in SAS 2025 Table
+              19, p. 56; the gap is derived.
+            </p>
+          </div>
+          <EvidenceStatusBadge status="derived" />
         </div>
-        <div className="border-y border-slate-200 py-3 text-sm leading-6 text-slate-700">
-          Yield gap (%) = (district yield − national reference) ÷ national
-          reference × 100.
-          <p className="mt-2 text-xs text-slate-500">
-            Both yield values are reported in SAS 2025 Annual Report Table 19,
-            p. 56.
-          </p>
-        </div>
+        <button
+          className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+          onClick={onOpenEvidence}
+          type="button"
+        >
+          View district evidence records
+          <ArrowRight aria-hidden="true" className="size-4" />
+        </button>
       </section>
 
       <section aria-labelledby="intervention-areas-heading">
-        <div className="mb-3">
-          <h2
-            id="intervention-areas-heading"
-            className="text-base font-semibold text-slate-900"
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2
+              className="text-base font-semibold text-slate-900"
+              id="intervention-areas-heading"
+            >
+              Potential intervention to investigate
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-slate-600">
+              Screening evidence for field investigation, not a causal finding
+              or investment recommendation.
+            </p>
+          </div>
+          <span
+            className={`inline-flex min-h-7 items-center rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ${
+              irrigationSignal.status === 'supported'
+                ? 'bg-green-50 text-green-800 ring-green-200'
+                : 'bg-slate-100 text-slate-700 ring-slate-200'
+            }`}
           >
-            Potential intervention areas
-          </h2>
+            {irrigationSignal.status === 'supported'
+              ? 'Evidence available'
+              : 'Insufficient evidence'}
+          </span>
         </div>
-        <p className="border-l-2 border-amber-500 py-1 pl-4 text-sm leading-6 text-slate-600">
-          Verified input-use, irrigation, and extension indicators are not
-          connected for this district and period. The yield gap alone does not
-          show which intervention would address it.
-        </p>
+        {irrigationSignal.status === 'supported' ? (
+          <article className="rounded-lg border border-green-200 bg-green-50/70 p-4">
+            <h3 className="text-sm font-semibold text-slate-900">
+              {irrigationSignal.intervention}
+            </h3>
+            <ul className="mt-2 space-y-1.5 text-sm leading-6 text-slate-700">
+              {irrigationSignal.rationale.map((reason) => (
+                <li className="flex gap-2" key={reason}>
+                  <span
+                    aria-hidden="true"
+                    className="mt-2 size-1.5 shrink-0 rounded-full bg-green-700"
+                  />
+                  <span>{reason}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
+        ) : (
+          <p className="border-l-2 border-slate-300 py-1 pl-4 text-sm leading-6 text-slate-600">
+            {irrigationSignal.rationale[0]} The yield gap by itself does not
+            identify which intervention would address it.
+          </p>
+        )}
       </section>
 
-      <section
-        aria-labelledby="source-methodology-heading"
-        className="border-t border-slate-200 pt-5"
-      >
-        <h2
-          id="source-methodology-heading"
-          className="text-base font-semibold text-slate-900"
-        >
-          Source and methodology
-        </h2>
+      <p className="border-t border-slate-200 pt-4 text-xs leading-5 text-slate-500">
+        Source:{' '}
         <a
-          className="mt-2 inline-block text-sm font-medium text-green-800 underline decoration-green-300 underline-offset-2 hover:text-green-950"
+          className="font-medium text-green-800 underline decoration-green-300 underline-offset-2 hover:text-green-950"
           href={source.sourceUrl}
           rel="noreferrer"
           target="_blank"
         >
           {source.report}
         </a>
-        <ul className="mt-2 space-y-1 text-xs leading-5 text-slate-600">
-          {source.references.map((reference) => (
-            <li key={reference.table}>
-              {reference.table} · p. {reference.page}
-            </li>
-          ))}
-        </ul>
-        <p className="mt-3 text-xs leading-5 text-slate-500">
-          Yield gap uses the district yield and national yield reference from
-          Table 19. Source values and units are displayed as reported.
-        </p>
-      </section>
+        , SAS 2025 Tables 13, 19, and 24. Irrigation context is reported in
+        Table 64. Data &amp; Methodology explains the comparison boundaries and
+        limitations.
+      </p>
     </div>
   )
 }

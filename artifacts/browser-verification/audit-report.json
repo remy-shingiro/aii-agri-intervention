@@ -1,0 +1,2531 @@
+{
+  "browser": "Google Chrome via Chrome DevTools Protocol",
+  "version": "Chrome/154.0.8037.92",
+  "mapLoaded": {
+    "documentReady": true,
+    "canvas": true,
+    "loading": false,
+    "error": false,
+    "sourceLoaded": true
+  },
+  "viewportReports": [
+    {
+      "width": 320,
+      "state": "overview",
+      "page": {
+        "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+        "viewport": {
+          "width": 320,
+          "height": 900
+        },
+        "document": {
+          "width": 320,
+          "height": 1757,
+          "horizontalOverflow": false
+        },
+        "title": "Rwanda Agricultural Overview",
+        "header": {
+          "position": "sticky",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 320,
+            "height": 65
+          }
+        },
+        "navigation": {
+          "position": "static",
+          "rect": {
+            "x": 0,
+            "y": 65,
+            "width": 320,
+            "height": 89
+          },
+          "active": "Overview",
+          "links": [
+            {
+              "text": "Overview",
+              "current": "page"
+            },
+            {
+              "text": "District Profile",
+              "current": null
+            }
+          ]
+        },
+        "main": {
+          "x": 16,
+          "y": 181,
+          "width": 288,
+          "height": 1548
+        },
+        "filters": {
+          "x": 33,
+          "y": 394,
+          "width": 255,
+          "height": 308
+        },
+        "filterPositions": [
+          {
+            "x": 33,
+            "y": 394,
+            "width": 255,
+            "height": 68
+          },
+          {
+            "x": 33,
+            "y": 474,
+            "width": 255,
+            "height": 68
+          },
+          {
+            "x": 33,
+            "y": 554,
+            "width": 255,
+            "height": 68
+          },
+          {
+            "x": 33,
+            "y": 634,
+            "width": 255,
+            "height": 68
+          }
+        ],
+        "map": {
+          "rect": {
+            "x": 16,
+            "y": 871,
+            "width": 288,
+            "height": 522
+          },
+          "canvas": {
+            "x": 17,
+            "y": 871,
+            "width": 287,
+            "height": 521
+          },
+          "ariaLabel": "Interactive Rwanda district map. Use district search above for keyboard-accessible selection.",
+          "loading": false,
+          "error": false,
+          "legend": true,
+          "announcement": ""
+        },
+        "search": {
+          "value": "",
+          "expanded": "false",
+          "suggestions": [],
+          "activeDescendant": null
+        },
+        "controls": [
+          {
+            "name": "Zoom in",
+            "x": 33,
+            "y": 1242,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "name": "Zoom out",
+            "x": 33,
+            "y": 1287,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "name": "Reset map view",
+            "x": 33,
+            "y": 1331,
+            "width": 44,
+            "height": 44
+          }
+        ],
+        "source": true,
+        "profile": {
+          "signal": false,
+          "districtYield": false,
+          "nationalReference": false,
+          "yieldGap": false,
+          "unavailableTrend": false,
+          "unavailableAreas": false,
+          "unsupportedConfidence": false,
+          "fakeDemo": false
+        },
+        "reducedMotion": false
+      }
+    },
+    {
+      "width": 375,
+      "state": "overview",
+      "page": {
+        "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+        "viewport": {
+          "width": 375,
+          "height": 900
+        },
+        "document": {
+          "width": 375,
+          "height": 1593,
+          "horizontalOverflow": false
+        },
+        "title": "Rwanda Agricultural Overview",
+        "header": {
+          "position": "sticky",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 375,
+            "height": 65
+          }
+        },
+        "navigation": {
+          "position": "static",
+          "rect": {
+            "x": 0,
+            "y": 65,
+            "width": 375,
+            "height": 65
+          },
+          "active": "Overview",
+          "links": [
+            {
+              "text": "Overview",
+              "current": "page"
+            },
+            {
+              "text": "District Profile",
+              "current": null
+            }
+          ]
+        },
+        "main": {
+          "x": 16,
+          "y": 157,
+          "width": 343,
+          "height": 1408
+        },
+        "filters": {
+          "x": 33,
+          "y": 314,
+          "width": 310,
+          "height": 308
+        },
+        "filterPositions": [
+          {
+            "x": 33,
+            "y": 314,
+            "width": 310,
+            "height": 68
+          },
+          {
+            "x": 33,
+            "y": 394,
+            "width": 310,
+            "height": 68
+          },
+          {
+            "x": 33,
+            "y": 474,
+            "width": 310,
+            "height": 68
+          },
+          {
+            "x": 33,
+            "y": 554,
+            "width": 310,
+            "height": 68
+          }
+        ],
+        "map": {
+          "rect": {
+            "x": 16,
+            "y": 771,
+            "width": 343,
+            "height": 522
+          },
+          "canvas": {
+            "x": 17,
+            "y": 771,
+            "width": 342,
+            "height": 521
+          },
+          "ariaLabel": "Interactive Rwanda district map. Use district search above for keyboard-accessible selection.",
+          "loading": false,
+          "error": false,
+          "legend": true,
+          "announcement": ""
+        },
+        "search": {
+          "value": "",
+          "expanded": "false",
+          "suggestions": [],
+          "activeDescendant": null
+        },
+        "controls": [
+          {
+            "name": "Zoom in",
+            "x": 33,
+            "y": 1142,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "name": "Zoom out",
+            "x": 33,
+            "y": 1187,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "name": "Reset map view",
+            "x": 33,
+            "y": 1231,
+            "width": 44,
+            "height": 44
+          }
+        ],
+        "source": true,
+        "profile": {
+          "signal": false,
+          "districtYield": false,
+          "nationalReference": false,
+          "yieldGap": false,
+          "unavailableTrend": false,
+          "unavailableAreas": false,
+          "unsupportedConfidence": false,
+          "fakeDemo": false
+        },
+        "reducedMotion": false
+      }
+    },
+    {
+      "width": 390,
+      "state": "overview",
+      "page": {
+        "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+        "viewport": {
+          "width": 390,
+          "height": 900
+        },
+        "document": {
+          "width": 390,
+          "height": 1573,
+          "horizontalOverflow": false
+        },
+        "title": "Rwanda Agricultural Overview",
+        "header": {
+          "position": "sticky",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 65
+          }
+        },
+        "navigation": {
+          "position": "static",
+          "rect": {
+            "x": 0,
+            "y": 65,
+            "width": 390,
+            "height": 65
+          },
+          "active": "Overview",
+          "links": [
+            {
+              "text": "Overview",
+              "current": "page"
+            },
+            {
+              "text": "District Profile",
+              "current": null
+            }
+          ]
+        },
+        "main": {
+          "x": 16,
+          "y": 157,
+          "width": 358,
+          "height": 1388
+        },
+        "filters": {
+          "x": 33,
+          "y": 314,
+          "width": 325,
+          "height": 308
+        },
+        "filterPositions": [
+          {
+            "x": 33,
+            "y": 314,
+            "width": 325,
+            "height": 68
+          },
+          {
+            "x": 33,
+            "y": 394,
+            "width": 325,
+            "height": 68
+          },
+          {
+            "x": 33,
+            "y": 474,
+            "width": 325,
+            "height": 68
+          },
+          {
+            "x": 33,
+            "y": 554,
+            "width": 325,
+            "height": 68
+          }
+        ],
+        "map": {
+          "rect": {
+            "x": 16,
+            "y": 751,
+            "width": 358,
+            "height": 522
+          },
+          "canvas": {
+            "x": 17,
+            "y": 751,
+            "width": 357,
+            "height": 521
+          },
+          "ariaLabel": "Interactive Rwanda district map. Use district search above for keyboard-accessible selection.",
+          "loading": false,
+          "error": false,
+          "legend": true,
+          "announcement": ""
+        },
+        "search": {
+          "value": "",
+          "expanded": "false",
+          "suggestions": [],
+          "activeDescendant": null
+        },
+        "controls": [
+          {
+            "name": "Zoom in",
+            "x": 33,
+            "y": 1122,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "name": "Zoom out",
+            "x": 33,
+            "y": 1167,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "name": "Reset map view",
+            "x": 33,
+            "y": 1211,
+            "width": 44,
+            "height": 44
+          }
+        ],
+        "source": true,
+        "profile": {
+          "signal": false,
+          "districtYield": false,
+          "nationalReference": false,
+          "yieldGap": false,
+          "unavailableTrend": false,
+          "unavailableAreas": false,
+          "unsupportedConfidence": false,
+          "fakeDemo": false
+        },
+        "reducedMotion": false
+      }
+    },
+    {
+      "width": 768,
+      "state": "overview",
+      "page": {
+        "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+        "viewport": {
+          "width": 768,
+          "height": 1000
+        },
+        "document": {
+          "width": 768,
+          "height": 1563,
+          "horizontalOverflow": false
+        },
+        "title": "Rwanda Agricultural Overview",
+        "header": {
+          "position": "sticky",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 768,
+            "height": 81
+          }
+        },
+        "navigation": {
+          "position": "static",
+          "rect": {
+            "x": 0,
+            "y": 81,
+            "width": 768,
+            "height": 65
+          },
+          "active": "Overview",
+          "links": [
+            {
+              "text": "Overview",
+              "current": "page"
+            },
+            {
+              "text": "District Profile",
+              "current": null
+            }
+          ]
+        },
+        "main": {
+          "x": 32,
+          "y": 185,
+          "width": 704,
+          "height": 1338
+        },
+        "filters": {
+          "x": 53,
+          "y": 326,
+          "width": 663,
+          "height": 148
+        },
+        "filterPositions": [
+          {
+            "x": 53,
+            "y": 326,
+            "width": 325,
+            "height": 68
+          },
+          {
+            "x": 390,
+            "y": 326,
+            "width": 325,
+            "height": 68
+          },
+          {
+            "x": 53,
+            "y": 406,
+            "width": 325,
+            "height": 68
+          },
+          {
+            "x": 390,
+            "y": 406,
+            "width": 325,
+            "height": 68
+          }
+        ],
+        "map": {
+          "rect": {
+            "x": 32,
+            "y": 587,
+            "width": 704,
+            "height": 680
+          },
+          "canvas": {
+            "x": 33,
+            "y": 587,
+            "width": 703,
+            "height": 679
+          },
+          "ariaLabel": "Interactive Rwanda district map. Use district search above for keyboard-accessible selection.",
+          "loading": false,
+          "error": false,
+          "legend": true,
+          "announcement": ""
+        },
+        "search": {
+          "value": "",
+          "expanded": "false",
+          "suggestions": [],
+          "activeDescendant": null
+        },
+        "controls": [
+          {
+            "name": "Zoom in",
+            "x": 49,
+            "y": 1116,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "name": "Zoom out",
+            "x": 49,
+            "y": 1161,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "name": "Reset map view",
+            "x": 49,
+            "y": 1205,
+            "width": 44,
+            "height": 44
+          }
+        ],
+        "source": true,
+        "profile": {
+          "signal": false,
+          "districtYield": false,
+          "nationalReference": false,
+          "yieldGap": false,
+          "unavailableTrend": false,
+          "unavailableAreas": false,
+          "unsupportedConfidence": false,
+          "fakeDemo": false
+        },
+        "reducedMotion": false
+      }
+    },
+    {
+      "width": 1024,
+      "state": "overview",
+      "page": {
+        "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+        "viewport": {
+          "width": 1024,
+          "height": 1000
+        },
+        "document": {
+          "width": 1009,
+          "height": 1543,
+          "horizontalOverflow": false
+        },
+        "title": "Rwanda Agricultural Overview",
+        "header": {
+          "position": "sticky",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 1009,
+            "height": 81
+          }
+        },
+        "navigation": {
+          "position": "fixed",
+          "rect": {
+            "x": 0,
+            "y": 80,
+            "width": 256,
+            "height": 920
+          },
+          "active": "Overview",
+          "links": [
+            {
+              "text": "Overview",
+              "current": "page"
+            },
+            {
+              "text": "District Profile",
+              "current": null
+            }
+          ]
+        },
+        "main": {
+          "x": 296,
+          "y": 129,
+          "width": 673,
+          "height": 1366
+        },
+        "filters": {
+          "x": 317,
+          "y": 297,
+          "width": 631,
+          "height": 148
+        },
+        "filterPositions": [
+          {
+            "x": 317,
+            "y": 297,
+            "width": 310,
+            "height": 68
+          },
+          {
+            "x": 638,
+            "y": 297,
+            "width": 310,
+            "height": 68
+          },
+          {
+            "x": 317,
+            "y": 377,
+            "width": 310,
+            "height": 68
+          },
+          {
+            "x": 638,
+            "y": 377,
+            "width": 310,
+            "height": 68
+          }
+        ],
+        "map": {
+          "rect": {
+            "x": 296,
+            "y": 558,
+            "width": 673,
+            "height": 680
+          },
+          "canvas": {
+            "x": 297,
+            "y": 559,
+            "width": 671,
+            "height": 679
+          },
+          "ariaLabel": "Interactive Rwanda district map. Use district search above for keyboard-accessible selection.",
+          "loading": false,
+          "error": false,
+          "legend": true,
+          "announcement": ""
+        },
+        "search": {
+          "value": "",
+          "expanded": "false",
+          "suggestions": [],
+          "activeDescendant": null
+        },
+        "controls": [
+          {
+            "name": "Zoom in",
+            "x": 313,
+            "y": 1087,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "name": "Zoom out",
+            "x": 313,
+            "y": 1132,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "name": "Reset map view",
+            "x": 313,
+            "y": 1177,
+            "width": 44,
+            "height": 44
+          }
+        ],
+        "source": true,
+        "profile": {
+          "signal": false,
+          "districtYield": false,
+          "nationalReference": false,
+          "yieldGap": false,
+          "unavailableTrend": false,
+          "unavailableAreas": false,
+          "unsupportedConfidence": false,
+          "fakeDemo": false
+        },
+        "reducedMotion": false
+      }
+    },
+    {
+      "width": 1280,
+      "state": "overview",
+      "page": {
+        "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+        "viewport": {
+          "width": 1280,
+          "height": 1000
+        },
+        "document": {
+          "width": 1265,
+          "height": 1182,
+          "horizontalOverflow": false
+        },
+        "title": "Rwanda Agricultural Overview",
+        "header": {
+          "position": "sticky",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 1265,
+            "height": 81
+          }
+        },
+        "navigation": {
+          "position": "fixed",
+          "rect": {
+            "x": 0,
+            "y": 80,
+            "width": 256,
+            "height": 920
+          },
+          "active": "Overview",
+          "links": [
+            {
+              "text": "Overview",
+              "current": "page"
+            },
+            {
+              "text": "District Profile",
+              "current": null
+            }
+          ]
+        },
+        "main": {
+          "x": 296,
+          "y": 129,
+          "width": 929,
+          "height": 1005
+        },
+        "filters": {
+          "x": 317,
+          "y": 273,
+          "width": 887,
+          "height": 68
+        },
+        "filterPositions": [
+          {
+            "x": 317,
+            "y": 273,
+            "width": 271,
+            "height": 68
+          },
+          {
+            "x": 600,
+            "y": 273,
+            "width": 193,
+            "height": 68
+          },
+          {
+            "x": 805,
+            "y": 273,
+            "width": 193,
+            "height": 68
+          },
+          {
+            "x": 1011,
+            "y": 273,
+            "width": 193,
+            "height": 68
+          }
+        ],
+        "map": {
+          "rect": {
+            "x": 296,
+            "y": 454,
+            "width": 565,
+            "height": 680
+          },
+          "canvas": {
+            "x": 297,
+            "y": 455,
+            "width": 563,
+            "height": 679
+          },
+          "ariaLabel": "Interactive Rwanda district map. Use district search above for keyboard-accessible selection.",
+          "loading": false,
+          "error": false,
+          "legend": true,
+          "announcement": ""
+        },
+        "search": {
+          "value": "",
+          "expanded": "false",
+          "suggestions": [],
+          "activeDescendant": null
+        },
+        "controls": [
+          {
+            "name": "Zoom in",
+            "x": 313,
+            "y": 983,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "name": "Zoom out",
+            "x": 313,
+            "y": 1028,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "name": "Reset map view",
+            "x": 313,
+            "y": 1073,
+            "width": 44,
+            "height": 44
+          }
+        ],
+        "source": true,
+        "profile": {
+          "signal": false,
+          "districtYield": false,
+          "nationalReference": false,
+          "yieldGap": false,
+          "unavailableTrend": false,
+          "unavailableAreas": false,
+          "unsupportedConfidence": false,
+          "fakeDemo": false
+        },
+        "reducedMotion": false
+      }
+    },
+    {
+      "width": 1440,
+      "state": "overview",
+      "page": {
+        "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "document": {
+          "width": 1425,
+          "height": 1182,
+          "horizontalOverflow": false
+        },
+        "title": "Rwanda Agricultural Overview",
+        "header": {
+          "position": "sticky",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 1425,
+            "height": 81
+          }
+        },
+        "navigation": {
+          "position": "fixed",
+          "rect": {
+            "x": 0,
+            "y": 80,
+            "width": 256,
+            "height": 920
+          },
+          "active": "Overview",
+          "links": [
+            {
+              "text": "Overview",
+              "current": "page"
+            },
+            {
+              "text": "District Profile",
+              "current": null
+            }
+          ]
+        },
+        "main": {
+          "x": 296,
+          "y": 129,
+          "width": 1089,
+          "height": 1005
+        },
+        "filters": {
+          "x": 317,
+          "y": 273,
+          "width": 1047,
+          "height": 68
+        },
+        "filterPositions": [
+          {
+            "x": 317,
+            "y": 273,
+            "width": 322,
+            "height": 68
+          },
+          {
+            "x": 650,
+            "y": 273,
+            "width": 230,
+            "height": 68
+          },
+          {
+            "x": 892,
+            "y": 273,
+            "width": 230,
+            "height": 68
+          },
+          {
+            "x": 1134,
+            "y": 273,
+            "width": 230,
+            "height": 68
+          }
+        ],
+        "map": {
+          "rect": {
+            "x": 296,
+            "y": 454,
+            "width": 725,
+            "height": 680
+          },
+          "canvas": {
+            "x": 297,
+            "y": 455,
+            "width": 723,
+            "height": 679
+          },
+          "ariaLabel": "Interactive Rwanda district map. Use district search above for keyboard-accessible selection.",
+          "loading": false,
+          "error": false,
+          "legend": true,
+          "announcement": ""
+        },
+        "search": {
+          "value": "",
+          "expanded": "false",
+          "suggestions": [],
+          "activeDescendant": null
+        },
+        "controls": [
+          {
+            "name": "Zoom in",
+            "x": 313,
+            "y": 983,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "name": "Zoom out",
+            "x": 313,
+            "y": 1028,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "name": "Reset map view",
+            "x": 313,
+            "y": 1073,
+            "width": 44,
+            "height": 44
+          }
+        ],
+        "source": true,
+        "profile": {
+          "signal": false,
+          "districtYield": false,
+          "nationalReference": false,
+          "yieldGap": false,
+          "unavailableTrend": false,
+          "unavailableAreas": false,
+          "unsupportedConfidence": false,
+          "fakeDemo": false
+        },
+        "reducedMotion": false
+      }
+    },
+    {
+      "width": 1440,
+      "state": "overview-selected-district",
+      "page": {
+        "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "document": {
+          "width": 1425,
+          "height": 1182,
+          "horizontalOverflow": false
+        },
+        "title": "Rwanda Agricultural Overview",
+        "header": {
+          "position": "sticky",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 1425,
+            "height": 81
+          }
+        },
+        "navigation": {
+          "position": "fixed",
+          "rect": {
+            "x": 0,
+            "y": 80,
+            "width": 256,
+            "height": 920
+          },
+          "active": "Overview",
+          "links": [
+            {
+              "text": "Overview",
+              "current": "page"
+            },
+            {
+              "text": "District Profile",
+              "current": null
+            }
+          ]
+        },
+        "main": {
+          "x": 296,
+          "y": 129,
+          "width": 1089,
+          "height": 1005
+        },
+        "filters": {
+          "x": 317,
+          "y": 273,
+          "width": 1047,
+          "height": 68
+        },
+        "filterPositions": [
+          {
+            "x": 317,
+            "y": 273,
+            "width": 322,
+            "height": 68
+          },
+          {
+            "x": 650,
+            "y": 273,
+            "width": 230,
+            "height": 68
+          },
+          {
+            "x": 892,
+            "y": 273,
+            "width": 230,
+            "height": 68
+          },
+          {
+            "x": 1134,
+            "y": 273,
+            "width": 230,
+            "height": 68
+          }
+        ],
+        "map": {
+          "rect": {
+            "x": 296,
+            "y": 454,
+            "width": 725,
+            "height": 680
+          },
+          "canvas": {
+            "x": 297,
+            "y": 455,
+            "width": 723,
+            "height": 679
+          },
+          "ariaLabel": "Interactive Rwanda district map. Use district search above for keyboard-accessible selection.",
+          "loading": false,
+          "error": false,
+          "legend": true,
+          "announcement": "Kayonza selected"
+        },
+        "search": {
+          "value": "Kayonza",
+          "expanded": "false",
+          "suggestions": [],
+          "activeDescendant": null
+        },
+        "controls": [
+          {
+            "name": "Zoom in",
+            "x": 313,
+            "y": 983,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "name": "Zoom out",
+            "x": 313,
+            "y": 1028,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "name": "Reset map view",
+            "x": 313,
+            "y": 1073,
+            "width": 44,
+            "height": 44
+          }
+        ],
+        "source": true,
+        "profile": {
+          "signal": true,
+          "districtYield": false,
+          "nationalReference": false,
+          "yieldGap": true,
+          "unavailableTrend": false,
+          "unavailableAreas": false,
+          "unsupportedConfidence": false,
+          "fakeDemo": false
+        },
+        "reducedMotion": false
+      }
+    },
+    {
+      "width": 1440,
+      "state": "district-profile",
+      "page": {
+        "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "document": {
+          "width": 1425,
+          "height": 1401,
+          "horizontalOverflow": false
+        },
+        "title": "Kayonza",
+        "header": {
+          "position": "sticky",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 1425,
+            "height": 81
+          }
+        },
+        "navigation": {
+          "position": "fixed",
+          "rect": {
+            "x": 0,
+            "y": 80,
+            "width": 256,
+            "height": 920
+          },
+          "active": "District Profile",
+          "links": [
+            {
+              "text": "Overview",
+              "current": null
+            },
+            {
+              "text": "District Profile",
+              "current": "page"
+            }
+          ]
+        },
+        "main": {
+          "x": 296,
+          "y": 129,
+          "width": 1089,
+          "height": 1225
+        },
+        "filters": null,
+        "filterPositions": [],
+        "map": null,
+        "search": null,
+        "controls": [],
+        "source": true,
+        "profile": {
+          "signal": true,
+          "districtYield": true,
+          "nationalReference": true,
+          "yieldGap": true,
+          "unavailableTrend": true,
+          "unavailableAreas": true,
+          "unsupportedConfidence": false,
+          "fakeDemo": false
+        },
+        "reducedMotion": false
+      }
+    }
+  ],
+  "profileViewportReports": [
+    {
+      "width": 320,
+      "page": {
+        "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+        "viewport": {
+          "width": 320,
+          "height": 900
+        },
+        "document": {
+          "width": 320,
+          "height": 2112,
+          "horizontalOverflow": false
+        },
+        "title": "Kayonza",
+        "header": {
+          "position": "sticky",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 320,
+            "height": 65
+          }
+        },
+        "navigation": {
+          "position": "static",
+          "rect": {
+            "x": 0,
+            "y": 65,
+            "width": 320,
+            "height": 89
+          },
+          "active": "District Profile",
+          "links": [
+            {
+              "text": "Overview",
+              "current": null
+            },
+            {
+              "text": "District Profile",
+              "current": "page"
+            }
+          ]
+        },
+        "main": {
+          "x": 16,
+          "y": 181,
+          "width": 288,
+          "height": 1903
+        },
+        "filters": null,
+        "filterPositions": [],
+        "map": null,
+        "search": null,
+        "controls": [],
+        "source": false,
+        "profile": {
+          "signal": true,
+          "districtYield": true,
+          "nationalReference": true,
+          "yieldGap": true,
+          "unavailableTrend": true,
+          "unavailableAreas": true,
+          "unsupportedConfidence": false,
+          "fakeDemo": false
+        },
+        "reducedMotion": false
+      }
+    },
+    {
+      "width": 375,
+      "page": {
+        "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+        "viewport": {
+          "width": 375,
+          "height": 900
+        },
+        "document": {
+          "width": 375,
+          "height": 2008,
+          "horizontalOverflow": false
+        },
+        "title": "Kayonza",
+        "header": {
+          "position": "sticky",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 375,
+            "height": 65
+          }
+        },
+        "navigation": {
+          "position": "static",
+          "rect": {
+            "x": 0,
+            "y": 65,
+            "width": 375,
+            "height": 65
+          },
+          "active": "District Profile",
+          "links": [
+            {
+              "text": "Overview",
+              "current": null
+            },
+            {
+              "text": "District Profile",
+              "current": "page"
+            }
+          ]
+        },
+        "main": {
+          "x": 16,
+          "y": 157,
+          "width": 343,
+          "height": 1823
+        },
+        "filters": null,
+        "filterPositions": [],
+        "map": null,
+        "search": null,
+        "controls": [],
+        "source": false,
+        "profile": {
+          "signal": true,
+          "districtYield": true,
+          "nationalReference": true,
+          "yieldGap": true,
+          "unavailableTrend": true,
+          "unavailableAreas": true,
+          "unsupportedConfidence": false,
+          "fakeDemo": false
+        },
+        "reducedMotion": false
+      }
+    },
+    {
+      "width": 390,
+      "page": {
+        "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+        "viewport": {
+          "width": 390,
+          "height": 900
+        },
+        "document": {
+          "width": 390,
+          "height": 1984,
+          "horizontalOverflow": false
+        },
+        "title": "Kayonza",
+        "header": {
+          "position": "sticky",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 390,
+            "height": 65
+          }
+        },
+        "navigation": {
+          "position": "static",
+          "rect": {
+            "x": 0,
+            "y": 65,
+            "width": 390,
+            "height": 65
+          },
+          "active": "District Profile",
+          "links": [
+            {
+              "text": "Overview",
+              "current": null
+            },
+            {
+              "text": "District Profile",
+              "current": "page"
+            }
+          ]
+        },
+        "main": {
+          "x": 16,
+          "y": 157,
+          "width": 358,
+          "height": 1799
+        },
+        "filters": null,
+        "filterPositions": [],
+        "map": null,
+        "search": null,
+        "controls": [],
+        "source": false,
+        "profile": {
+          "signal": true,
+          "districtYield": true,
+          "nationalReference": true,
+          "yieldGap": true,
+          "unavailableTrend": true,
+          "unavailableAreas": true,
+          "unsupportedConfidence": false,
+          "fakeDemo": false
+        },
+        "reducedMotion": false
+      }
+    },
+    {
+      "width": 768,
+      "page": {
+        "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+        "viewport": {
+          "width": 768,
+          "height": 1000
+        },
+        "document": {
+          "width": 768,
+          "height": 1567,
+          "horizontalOverflow": false
+        },
+        "title": "Kayonza",
+        "header": {
+          "position": "sticky",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 768,
+            "height": 81
+          }
+        },
+        "navigation": {
+          "position": "static",
+          "rect": {
+            "x": 0,
+            "y": 81,
+            "width": 768,
+            "height": 65
+          },
+          "active": "District Profile",
+          "links": [
+            {
+              "text": "Overview",
+              "current": null
+            },
+            {
+              "text": "District Profile",
+              "current": "page"
+            }
+          ]
+        },
+        "main": {
+          "x": 32,
+          "y": 185,
+          "width": 704,
+          "height": 1341
+        },
+        "filters": null,
+        "filterPositions": [],
+        "map": null,
+        "search": null,
+        "controls": [],
+        "source": false,
+        "profile": {
+          "signal": true,
+          "districtYield": true,
+          "nationalReference": true,
+          "yieldGap": true,
+          "unavailableTrend": true,
+          "unavailableAreas": true,
+          "unsupportedConfidence": false,
+          "fakeDemo": false
+        },
+        "reducedMotion": false
+      }
+    },
+    {
+      "width": 1024,
+      "page": {
+        "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+        "viewport": {
+          "width": 1024,
+          "height": 1000
+        },
+        "document": {
+          "width": 1009,
+          "height": 1449,
+          "horizontalOverflow": false
+        },
+        "title": "Kayonza",
+        "header": {
+          "position": "sticky",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 1009,
+            "height": 81
+          }
+        },
+        "navigation": {
+          "position": "fixed",
+          "rect": {
+            "x": 0,
+            "y": 80,
+            "width": 256,
+            "height": 920
+          },
+          "active": "District Profile",
+          "links": [
+            {
+              "text": "Overview",
+              "current": null
+            },
+            {
+              "text": "District Profile",
+              "current": "page"
+            }
+          ]
+        },
+        "main": {
+          "x": 296,
+          "y": 129,
+          "width": 673,
+          "height": 1273
+        },
+        "filters": null,
+        "filterPositions": [],
+        "map": null,
+        "search": null,
+        "controls": [],
+        "source": true,
+        "profile": {
+          "signal": true,
+          "districtYield": true,
+          "nationalReference": true,
+          "yieldGap": true,
+          "unavailableTrend": true,
+          "unavailableAreas": true,
+          "unsupportedConfidence": false,
+          "fakeDemo": false
+        },
+        "reducedMotion": false
+      }
+    },
+    {
+      "width": 1280,
+      "page": {
+        "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+        "viewport": {
+          "width": 1280,
+          "height": 1000
+        },
+        "document": {
+          "width": 1265,
+          "height": 1425,
+          "horizontalOverflow": false
+        },
+        "title": "Kayonza",
+        "header": {
+          "position": "sticky",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 1265,
+            "height": 81
+          }
+        },
+        "navigation": {
+          "position": "fixed",
+          "rect": {
+            "x": 0,
+            "y": 80,
+            "width": 256,
+            "height": 920
+          },
+          "active": "District Profile",
+          "links": [
+            {
+              "text": "Overview",
+              "current": null
+            },
+            {
+              "text": "District Profile",
+              "current": "page"
+            }
+          ]
+        },
+        "main": {
+          "x": 296,
+          "y": 129,
+          "width": 929,
+          "height": 1249
+        },
+        "filters": null,
+        "filterPositions": [],
+        "map": null,
+        "search": null,
+        "controls": [],
+        "source": true,
+        "profile": {
+          "signal": true,
+          "districtYield": true,
+          "nationalReference": true,
+          "yieldGap": true,
+          "unavailableTrend": true,
+          "unavailableAreas": true,
+          "unsupportedConfidence": false,
+          "fakeDemo": false
+        },
+        "reducedMotion": false
+      }
+    },
+    {
+      "width": 1440,
+      "page": {
+        "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "document": {
+          "width": 1425,
+          "height": 1401,
+          "horizontalOverflow": false
+        },
+        "title": "Kayonza",
+        "header": {
+          "position": "sticky",
+          "rect": {
+            "x": 0,
+            "y": 0,
+            "width": 1425,
+            "height": 81
+          }
+        },
+        "navigation": {
+          "position": "fixed",
+          "rect": {
+            "x": 0,
+            "y": 80,
+            "width": 256,
+            "height": 920
+          },
+          "active": "District Profile",
+          "links": [
+            {
+              "text": "Overview",
+              "current": null
+            },
+            {
+              "text": "District Profile",
+              "current": "page"
+            }
+          ]
+        },
+        "main": {
+          "x": 296,
+          "y": 129,
+          "width": 1089,
+          "height": 1225
+        },
+        "filters": null,
+        "filterPositions": [],
+        "map": null,
+        "search": null,
+        "controls": [],
+        "source": true,
+        "profile": {
+          "signal": true,
+          "districtYield": true,
+          "nationalReference": true,
+          "yieldGap": true,
+          "unavailableTrend": true,
+          "unavailableAreas": true,
+          "unsupportedConfidence": false,
+          "fakeDemo": false
+        },
+        "reducedMotion": false
+      }
+    }
+  ],
+  "keyboard": {
+    "skipLink": {
+      "text": "Skip to main content",
+      "href": "#main-content",
+      "focusVisible": true,
+      "visible": true,
+      "rect": {
+        "x": 12,
+        "y": 12,
+        "width": 164,
+        "height": 44
+      }
+    },
+    "firstNav": {
+      "text": "Overview",
+      "tag": "BUTTON",
+      "focusVisible": true
+    },
+    "secondNav": {
+      "text": "District Profile",
+      "tag": "BUTTON",
+      "focusVisible": true
+    },
+    "suggestions": {
+      "focused": true,
+      "value": "Kayonza",
+      "expanded": "true",
+      "items": [
+        "Kayonza"
+      ],
+      "activeDescendant": null
+    },
+    "highlighted": {
+      "activeDescendant": "_r_0_-listbox-option-0",
+      "selected": "Kayonza"
+    },
+    "desktopSelected": "Kayonza",
+    "desktopSelectedAnnouncement": "Kayonza selected",
+    "desktopProfileH1": "Kayonza",
+    "profileOpened": true,
+    "mobileStart": {
+      "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+      "viewport": {
+        "width": 375,
+        "height": 900
+      },
+      "document": {
+        "width": 375,
+        "height": 1847,
+        "horizontalOverflow": false
+      },
+      "title": "Rwanda Agricultural Overview",
+      "header": {
+        "position": "sticky",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 65
+        }
+      },
+      "navigation": {
+        "position": "static",
+        "rect": {
+          "x": 0,
+          "y": 65,
+          "width": 375,
+          "height": 65
+        },
+        "active": "Overview",
+        "links": [
+          {
+            "text": "Overview",
+            "current": "page"
+          },
+          {
+            "text": "District Profile",
+            "current": null
+          }
+        ]
+      },
+      "main": {
+        "x": 16,
+        "y": 157,
+        "width": 343,
+        "height": 1661
+      },
+      "filters": {
+        "x": 33,
+        "y": 314,
+        "width": 310,
+        "height": 308
+      },
+      "filterPositions": [
+        {
+          "x": 33,
+          "y": 314,
+          "width": 310,
+          "height": 68
+        },
+        {
+          "x": 33,
+          "y": 394,
+          "width": 310,
+          "height": 68
+        },
+        {
+          "x": 33,
+          "y": 474,
+          "width": 310,
+          "height": 68
+        },
+        {
+          "x": 33,
+          "y": 554,
+          "width": 310,
+          "height": 68
+        }
+      ],
+      "map": {
+        "rect": {
+          "x": 16,
+          "y": 771,
+          "width": 343,
+          "height": 522
+        },
+        "canvas": {
+          "x": 17,
+          "y": 771,
+          "width": 342,
+          "height": 521
+        },
+        "ariaLabel": "Interactive Rwanda district map. Use district search above for keyboard-accessible selection.",
+        "loading": false,
+        "error": false,
+        "legend": true,
+        "announcement": "Kayonza selected"
+      },
+      "search": {
+        "value": "",
+        "expanded": "false",
+        "suggestions": [],
+        "activeDescendant": null
+      },
+      "controls": [
+        {
+          "name": "Zoom in",
+          "x": 33,
+          "y": 1142,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "name": "Zoom out",
+          "x": 33,
+          "y": 1187,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "name": "Reset map view",
+          "x": 33,
+          "y": 1231,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "source": true,
+      "profile": {
+        "signal": true,
+        "districtYield": false,
+        "nationalReference": false,
+        "yieldGap": true,
+        "unavailableTrend": false,
+        "unavailableAreas": false,
+        "unsupportedConfidence": false,
+        "fakeDemo": false
+      },
+      "reducedMotion": false
+    },
+    "mobileSuggestions": {
+      "value": "Kayonza",
+      "expanded": "true",
+      "items": [
+        "Kayonza"
+      ]
+    },
+    "mobileSelected": "Kayonza",
+    "mobileSelectedAnnouncement": "Kayonza selected",
+    "mobileProfileH1": "Kayonza"
+  },
+  "desktopProfile": {
+    "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "document": {
+      "width": 1425,
+      "height": 1401,
+      "horizontalOverflow": false
+    },
+    "title": "Kayonza",
+    "header": {
+      "position": "sticky",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 1425,
+        "height": 81
+      }
+    },
+    "navigation": {
+      "position": "fixed",
+      "rect": {
+        "x": 0,
+        "y": 80,
+        "width": 256,
+        "height": 920
+      },
+      "active": "District Profile",
+      "links": [
+        {
+          "text": "Overview",
+          "current": null
+        },
+        {
+          "text": "District Profile",
+          "current": "page"
+        }
+      ]
+    },
+    "main": {
+      "x": 296,
+      "y": 129,
+      "width": 1089,
+      "height": 1225
+    },
+    "filters": null,
+    "filterPositions": [],
+    "map": null,
+    "search": null,
+    "controls": [],
+    "source": true,
+    "profile": {
+      "signal": true,
+      "districtYield": true,
+      "nationalReference": true,
+      "yieldGap": true,
+      "unavailableTrend": true,
+      "unavailableAreas": true,
+      "unsupportedConfidence": false,
+      "fakeDemo": false
+    },
+    "reducedMotion": false
+  },
+  "mobileProfile": {
+    "url": "http://127.0.0.1:5173/?browser-audit=1791187295551",
+    "viewport": {
+      "width": 375,
+      "height": 900
+    },
+    "document": {
+      "width": 375,
+      "height": 2008,
+      "horizontalOverflow": false
+    },
+    "title": "Kayonza",
+    "header": {
+      "position": "sticky",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 375,
+        "height": 65
+      }
+    },
+    "navigation": {
+      "position": "static",
+      "rect": {
+        "x": 0,
+        "y": 65,
+        "width": 375,
+        "height": 65
+      },
+      "active": "District Profile",
+      "links": [
+        {
+          "text": "Overview",
+          "current": null
+        },
+        {
+          "text": "District Profile",
+          "current": "page"
+        }
+      ]
+    },
+    "main": {
+      "x": 16,
+      "y": 157,
+      "width": 343,
+      "height": 1823
+    },
+    "filters": null,
+    "filterPositions": [],
+    "map": null,
+    "search": null,
+    "controls": [],
+    "source": false,
+    "profile": {
+      "signal": true,
+      "districtYield": true,
+      "nationalReference": true,
+      "yieldGap": true,
+      "unavailableTrend": true,
+      "unavailableAreas": true,
+      "unsupportedConfidence": false,
+      "fakeDemo": false
+    },
+    "reducedMotion": false
+  },
+  "reducedMotion": {
+    "enabled": true,
+    "transitionDuration": "1e-05s",
+    "animationDuration": "1e-05s"
+  },
+  "screenshots": [
+    {
+      "file": "C:\\Users\\shing\\Desktop\\code\\AII\\artifacts\\browser-verification\\overview-320.png",
+      "bytes": 104694,
+      "pixels": "320x1757"
+    },
+    {
+      "file": "C:\\Users\\shing\\Desktop\\code\\AII\\artifacts\\browser-verification\\overview-375.png",
+      "bytes": 99846,
+      "pixels": "375x1593"
+    },
+    {
+      "file": "C:\\Users\\shing\\Desktop\\code\\AII\\artifacts\\browser-verification\\overview-390.png",
+      "bytes": 113617,
+      "pixels": "390x1573"
+    },
+    {
+      "file": "C:\\Users\\shing\\Desktop\\code\\AII\\artifacts\\browser-verification\\overview-768.png",
+      "bytes": 109273,
+      "pixels": "768x1563"
+    },
+    {
+      "file": "C:\\Users\\shing\\Desktop\\code\\AII\\artifacts\\browser-verification\\overview-1024.png",
+      "bytes": 179141,
+      "pixels": "1008x1542"
+    },
+    {
+      "file": "C:\\Users\\shing\\Desktop\\code\\AII\\artifacts\\browser-verification\\overview-1280.png",
+      "bytes": 168483,
+      "pixels": "1264x1182"
+    },
+    {
+      "file": "C:\\Users\\shing\\Desktop\\code\\AII\\artifacts\\browser-verification\\overview-1440.png",
+      "bytes": 184246,
+      "pixels": "1424x1182"
+    },
+    {
+      "file": "C:\\Users\\shing\\Desktop\\code\\AII\\artifacts\\browser-verification\\overview-1440-selected-kayonza.png",
+      "bytes": 130928,
+      "pixels": "1424x1182"
+    },
+    {
+      "file": "C:\\Users\\shing\\Desktop\\code\\AII\\artifacts\\browser-verification\\district-profile-1440-kayonza.png",
+      "bytes": 109974,
+      "pixels": "1424x1401"
+    },
+    {
+      "file": "C:\\Users\\shing\\Desktop\\code\\AII\\artifacts\\browser-verification\\district-profile-375-kayonza.png",
+      "bytes": 96104,
+      "pixels": "375x2008"
+    },
+    {
+      "file": "C:\\Users\\shing\\Desktop\\code\\AII\\artifacts\\browser-verification\\overview-375-selected-kayonza.png",
+      "bytes": 121459,
+      "pixels": "375x1846"
+    }
+  ],
+  "networkLog": [
+    {
+      "kind": "request",
+      "url": "http://127.0.0.1:5173/data/rwanda-districts.geojson"
+    },
+    {
+      "kind": "request",
+      "url": "http://127.0.0.1:5173/data/rwanda-districts.geojson"
+    },
+    {
+      "kind": "geojson-response",
+      "status": 200,
+      "fromDiskCache": false,
+      "fromServiceWorker": false
+    },
+    {
+      "kind": "geojson-response",
+      "status": 200,
+      "fromDiskCache": false,
+      "fromServiceWorker": false
+    },
+    {
+      "kind": "request",
+      "url": "http://127.0.0.1:5173/data/rwanda-districts.geojson"
+    },
+    {
+      "kind": "request",
+      "url": "http://127.0.0.1:5173/data/rwanda-districts.geojson"
+    },
+    {
+      "kind": "geojson-response",
+      "status": 200,
+      "fromDiskCache": false,
+      "fromServiceWorker": false
+    },
+    {
+      "kind": "geojson-response",
+      "status": 200,
+      "fromDiskCache": false,
+      "fromServiceWorker": false
+    }
+  ],
+  "browserEvents": [],
+  "freshDesktop": {
+    "mapLoaded": {
+      "complete": true,
+      "canvas": true,
+      "loading": false,
+      "error": false,
+      "source": true
+    },
+    "overview": {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document": {
+        "width": 1425,
+        "horizontalOverflow": false
+      },
+      "title": "Rwanda Agricultural Overview",
+      "activeNavigation": "Overview",
+      "map": {
+        "bounds": {
+          "x": 296,
+          "y": 454,
+          "width": 725,
+          "height": 680
+        },
+        "canvas": {
+          "x": 297,
+          "y": 455,
+          "width": 723,
+          "height": 679
+        },
+        "loading": false,
+        "legend": true,
+        "announcement": ""
+      },
+      "controls": [
+        {
+          "label": "Zoom in",
+          "x": 313,
+          "y": 983,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Zoom out",
+          "x": 313,
+          "y": 1028,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Reset map view",
+          "x": 313,
+          "y": 1073,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "search": {
+        "value": "",
+        "expanded": "false",
+        "items": [],
+        "activeDescendant": null
+      },
+      "source": true,
+      "signal": false,
+      "yieldGap": false,
+      "districtYield": false,
+      "nationalReference": false,
+      "unavailableTrend": false,
+      "unavailableAreas": false,
+      "unsupportedConfidence": false,
+      "mockContent": false
+    },
+    "selected": {
+      "suggestions": {
+        "value": "Kayonza",
+        "expanded": "true",
+        "items": [
+          "Kayonza"
+        ]
+      },
+      "highlight": {
+        "activeDescendant": "_r_0_-listbox-option-0",
+        "selected": "Kayonza"
+      },
+      "state": {
+        "viewport": {
+          "width": 1440,
+          "height": 1000
+        },
+        "document": {
+          "width": 1425,
+          "horizontalOverflow": false
+        },
+        "title": "Rwanda Agricultural Overview",
+        "activeNavigation": "Overview",
+        "map": {
+          "bounds": {
+            "x": 296,
+            "y": 454,
+            "width": 725,
+            "height": 680
+          },
+          "canvas": {
+            "x": 297,
+            "y": 455,
+            "width": 723,
+            "height": 679
+          },
+          "loading": false,
+          "legend": true,
+          "announcement": "Kayonza selected"
+        },
+        "controls": [
+          {
+            "label": "Zoom in",
+            "x": 313,
+            "y": 983,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "label": "Zoom out",
+            "x": 313,
+            "y": 1028,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "label": "Reset map view",
+            "x": 313,
+            "y": 1073,
+            "width": 44,
+            "height": 44
+          }
+        ],
+        "search": {
+          "value": "Kayonza",
+          "expanded": "false",
+          "items": [],
+          "activeDescendant": null
+        },
+        "source": true,
+        "signal": true,
+        "yieldGap": true,
+        "districtYield": false,
+        "nationalReference": false,
+        "unavailableTrend": false,
+        "unavailableAreas": false,
+        "unsupportedConfidence": false,
+        "mockContent": false
+      }
+    },
+    "profile": {
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "document": {
+        "width": 1425,
+        "horizontalOverflow": false
+      },
+      "title": "Kayonza",
+      "activeNavigation": "District Profile",
+      "map": null,
+      "controls": [],
+      "search": null,
+      "source": true,
+      "signal": true,
+      "yieldGap": true,
+      "districtYield": true,
+      "nationalReference": true,
+      "unavailableTrend": true,
+      "unavailableAreas": true,
+      "unsupportedConfidence": false,
+      "mockContent": false
+    }
+  },
+  "freshMobile": {
+    "mapLoaded": {
+      "complete": true,
+      "canvas": true,
+      "loading": false,
+      "error": false,
+      "source": true
+    },
+    "overview": {
+      "viewport": {
+        "width": 375,
+        "height": 900
+      },
+      "document": {
+        "width": 375,
+        "horizontalOverflow": false
+      },
+      "title": "Rwanda Agricultural Overview",
+      "activeNavigation": "Overview",
+      "map": {
+        "bounds": {
+          "x": 16,
+          "y": 771,
+          "width": 343,
+          "height": 522
+        },
+        "canvas": {
+          "x": 17,
+          "y": 771,
+          "width": 342,
+          "height": 521
+        },
+        "loading": false,
+        "legend": true,
+        "announcement": ""
+      },
+      "controls": [
+        {
+          "label": "Zoom in",
+          "x": 33,
+          "y": 1142,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Zoom out",
+          "x": 33,
+          "y": 1187,
+          "width": 44,
+          "height": 44
+        },
+        {
+          "label": "Reset map view",
+          "x": 33,
+          "y": 1231,
+          "width": 44,
+          "height": 44
+        }
+      ],
+      "search": {
+        "value": "",
+        "expanded": "false",
+        "items": [],
+        "activeDescendant": null
+      },
+      "source": true,
+      "signal": false,
+      "yieldGap": false,
+      "districtYield": false,
+      "nationalReference": false,
+      "unavailableTrend": false,
+      "unavailableAreas": false,
+      "unsupportedConfidence": false,
+      "mockContent": false
+    },
+    "selected": {
+      "suggestions": {
+        "value": "Kayonza",
+        "expanded": "true",
+        "items": [
+          "Kayonza"
+        ]
+      },
+      "highlight": {
+        "activeDescendant": "_r_0_-listbox-option-0",
+        "selected": "Kayonza"
+      },
+      "state": {
+        "viewport": {
+          "width": 375,
+          "height": 900
+        },
+        "document": {
+          "width": 375,
+          "horizontalOverflow": false
+        },
+        "title": "Rwanda Agricultural Overview",
+        "activeNavigation": "Overview",
+        "map": {
+          "bounds": {
+            "x": 16,
+            "y": 771,
+            "width": 343,
+            "height": 522
+          },
+          "canvas": {
+            "x": 17,
+            "y": 771,
+            "width": 342,
+            "height": 521
+          },
+          "loading": false,
+          "legend": true,
+          "announcement": "Kayonza selected"
+        },
+        "controls": [
+          {
+            "label": "Zoom in",
+            "x": 33,
+            "y": 1142,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "label": "Zoom out",
+            "x": 33,
+            "y": 1187,
+            "width": 44,
+            "height": 44
+          },
+          {
+            "label": "Reset map view",
+            "x": 33,
+            "y": 1231,
+            "width": 44,
+            "height": 44
+          }
+        ],
+        "search": {
+          "value": "Kayonza",
+          "expanded": "false",
+          "items": [],
+          "activeDescendant": null
+        },
+        "source": true,
+        "signal": true,
+        "yieldGap": true,
+        "districtYield": false,
+        "nationalReference": false,
+        "unavailableTrend": false,
+        "unavailableAreas": false,
+        "unsupportedConfidence": false,
+        "mockContent": false
+      }
+    },
+    "profile": {
+      "viewport": {
+        "width": 375,
+        "height": 900
+      },
+      "document": {
+        "width": 375,
+        "horizontalOverflow": false
+      },
+      "title": "Kayonza",
+      "activeNavigation": "District Profile",
+      "map": null,
+      "controls": [],
+      "search": null,
+      "source": false,
+      "signal": true,
+      "yieldGap": true,
+      "districtYield": true,
+      "nationalReference": true,
+      "unavailableTrend": true,
+      "unavailableAreas": true,
+      "unsupportedConfidence": false,
+      "mockContent": false
+    }
+  },
+  "freshScreenshots": [
+    {
+      "file": "C:\\Users\\shing\\Desktop\\code\\AII\\artifacts\\browser-verification\\overview-1440.png",
+      "pixels": "1424x1182",
+      "bytes": 184246
+    },
+    {
+      "file": "C:\\Users\\shing\\Desktop\\code\\AII\\artifacts\\browser-verification\\overview-1440-selected-kayonza.png",
+      "pixels": "1424x1182",
+      "bytes": 192958
+    },
+    {
+      "file": "C:\\Users\\shing\\Desktop\\code\\AII\\artifacts\\browser-verification\\district-profile-1440-kayonza.png",
+      "pixels": "1424x1401",
+      "bytes": 109974
+    },
+    {
+      "file": "C:\\Users\\shing\\Desktop\\code\\AII\\artifacts\\browser-verification\\overview-375.png",
+      "pixels": "375x1593",
+      "bytes": 101088
+    },
+    {
+      "file": "C:\\Users\\shing\\Desktop\\code\\AII\\artifacts\\browser-verification\\overview-375-selected-kayonza.png",
+      "pixels": "375x1846",
+      "bytes": 111168
+    },
+    {
+      "file": "C:\\Users\\shing\\Desktop\\code\\AII\\artifacts\\browser-verification\\district-profile-375-kayonza.png",
+      "pixels": "375x2008",
+      "bytes": 96103
+    }
+  ],
+  "finalBrowserEvents": []
+}

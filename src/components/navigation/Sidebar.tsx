@@ -1,4 +1,5 @@
-import { BarChart3, Map } from 'lucide-react'
+import { BarChart3, BookOpenText, FileSearch, Map } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 import { SidebarNavItem } from './SidebarNavItem'
 import type { NavigationItem } from './navigation.types'
@@ -9,9 +10,11 @@ interface SidebarProps {
   onNavigate: (page: NavigationItem) => void
 }
 
-const navigationIcons: Record<NavigationItem, typeof Map> = {
+const navigationIcons: Record<NavigationItem, LucideIcon> = {
   Overview: BarChart3,
   'District Profile': Map,
+  Evidence: FileSearch,
+  'Data & Methodology': BookOpenText,
 }
 
 export function Sidebar({ activePage, items, onNavigate }: SidebarProps) {
@@ -34,7 +37,7 @@ export function Sidebar({ activePage, items, onNavigate }: SidebarProps) {
         </div>
 
         <div className="hidden border-t border-slate-200 pt-4 text-xs leading-5 text-slate-500 lg:mt-auto lg:block">
-          <p className="font-semibold text-slate-700">Current data source</p>
+          <p className="font-semibold text-slate-700">Connected evidence</p>
           <p className="mt-1">NISR Seasonal Agricultural Survey 2025</p>
           <p>Season A · Agricultural year 2024/25</p>
         </div>

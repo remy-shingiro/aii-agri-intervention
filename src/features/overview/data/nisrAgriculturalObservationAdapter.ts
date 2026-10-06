@@ -54,8 +54,8 @@ function isValidSourceDataset(
     dataset.source.references.every(
       (reference) =>
         reference.table.trim().length > 0 &&
-        Number.isInteger(reference.page) &&
-        reference.page > 0,
+        (reference.page === undefined ||
+          (Number.isInteger(reference.page) && reference.page > 0)),
     )
   )
 }
