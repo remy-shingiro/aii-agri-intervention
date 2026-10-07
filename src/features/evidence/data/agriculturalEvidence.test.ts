@@ -83,6 +83,13 @@ describe('normalized NISR agricultural evidence', () => {
       period: { year: '2023/24' },
     })
     expect(ahs?.period.season).toBeUndefined()
+    expect(ahs).toMatchObject({ value: 14.1, unit: '%' })
+    expect(
+      findRecord('AHS 2024', 'fertilizer_risk_awareness', 'Rwanda', undefined),
+    ).toMatchObject({ value: 34.8, sourceReference: { page: 11 } })
+    expect(
+      findRecord('AHS 2024', 'beekeeping', 'Rwanda', undefined),
+    ).toMatchObject({ value: 4.8, status: 'observed' })
     expect(normalizedEvidenceRecords.some((record) => record.geography.level === 'province')).toBe(false)
     expect(nisrDataInventory.some((record) => record.geographyLevel === 'province')).toBe(true)
   })

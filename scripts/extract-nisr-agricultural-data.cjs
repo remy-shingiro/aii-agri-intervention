@@ -376,26 +376,26 @@ const INPUT_TABLES = {
 }
 
 const AHS_SUMMARY = [
-  { row: 12, label: 'Percentage of agricultural households who used improved seeds', indicator: 'improved_seed_use', kind: 'trend' },
-  { row: 13, label: 'Percentage of agricultural households who used organic fertilizer', indicator: 'organic_fertilizer_use', kind: 'trend' },
-  { row: 14, label: 'Percentage of agricultural households who used inorganic fertilizer', indicator: 'inorganic_fertilizer_use', kind: 'trend' },
-  { row: 15, label: 'Percentage of agricultural households who used pesticides', indicator: 'pesticide_use', kind: 'trend' },
-  { row: 16, label: 'Percentage of agricultural households who practice irrigation', indicator: 'irrigation_practice', kind: 'trend' },
-  { row: 17, label: 'Percentage of agricultural households who practice erosion control measures', indicator: 'erosion_control_practice', kind: 'trend' },
-  { row: 18, label: 'Percentage of agricultural households who planted agroforestry trees in their plots', indicator: 'agroforestry_practice', kind: 'unavailable' },
-  { row: 19, label: 'Percentage of households who used mechanical equipment used in cultivation', indicator: 'mechanical_equipment_use', kind: 'unavailable' },
-  { row: 20, label: 'Percentage of agricultural households with at least one member belongs to agricultural cooperative or association', indicator: 'agricultural_association_membership', kind: 'trend' },
-  { row: 21, label: 'Percentage of agricultural households with at least one member received an agricultural extension', indicator: 'agricultural_extension_use', kind: 'unavailable' },
-  { row: 22, label: 'Percentage of agricultural households who had a kitchen garden', indicator: 'kitchen_garden_use', kind: 'trend' },
-  { row: 23, label: 'Percentage of agricultural households that are aware of environmental risks associated with the excessive use or misuse of inorganic fertilizers.', indicator: 'fertilizer_risk_awareness', kind: 'unavailable' },
-  { row: 24, label: 'Percentage of agricultural households that are aware of the environmental and health risks associated with the use of pesticides', indicator: 'pesticide_risk_awareness', kind: 'unavailable' },
-  { row: 25, label: 'Percentage of cattle owners out of total households rearing livestock', indicator: 'livestock_ownership', species: 'Cattle', kind: 'trend' },
-  { row: 26, label: 'Percentage of goat owners out of total households rearing livestock', indicator: 'livestock_ownership', species: 'Goat', kind: 'trend' },
-  { row: 27, label: 'Percentage of sheep owners out of total households rearing livestock', indicator: 'livestock_ownership', species: 'Sheep', kind: 'trend' },
-  { row: 28, label: 'Percentage of pig owners out of total households rearing livestock', indicator: 'livestock_ownership', species: 'Pig', kind: 'trend' },
-  { row: 29, label: 'Percentage of chicken owners out of total households rearing livestock', indicator: 'livestock_ownership', species: 'Chicken', kind: 'trend' },
-  { row: 30, label: 'Percentage of rabbit owners out of total households rearing livestock', indicator: 'livestock_ownership', species: 'Rabbit', kind: 'trend' },
-  { row: 31, label: 'Percentage of agricultural households who did bee keeping', indicator: 'beekeeping', kind: 'unavailable' },
+  { row: 12, label: 'Percentage of agricultural households who used improved seeds', indicator: 'improved_seed_use' },
+  { row: 13, label: 'Percentage of agricultural households who used organic fertilizer', indicator: 'organic_fertilizer_use' },
+  { row: 14, label: 'Percentage of agricultural households who used inorganic fertilizer', indicator: 'inorganic_fertilizer_use' },
+  { row: 15, label: 'Percentage of agricultural households who used pesticides', indicator: 'pesticide_use' },
+  { row: 16, label: 'Percentage of agricultural households who practice irrigation', indicator: 'irrigation_practice' },
+  { row: 17, label: 'Percentage of agricultural households who practice erosion control measures', indicator: 'erosion_control_practice' },
+  { row: 18, label: 'Percentage of agricultural households who planted agroforestry trees in their plots', indicator: 'agroforestry_practice' },
+  { row: 19, label: 'Percentage of households who used mechanical equipment used in cultivation', indicator: 'mechanical_equipment_use' },
+  { row: 20, label: 'Percentage of agricultural households with at least one member belongs to agricultural cooperative or association', indicator: 'agricultural_association_membership' },
+  { row: 21, label: 'Percentage of agricultural households with at least one member received an agricultural extension', indicator: 'agricultural_extension_use' },
+  { row: 22, label: 'Percentage of agricultural households who had a kitchen garden', indicator: 'kitchen_garden_use' },
+  { row: 23, label: 'Percentage of agricultural households that are aware of environmental risks associated with the excessive use or misuse of inorganic fertilizers.', indicator: 'fertilizer_risk_awareness' },
+  { row: 24, label: 'Percentage of agricultural households that are aware of the environmental and health risks associated with the use of pesticides', indicator: 'pesticide_risk_awareness' },
+  { row: 25, label: 'Percentage of cattle owners out of total households rearing livestock', indicator: 'livestock_ownership', species: 'Cattle' },
+  { row: 26, label: 'Percentage of goat owners out of total households rearing livestock', indicator: 'livestock_ownership', species: 'Goat' },
+  { row: 27, label: 'Percentage of sheep owners out of total households rearing livestock', indicator: 'livestock_ownership', species: 'Sheep' },
+  { row: 28, label: 'Percentage of pig owners out of total households rearing livestock', indicator: 'livestock_ownership', species: 'Pig' },
+  { row: 29, label: 'Percentage of chicken owners out of total households rearing livestock', indicator: 'livestock_ownership', species: 'Chicken' },
+  { row: 30, label: 'Percentage of rabbit owners out of total households rearing livestock', indicator: 'livestock_ownership', species: 'Rabbit' },
+  { row: 31, label: 'Percentage of agricultural households who did bee keeping', indicator: 'beekeeping' },
 ]
 
 const EXTRACTED_TABLES = new Map([
@@ -877,13 +877,21 @@ function extractPracticeTables(dataset, pages, districts, records, inventory) {
 function extractAhsSummary(dataset, pages, records, inventory) {
   const page = pages.find((item) => /^\s*\d+ Table 1:\s*Summary of AHS 2024 results/i.test(item.text))
   if (!page) throw new Error('AHS 2024 Table 1 summary was not found')
-  console.log('AHS Table 1 source header', JSON.stringify(page.text.slice(0, 1800)))
-  console.log('AHS Table 1 fragments', JSON.stringify(page.fragments.slice(0, 45).map(({ text, x, y }) => ({ text, x, y }))))
   const table = sourceTableReference(1, 'Summary of AHS 2024 results', page.printedPage)
-  for (const rowNumber of [12, 18, 19, 21, 23, 24, 31]) {
-    const row = page.fragments.find((fragment) => new RegExp(`^\\s*${rowNumber}\\s`).test(fragment.text))
-    if (row) console.log('AHS row fragments', rowNumber, JSON.stringify(page.fragments.filter((fragment) => Math.abs(fragment.y - row.y) < 0.8).map(({ text, x, y }) => ({ text: text.trim(), x, y }))))
-  }
+  const yearHeader = page.fragments.find((fragment) =>
+    fragment.text.trim() === '2024' &&
+    page.fragments.some(
+      (candidate) =>
+        candidate.text.trim() === '2017' &&
+        Math.abs(candidate.y - fragment.y) < 0.8,
+    ) &&
+    page.fragments.some(
+      (candidate) =>
+        candidate.text.trim() === '2020' &&
+        Math.abs(candidate.y - fragment.y) < 0.8,
+    ),
+  )
+  if (!yearHeader) throw new Error('AHS Table 1 2024 column was not found')
   const geography = { level: 'national', name: 'Rwanda' }
   const period = {
     year: dataset.agriculturalYear,
@@ -891,33 +899,25 @@ function extractAhsSummary(dataset, pages, records, inventory) {
   }
 
   for (const summary of AHS_SUMMARY) {
-    const next = AHS_SUMMARY.find((candidate) => candidate.row === summary.row + 1)
-    const start = page.text.indexOf(`${summary.row} ${summary.label}`)
-    if (start < 0) throw new Error(`AHS Table 1 row ${summary.row} is missing`)
-    const end = next
-      ? page.text.indexOf(`${next.row} ${next.label}`, start + 1)
-      : page.text.indexOf('Source: NISR, AHS 2024', start)
-    const rawValues = parseNumericCells(
-      page.text.slice(
-        start + summary.row.toString().length + summary.label.length,
-        end < 0 ? undefined : end,
-      ),
+    const row = page.fragments.find(
+      (fragment) => fragment.text.trim() === String(summary.row),
     )
-    const selectedCell = rawValues.length >= 3
-      ? rawValues[2]
-      : rawValues.length === 1
-        ? rawValues[0]
-        : undefined
-    if (selectedCell === undefined && summary.kind !== 'unavailable') {
-      throw new Error(`AHS Table 1 row ${summary.row}: selected year cell is missing`)
+    if (!row) throw new Error(`AHS Table 1 row ${summary.row} is missing`)
+    const currentYearCells = page.fragments.filter((fragment) => {
+      const cell = fragment.text.trim()
+      return (
+        Math.abs(fragment.y - row.y) < 0.8 &&
+        fragment.x > yearHeader.x &&
+        parseNumericCells(cell).length === 1 &&
+        parseNumericCells(cell)[0] === cell
+      )
+    })
+    if (currentYearCells.length > 1) {
+      throw new Error(`AHS Table 1 row ${summary.row}: multiple 2024 cells were found`)
     }
-    const value = selectedCell === undefined
+    const value = currentYearCells.length === 0
       ? null
-      : cellValue(selectedCell, 1, summary.label)
-    if (summary.kind === 'unavailable' && value !== null) {
-      console.log('AHS unavailable row contains data', summary.row, JSON.stringify(rawValues), JSON.stringify(page.text.slice(start, end < 0 ? start + 600 : end)))
-      throw new Error(`AHS Table 1 row ${summary.row}: source is not unavailable`)
-    }
+      : cellValue(currentYearCells[0].text.trim(), 1, summary.label)
     const record = makeRecord(dataset, {
       indicator: summary.indicator,
       label: summary.label,

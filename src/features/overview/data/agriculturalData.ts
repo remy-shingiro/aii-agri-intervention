@@ -14,19 +14,35 @@ function normalize(value: string): string {
   return value.trim().toLowerCase()
 }
 
-function sameObservationPeriod(
-  first: EvidenceRecord,
-  second: EvidenceRecord,
-): boolean {
-  return (
-    first.dataset === second.dataset &&
-    first.period.year === second.period.year &&
-    first.period.season === second.period.season &&
-    normalize(first.crop ?? '') === normalize(second.crop ?? '') &&
-    first.geography.level === 'district' &&
-    second.geography.level === 'district' &&
-    first.geography.id === second.geography.id
-  )
+function observationKey(record: EvidenceRecord): string {
+  return [
+    record.dataset,
+    record.period.year,
+    record.period.season ?? '',
+    normalize(record.crop ?? ''),
+    normalize(record.geography.id),
+  ].join('|')
+}
+
+const observedDistrictRecordsByKey = new Map<
+  string,
+  Map<EvidenceRecord['indicator'], EvidenceRecord>
+>()
+for (const record of normalizedEvidenceRecords) {
+  if (
+    record.geography.level !== 'district' ||
+    record.status !== 'observed' ||
+    record.value === null
+  ) {
+    continue
+  }
+
+  const key = observationKey(record)
+  const matchingIndicators =
+    observedDistrictRecordsByKey.get(key) ??
+    new Map<EvidenceRecord['indicator'], EvidenceRecord>()
+  matchingIndicators.set(record.indicator, record)
+  observedDistrictRecordsByKey.set(key, matchingIndicators)
 }
 
 function getCompleteObservations(): readonly AgriculturalObservation[] {
@@ -41,20 +57,11 @@ function getCompleteObservations(): readonly AgriculturalObservation[] {
       return []
     }
 
-    const production = normalizedEvidenceRecords.find(
-      (record) =>
-        record.indicator === 'crop_production' &&
-        record.status === 'observed' &&
-        record.value !== null &&
-        sameObservationPeriod(yieldRecord, record),
+    const matchingRecords = observedDistrictRecordsByKey.get(
+      observationKey(yieldRecord),
     )
-    const area = normalizedEvidenceRecords.find(
-      (record) =>
-        record.indicator === 'cultivated_area' &&
-        record.status === 'observed' &&
-        record.value !== null &&
-        sameObservationPeriod(yieldRecord, record),
-    )
+    const production = matchingRecords?.get('crop_production')
+    const area = matchingRecords?.get('cultivated_area')
     if (!production || production.value === null || !area || area.value === null) {
       return []
     }

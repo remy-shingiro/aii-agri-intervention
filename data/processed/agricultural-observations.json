@@ -430803,7 +430803,7 @@
     "id": "ahs-2024-annual-2023-24-rwanda-agroforestry_practice",
     "indicator": "agroforestry_practice",
     "label": "Percentage of agricultural households who planted agroforestry trees in their plots",
-    "value": null,
+    "value": 67,
     "unit": "%",
     "geography": {
       "level": "national",
@@ -430832,13 +430832,13 @@
       "table": "Table 1: Summary of AHS 2024 results",
       "page": 11
     },
-    "status": "unavailable"
+    "status": "observed"
   },
   {
     "id": "ahs-2024-annual-2023-24-rwanda-mechanical_equipment_use",
     "indicator": "mechanical_equipment_use",
     "label": "Percentage of households who used mechanical equipment used in cultivation",
-    "value": null,
+    "value": 0.1,
     "unit": "%",
     "geography": {
       "level": "national",
@@ -430867,7 +430867,7 @@
       "table": "Table 1: Summary of AHS 2024 results",
       "page": 11
     },
-    "status": "unavailable"
+    "status": "observed"
   },
   {
     "id": "ahs-2024-annual-2023-24-rwanda-agricultural_association_membership",
@@ -430908,7 +430908,7 @@
     "id": "ahs-2024-annual-2023-24-rwanda-agricultural_extension_use",
     "indicator": "agricultural_extension_use",
     "label": "Percentage of agricultural households with at least one member received an agricultural extension",
-    "value": null,
+    "value": 67.1,
     "unit": "%",
     "geography": {
       "level": "national",
@@ -430937,7 +430937,7 @@
       "table": "Table 1: Summary of AHS 2024 results",
       "page": 11
     },
-    "status": "unavailable"
+    "status": "observed"
   },
   {
     "id": "ahs-2024-annual-2023-24-rwanda-kitchen_garden_use",
@@ -430978,7 +430978,7 @@
     "id": "ahs-2024-annual-2023-24-rwanda-fertilizer_risk_awareness",
     "indicator": "fertilizer_risk_awareness",
     "label": "Percentage of agricultural households that are aware of environmental risks associated with the excessive use or misuse of inorganic fertilizers.",
-    "value": null,
+    "value": 34.8,
     "unit": "%",
     "geography": {
       "level": "national",
@@ -431007,13 +431007,13 @@
       "table": "Table 1: Summary of AHS 2024 results",
       "page": 11
     },
-    "status": "unavailable"
+    "status": "observed"
   },
   {
     "id": "ahs-2024-annual-2023-24-rwanda-pesticide_risk_awareness",
     "indicator": "pesticide_risk_awareness",
     "label": "Percentage of agricultural households that are aware of the environmental and health risks associated with the use of pesticides",
-    "value": null,
+    "value": 24.3,
     "unit": "%",
     "geography": {
       "level": "national",
@@ -431042,7 +431042,7 @@
       "table": "Table 1: Summary of AHS 2024 results",
       "page": 11
     },
-    "status": "unavailable"
+    "status": "observed"
   },
   {
     "id": "ahs-2024-annual-2023-24-rwanda-livestock_ownership-cattle",
@@ -431264,7 +431264,7 @@
     "id": "ahs-2024-annual-2023-24-rwanda-beekeeping",
     "indicator": "beekeeping",
     "label": "Percentage of agricultural households who did bee keeping",
-    "value": null,
+    "value": 4.8,
     "unit": "%",
     "geography": {
       "level": "national",
@@ -431293,6 +431293,6 @@
       "table": "Table 1: Summary of AHS 2024 results",
       "page": 11
     },
-    "status": "unavailable"
+    "status": "observed"
   }
 ]

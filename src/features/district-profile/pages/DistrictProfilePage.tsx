@@ -639,6 +639,10 @@ export function DistrictProfilePage({
             </dd>
           </div>
         </dl>
+        <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
+          <EvidenceSourceMetadata record={insight.districtYieldRecord} />
+          <EvidenceSourceMetadata record={insight.nationalYieldRecord} />
+        </div>
       </section>
 
       <section aria-labelledby="productivity-heading">

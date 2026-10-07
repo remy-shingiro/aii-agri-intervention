@@ -139,7 +139,7 @@ export function DataMethodologyPage() {
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-xl border border-green-200 bg-green-50 p-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-green-800">
-            Primary dataset
+            Household context
           </p>
           <p className="mt-1 text-sm font-semibold text-slate-900">
             NISR AHS 2024
@@ -150,7 +150,7 @@ export function DataMethodologyPage() {
             AHS reference period
           </p>
           <p className="mt-1 text-sm font-semibold text-slate-900">
-            2023/24 · Seasons A, B, and C
+            2023/24 · Annual, no SAS season
           </p>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4">
@@ -202,7 +202,7 @@ export function DataMethodologyPage() {
           The generated inventory contains {nisrDataInventory.length.toLocaleString()} observation and table-catalog entries. {inventoryCatalogCount} report tables are catalogued but not cell-extracted; their presence in a report is not treated as connected evidence.
         </p>
         <p className="mt-2 text-xs leading-5 text-slate-500">
-          Connected indicators include crop cultivated area, yield, production, improved-seed use, organic and inorganic fertilizer use, pesticide use, irrigation, erosion control, mechanical equipment, and agroforestry. AHS 2024 also contributes agricultural-association membership, kitchen gardens, and livestock ownership by species. Its 2024 beekeeping cell is unavailable.
+          Connected indicators include crop cultivated area, yield, production, improved-seed use, organic and inorganic fertilizer use, pesticide use, irrigation, erosion control, mechanical equipment, and agroforestry. AHS 2024 adds national household percentages for agricultural association membership, extension, kitchen gardens, fertilizer and pesticide risk awareness, livestock ownership by species, and beekeeping. These AHS measures are not district observations.
         </p>
       </MethodologySection>
 
