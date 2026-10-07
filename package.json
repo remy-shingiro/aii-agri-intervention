@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "extract:nisr": "node scripts/extract-nisr-agricultural-data.cjs",
     "test": "vitest run",
     "typecheck": "tsc -b",
     "format": "prettier --write ."

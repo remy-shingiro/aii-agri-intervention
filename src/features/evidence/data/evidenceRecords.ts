@@ -1,213 +1,98 @@
-import type { AgriculturalObservationSource } from '../../../types/data-contract'
+import type { EvidenceRecord } from '../types/evidence.types'
 import {
-  getAgriculturalObservations,
-  getNationalMaizeYieldReference,
-} from '../../overview/data/agriculturalData'
-import { nisrSeasonA2025DistrictPractices } from '../../overview/data/nisrSeasonA2025DistrictPractices'
-import { calculateInterventionSignal } from '../../overview/utils/calculateInterventionSignal'
-import type { EvidenceIndicator, EvidenceRecord } from '../types/evidence.types'
+  comparisonFor,
+  normalizedEvidenceRecords,
+} from './agriculturalEvidence'
 
-type NisrSource = Extract<
-  AgriculturalObservationSource,
-  { readonly kind: 'nisr' }
->
+function normalize(value: string): string {
+  return value.trim().toLowerCase()
+}
 
-function sourceReference(source: NisrSource, tableName: string) {
-  const reference = source.references.find((item) =>
-    item.table.includes(tableName),
-  )
+function comparisonKey(record: EvidenceRecord): string {
+  return [
+    record.dataset,
+    record.indicator,
+    normalize(record.crop ?? ''),
+    normalize(record.species ?? ''),
+    record.period.year,
+    record.period.season ?? '',
+    record.period.label ?? '',
+    record.unit,
+  ].join('|')
+}
 
-  if (!reference) {
-    throw new Error(`Missing NISR source reference for ${tableName}`)
+const nationalRecordsByKey = new Map<string, EvidenceRecord>()
+for (const record of normalizedEvidenceRecords) {
+  if (record.geography.level === 'national') {
+    nationalRecordsByKey.set(comparisonKey(record), record)
   }
-
-  return reference
 }
 
-function districtId(name: string): string {
-  return name.toLowerCase().replaceAll(' ', '-')
-}
-
-function createId(district: string, indicator: EvidenceIndicator): string {
-  return `sas-2025-season-a-${districtId(district)}-${indicator}`
-}
-
-const nationalYieldReference = getNationalMaizeYieldReference()
-const agriculturalObservations = getAgriculturalObservations()
-const yieldReference = sourceReference(
-  nationalYieldReference.source,
-  'Table 19',
-)
-
-const cropEvidenceRecords: readonly EvidenceRecord[] =
-  agriculturalObservations.flatMap((observation) => {
-    const district = {
-      level: 'district' as const,
-      id: districtId(observation.district),
-      name: observation.district,
+const comparedObservations: readonly EvidenceRecord[] =
+  normalizedEvidenceRecords.map((record) => {
+    if (record.geography.level !== 'district' || record.status !== 'observed') {
+      return record
     }
-    const period = {
-      year: observation.agriculturalYear,
-      season: observation.season,
-    }
-    const signal = calculateInterventionSignal({
-      yield: observation.yieldKilogramsPerHectare,
-      referenceYield: nationalYieldReference.value,
-    })
 
-    if (observation.source.kind !== 'nisr') {
+    const national = nationalRecordsByKey.get(comparisonKey(record))
+    const comparison = national ? comparisonFor(record, national) : undefined
+    if (!national || !comparison) return record
+
+    return {
+      ...record,
+      referenceValue: comparison.nationalValue,
+      referenceLabel: `National ${record.indicator.replaceAll('_', ' ')}`,
+      referenceEvidenceId: comparison.nationalRecordId,
+      difference: comparison.difference,
+      differenceUnit:
+        record.unit === '%' ? 'percentage points' : record.unit,
+      comparisonStatus: 'derived',
+    }
+  })
+
+const yieldGapRecords: readonly EvidenceRecord[] = comparedObservations.flatMap(
+  (district) => {
+    if (
+      district.indicator !== 'average_yield' ||
+      district.geography.level !== 'district' ||
+      district.status !== 'observed' ||
+      district.value === null ||
+      district.referenceValue === undefined ||
+      district.referenceValue <= 0 ||
+      !district.referenceEvidenceId
+    ) {
       return []
     }
 
-    const common = {
-      crop: observation.crop,
-      geography: district,
-      period,
-      dataset: observation.source.dataset,
-      source: observation.source,
-    }
+    const value =
+      ((district.value - district.referenceValue) / district.referenceValue) *
+      100
+    const national = comparedObservations.find(
+      (record) => record.id === district.referenceEvidenceId,
+    )
+    if (!national) return []
 
     return [
       {
-        ...common,
-        id: createId(observation.district, 'average_yield'),
-        indicator: 'average_yield',
-        label: 'Average maize yield',
-        value: observation.yieldKilogramsPerHectare,
-        unit: 'Kg/Ha',
-        status: 'observed',
-        sourceReference: sourceReference(observation.source, 'Table 19'),
-        referenceValue: nationalYieldReference.value,
-        referenceLabel: 'National maize yield',
-        difference:
-          observation.yieldKilogramsPerHectare - nationalYieldReference.value,
-        differenceUnit: 'Kg/Ha',
-        comparisonStatus: 'derived',
-        referenceEvidenceId: createId('Rwanda', 'average_yield'),
-      },
-      {
-        ...common,
-        id: createId(observation.district, 'yield_gap'),
+        ...district,
+        id: `${district.id}-yield-gap`,
         indicator: 'yield_gap',
-        label: 'Yield gap vs national reference',
-        value: signal.yieldGapPct,
+        label: `${district.crop ?? 'Crop'} yield gap vs national reference`,
+        value,
         unit: '%',
         status: 'derived',
-        derivedFromEvidenceIds: [
-          createId(observation.district, 'average_yield'),
-          createId('Rwanda', 'average_yield'),
-        ],
-        sourceReference: yieldReference,
         referenceValue: 0,
         referenceLabel: 'National parity (0% gap)',
-        difference: signal.yieldGapPct,
-        differenceUnit: 'percentage points',
-      },
-      {
-        ...common,
-        id: createId(observation.district, 'cultivated_area'),
-        indicator: 'cultivated_area',
-        label: 'Cultivated maize area',
-        value: observation.cultivatedAreaHectares,
-        unit: 'Ha',
-        status: 'observed',
-        sourceReference: sourceReference(observation.source, 'Table 13'),
-      },
-      {
-        ...common,
-        id: createId(observation.district, 'crop_production'),
-        indicator: 'crop_production',
-        label: 'Maize production',
-        value: observation.productionTonnes,
-        unit: 'MT',
-        status: 'observed',
-        sourceReference: sourceReference(observation.source, 'Table 24'),
-      },
+        difference: value,
+        differenceUnit: '%',
+        comparisonStatus: undefined,
+        derivedFromEvidenceIds: [district.id, national.id],
+      } satisfies EvidenceRecord,
     ]
-  })
-
-const nationalYieldEvidenceRecord: EvidenceRecord = {
-  id: createId('Rwanda', 'average_yield'),
-  indicator: 'average_yield',
-  label: 'National average maize yield',
-  crop: nationalYieldReference.crop,
-  value: nationalYieldReference.value,
-  unit: nationalYieldReference.unit,
-  geography: {
-    level: 'national',
-    id: 'rwanda',
-    name: 'Rwanda',
   },
-  period: {
-    year: nationalYieldReference.agriculturalYear,
-    season: nationalYieldReference.season,
-  },
-  dataset: nationalYieldReference.source.dataset,
-  source: nationalYieldReference.source,
-  sourceReference: yieldReference,
-  status: 'observed',
-}
-
-const irrigationEvidenceRecords: readonly EvidenceRecord[] =
-  nisrSeasonA2025DistrictPractices.records.map((observation) => ({
-    id: createId(observation.district, 'irrigation_practice'),
-    indicator: 'irrigation_practice',
-    label: 'Farmers practicing irrigation',
-    value: observation.irrigationPracticePct,
-    unit: '%',
-    geography: {
-      level: 'district',
-      id: districtId(observation.district),
-      name: observation.district,
-    },
-    period: {
-      year: nisrSeasonA2025DistrictPractices.agriculturalYear,
-      season: nisrSeasonA2025DistrictPractices.season,
-    },
-    dataset: nisrSeasonA2025DistrictPractices.source.dataset,
-    source: nisrSeasonA2025DistrictPractices.source,
-    sourceReference: sourceReference(
-      nisrSeasonA2025DistrictPractices.source,
-      'Table 64',
-    ),
-    status: 'observed',
-    referenceValue: nisrSeasonA2025DistrictPractices.nationalReference,
-    referenceLabel: 'National irrigation practice estimate',
-    difference:
-      observation.irrigationPracticePct -
-      nisrSeasonA2025DistrictPractices.nationalReference,
-    differenceUnit: 'percentage points',
-    comparisonStatus: 'derived',
-    referenceEvidenceId: createId('Rwanda', 'irrigation_practice'),
-  }))
-
-const nationalIrrigationEvidenceRecord: EvidenceRecord = {
-  id: createId('Rwanda', 'irrigation_practice'),
-  indicator: 'irrigation_practice',
-  label: 'National farmers practicing irrigation',
-  value: nisrSeasonA2025DistrictPractices.nationalReference,
-  unit: nisrSeasonA2025DistrictPractices.unit,
-  geography: {
-    level: 'national',
-    id: 'rwanda',
-    name: 'Rwanda',
-  },
-  period: {
-    year: nisrSeasonA2025DistrictPractices.agriculturalYear,
-    season: nisrSeasonA2025DistrictPractices.season,
-  },
-  dataset: nisrSeasonA2025DistrictPractices.source.dataset,
-  source: nisrSeasonA2025DistrictPractices.source,
-  sourceReference: sourceReference(
-    nisrSeasonA2025DistrictPractices.source,
-    'Table 64',
-  ),
-  status: 'observed',
-}
+)
 
 export const evidenceRecords: readonly EvidenceRecord[] = [
-  nationalYieldEvidenceRecord,
-  ...cropEvidenceRecords,
-  nationalIrrigationEvidenceRecord,
-  ...irrigationEvidenceRecords,
+  ...comparedObservations,
+  ...yieldGapRecords,
 ]

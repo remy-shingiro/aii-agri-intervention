@@ -1,30 +1,55 @@
 import { ArrowUpRight, BookOpenText, Calculator, MapPinned } from 'lucide-react'
 
 import { MethodologySection } from '../components/MethodologySection'
+import {
+  nisrDataInventory,
+  normalizedEvidenceRecords,
+} from '../../evidence/data/agriculturalEvidence'
+
+function datasetCoverage(dataset: string) {
+  const records = normalizedEvidenceRecords.filter(
+    (record) => record.dataset === dataset,
+  )
+  return {
+    records: records.length,
+    observed: records.filter((record) => record.status === 'observed').length,
+    unavailable: records.filter((record) => record.status === 'unavailable').length,
+    districtRows: records.filter((record) => record.geography.level === 'district').length,
+    crops: new Set(records.flatMap((record) => record.crop ? [record.crop] : [])).size,
+    seasons: [...new Set(records.flatMap((record) => record.period.season ? [record.period.season] : []))],
+  }
+}
+
+const sas2024Coverage = datasetCoverage('SAS 2024')
+const sas2025Coverage = datasetCoverage('SAS 2025')
+const ahsCoverage = datasetCoverage('AHS 2024')
+const inventoryCatalogCount = nisrDataInventory.filter(
+  (record) => record.extractionStatus === 'catalogued_not_connected',
+).length
 
 const sourceCards = [
   {
     name: 'Agricultural Household Survey 2024',
-    role: 'Primary agricultural context',
-    period: 'Agricultural seasons A, B, and C of 2023/24',
+    role: 'National household context',
+    period: 'Agricultural year 2023/24 · no SAS season',
     detail:
-      'A household survey led by NISR. AHS findings describe agricultural households, production, practices, inputs, and services. It is the primary context for this product; its sample design is not used to manufacture district values.',
+      `AII connects ${ahsCoverage.records} Table 1 summary indicators at national level (${ahsCoverage.observed} observed and ${ahsCoverage.unavailable} unavailable). Province and crop tables are listed in the inventory but their values are not connected here. AHS remains distinct from SAS.`,
     href: 'https://www.statistics.gov.rw/data-sources/surveys/Agricultural-Household-Survey/agricultural-household-survey-2024',
   },
   {
     name: 'Seasonal Agricultural Survey 2024',
-    role: 'Prior-year NISR publication',
+    role: 'Connected seasonal statistics',
     period: 'Agricultural year 2023/24 · Seasons A, B, and C',
     detail:
-      'NISR published district tables for the 2023/24 agricultural year. Those historical district records are not connected to the current explorer, so AII does not display them as a trend yet.',
+      `${sas2024Coverage.records.toLocaleString()} normalized records cover ${sas2024Coverage.crops} crop labels and district plus national rows across Seasons ${sas2024Coverage.seasons.join(', ')}. Crop columns vary by season; dash cells remain unavailable.`,
     href: 'https://www.statistics.gov.rw/sites/default/files/documents/2025-02/SAS%202024%20Annual.pdf',
   },
   {
     name: 'Seasonal Agricultural Survey 2025',
-    role: 'Current connected district evidence',
-    period: 'Agricultural year 2024/25 · Season A',
+    role: 'Connected seasonal statistics',
+    period: 'Agricultural year 2024/25 · Seasons A, B, and C',
     detail:
-      'The Overview, Evidence explorer, and district productivity signal currently use reported district maize yield, cultivated area, production, and district-wide agricultural practice estimates from this annual report.',
+      `${sas2025Coverage.records.toLocaleString()} normalized records cover ${sas2025Coverage.crops} crop labels and district plus national rows across Seasons ${sas2025Coverage.seasons.join(', ')}. The existing Season A maize and irrigation records retain their verified IDs and values.`,
     href: 'https://www.statistics.gov.rw/sites/default/files/documents/2025-12/SAS%202025%20Final%20report.pdf',
   },
 ] as const
@@ -33,22 +58,22 @@ const signalSteps = [
   {
     number: '01',
     title: 'District observation',
-    text: 'Read the district maize yield reported in SAS 2025 Table 19. Production and cultivated area remain separate observed values from Tables 24 and 13.',
+    text: 'Read the selected crop yield from the matching district, year, season, and SAS report. Production and cultivated area remain separate observed indicators.',
   },
   {
     number: '02',
     title: 'National reference',
-    text: 'Use the national maize yield in the same table, season, and agricultural year as the comparison value.',
+    text: 'Use the national value from that same dataset, indicator, crop, year, season, and unit.',
   },
   {
     number: '03',
     title: 'Yield gap',
-    text: 'Calculate (district yield − national yield) ÷ national yield × 100. The percentage is derived; the two yield values are reported observations.',
+    text: 'Calculate (district yield minus national yield) divided by national yield, then multiply by 100. The percentage is derived; both input values are observed.',
   },
   {
     number: '04',
     title: 'Evidence assessment',
-    text: 'Check whether same-period district evidence exists for a potential intervention area. The current irrigation screen compares Table 64 district and national practice estimates.',
+    text: 'Check whether same-period district evidence exists for a potential investigation area. Irrigation practice remains a district-wide measure across crop activity.',
   },
   {
     number: '05',
@@ -133,14 +158,14 @@ export function DataMethodologyPage() {
             Connected productivity signal
           </p>
           <p className="mt-1 text-sm font-semibold text-slate-900">
-            SAS 2025 · Season A · 2024/25
+            SAS 2024 and SAS 2025 · A, B, and C
           </p>
         </div>
       </div>
 
       <MethodologySection
         id="datasets-heading"
-        intro="AHS supplies the primary agricultural household context. The current district productivity measures are transcribed from the cited SAS tables; these surveys have different roles and periods."
+        intro="The reports are kept as separate datasets with their published periods and geographies. The local inventory distinguishes extracted observations from tables that are catalogued but not connected."
         title="NISR source register"
       >
         <div className="grid gap-3 lg:grid-cols-3">
@@ -148,6 +173,37 @@ export function DataMethodologyPage() {
             <SourceCard key={source.name} {...source} />
           ))}
         </div>
+      </MethodologySection>
+
+      <MethodologySection
+        id="extraction-heading"
+        intro="The extraction script reads the untouched local PDF reports, preserves the printed crop header, geography, period, unit, and table page, then validates records before writing frontend JSON."
+        title="Extraction and connected coverage"
+      >
+        <div className="grid gap-3 sm:grid-cols-3">
+          {[
+            { name: 'SAS 2024', coverage: sas2024Coverage },
+            { name: 'SAS 2025', coverage: sas2025Coverage },
+            { name: 'AHS 2024', coverage: ahsCoverage },
+          ].map(({ name, coverage }) => (
+            <article className="rounded-xl border border-slate-200 bg-white p-4" key={name}>
+              <h3 className="text-sm font-semibold text-slate-900">{name}</h3>
+              <dl className="mt-3 space-y-2 text-xs">
+                <div className="flex justify-between gap-3"><dt className="text-slate-500">Normalized records</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.records.toLocaleString()}</dd></div>
+                <div className="flex justify-between gap-3"><dt className="text-slate-500">Observed</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.observed.toLocaleString()}</dd></div>
+                <div className="flex justify-between gap-3"><dt className="text-slate-500">Unavailable</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.unavailable.toLocaleString()}</dd></div>
+                <div className="flex justify-between gap-3"><dt className="text-slate-500">District rows</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.districtRows.toLocaleString()}</dd></div>
+                {coverage.crops > 0 && <div className="flex justify-between gap-3"><dt className="text-slate-500">Crop labels</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.crops}</dd></div>}
+              </dl>
+            </article>
+          ))}
+        </div>
+        <p className="mt-3 text-xs leading-5 text-slate-500">
+          The generated inventory contains {nisrDataInventory.length.toLocaleString()} observation and table-catalog entries. {inventoryCatalogCount} report tables are catalogued but not cell-extracted; their presence in a report is not treated as connected evidence.
+        </p>
+        <p className="mt-2 text-xs leading-5 text-slate-500">
+          Connected indicators include crop cultivated area, yield, production, improved-seed use, organic and inorganic fertilizer use, pesticide use, irrigation, erosion control, mechanical equipment, and agroforestry. AHS 2024 also contributes agricultural-association membership, kitchen gardens, and livestock ownership by species. Its 2024 beekeeping cell is unavailable.
+        </p>
       </MethodologySection>
 
       <MethodologySection
@@ -164,12 +220,11 @@ export function DataMethodologyPage() {
               </h3>
             </div>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              AII displays a district figure only when a NISR publication
-              explicitly reports that indicator at district level. For the
-              connected period, SAS 2025 Table 19 reports crop yields by
-              district and nationally; Table 64 reports agricultural practices
-              by district and nationally. National values remain national
-              references.
+              AII displays a district figure only when a NISR table reports
+              that indicator for the district. SAS 2024 and SAS 2025 connected
+              crop and practice tables contain district and national rows.
+              AHS Table 1 contributes national summary values only. No
+              province value is copied down to districts.
             </p>
           </article>
           <article className="rounded-xl border border-slate-200 bg-white p-5">
@@ -183,11 +238,10 @@ export function DataMethodologyPage() {
               </h3>
             </div>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              AHS 2024 selected 600 enumeration areas from the 1,674 EICV7
-              enumeration areas, with district allocations based on agricultural
-              household counts. EICV7 is part of AHS sampling design; it is not
-              the agricultural dataset. Sampling context is not used to expand
-              national AHS results into district observations.
+              EICV7 is part of AHS 2024 sampling-frame and design context; it
+              is not an agricultural observation dataset. AHS sampling
+              information is not used to expand national summary results into
+              district observations.
             </p>
           </article>
         </div>
@@ -257,13 +311,14 @@ export function DataMethodologyPage() {
       >
         <ul className="grid gap-2 sm:grid-cols-2">
           {[
-            'District maize yield, area, production, and practice records are currently connected only for Season A 2024/25.',
-            'NISR SAS 2024 district tables are published, but historical district records are not connected here; AII therefore does not show a time trend.',
-            'Other crop and season combinations show unavailable states until their matching source records are connected.',
-            'AHS sample coverage and EICV7 design context do not create district-level AHS estimates in this product.',
-            'District-wide irrigation practice covers agricultural activity across crops. It is not specific to maize or to the farmers represented by the yield estimate.',
-            'A yield gap does not identify its cause. The irrigation screen is a same-period comparison for field investigation, not evidence of causality or predicted impact.',
-            'Evidence for soil fertility, post-harvest storage, processing, value addition, and export opportunities is not connected to the current district signal.',
+            'SAS 2024 and SAS 2025 remain separate datasets for 2023/24 and 2024/25. AII does not calculate trends across them.',
+            'Crop columns differ by season in the reports. A crop without an observed row in a selected period remains unavailable.',
+            'AHS 2024 Table 1 contributes national summary rows without a SAS season. The listed province and crop tables are catalogued but are not cell-extracted in this release.',
+            'The AHS 2024 Table 1 values for agroforestry, mechanical equipment, agricultural extension, two environmental-risk awareness indicators, and beekeeping are unavailable for 2024.',
+            'No province-level observations are currently connected. National and district records keep their published geography.',
+            'District-wide irrigation practice covers agricultural activity across crops. It is not maize-specific or linked to the farmers represented by the yield estimate.',
+            'A yield gap does not identify its cause. The irrigation screen is a same-period comparison for investigation, not evidence of causality or predicted impact.',
+            'Connected soil and environmental evidence is limited to reported practices such as erosion control and agroforestry. Soil quality, post-harvest loss, storage, processing, credit, and export indicators are not connected.',
           ].map((limitation) => (
             <li
               className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-600"

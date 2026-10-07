@@ -19,7 +19,7 @@ import {
   type DistrictLabelAnchor,
   type DistrictLabelFeature,
 } from '../data/districtLabelAnchors'
-import { districtInsights } from '../data/districtInsights'
+import { getDistrictInsights } from '../data/districtInsights'
 import { getInterventionSignalLevel } from '../utils/calculateInterventionSignal'
 import { AttentionLegend } from './AttentionLegend'
 import { RwandaMapControls } from './RwandaMapControls'
@@ -99,27 +99,11 @@ interface RwandaMapPanelProps {
 }
 
 function getInsightFilters(crop: string, season: string, year: string) {
-  const cropLabel = getCropLabel(crop)
-  const seasonLabel = getSeasonLabel(season)
-  const yearLabel = getYearLabel(year)
-
-  return districtInsights.filter(
-    (district) =>
-      district.crop.toLowerCase() === cropLabel.toLowerCase() &&
-      district.season.toLowerCase() === seasonLabel.toLowerCase() &&
-      district.year === yearLabel,
-  )
+  return getDistrictInsights(crop, season, year)
 }
 
 function getCropLabel(value: string): string {
-  const labels: Record<string, string> = {
-    maize: 'Maize',
-    beans: 'Beans',
-    rice: 'Rice',
-    wheat: 'Wheat',
-  }
-
-  return labels[value] ?? value
+  return value.replace(/\b\w/g, (letter) => letter.toUpperCase())
 }
 
 function getSeasonLabel(value: string): string {
@@ -133,13 +117,7 @@ function getSeasonLabel(value: string): string {
 }
 
 function getYearLabel(value: string): string {
-  const labels: Record<string, string> = {
-    '2024-25': '2024/25',
-    '2023-24': '2023/24',
-    '2022-23': '2022/23',
-  }
-
-  return labels[value] ?? value
+  return value.replace('-', '/')
 }
 
 function getSeasonCode(value: string): AgriculturalSeason | undefined {

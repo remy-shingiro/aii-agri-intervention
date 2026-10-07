@@ -1,18 +1,21 @@
-import type { InterventionSignal } from '../types/interventionSignal.types'
 import type {
   AgriculturalObservationSource,
   AgriculturalYieldReference,
 } from '../../../types/data-contract'
+import { evidenceRecords } from '../../evidence/data/evidenceRecords'
+import type { EvidenceRecord } from '../../evidence/types/evidence.types'
+import type { InterventionSignal } from '../types/interventionSignal.types'
 import { calculateInterventionSignal } from '../utils/calculateInterventionSignal'
-import {
-  getAgriculturalObservations,
-  getNationalMaizeYieldReference,
-} from './agriculturalData'
+
+type NisrSource = Extract<
+  AgriculturalObservationSource,
+  { readonly kind: 'nisr' }
+>
 
 export interface DistrictInsight {
   district: string
   crop: string
-  source: AgriculturalObservationSource
+  source: NisrSource
   nationalYieldReference: AgriculturalYieldReference
   season: string
   year: string
@@ -24,106 +27,153 @@ export interface DistrictInsight {
   inputUse: string
   yieldGapPct: number
   interventionSignal: InterventionSignal
+  districtYieldRecord: EvidenceRecord
+  nationalYieldRecord: EvidenceRecord
+  productionRecord?: EvidenceRecord
+  areaRecord?: EvidenceRecord
 }
 
-function formatTonnes(value: number): string {
-  return `${value.toLocaleString()} tonnes`
+function normalize(value: string): string {
+  return value.trim().toLowerCase()
 }
 
-function formatArea(value: number): string {
-  return `${value.toLocaleString()} ha`
+function toYear(value: string): string {
+  return value.replace('-', '/')
 }
 
-function formatYield(value: number): string {
-  return `${(value / 1000).toFixed(2)} t/ha`
+function toSeason(value: string): string | undefined {
+  return ({
+    'season-a': 'A',
+    'season-b': 'B',
+    'season-c': 'C',
+  })[value]
 }
 
-function createInsight(district: string, yieldGapPct: number): string {
-  if (yieldGapPct <= -20) {
-    return `Maize yield is ${Math.abs(yieldGapPct).toFixed(1)}% below the national reference, indicating a significant productivity gap that warrants further investigation.`
+function formatValue(record: EvidenceRecord | undefined): string {
+  if (record?.status !== 'observed' || record.value === null) {
+    return 'Unavailable'
   }
 
-  if (yieldGapPct <= -10) {
-    return `Maize yield is ${Math.abs(yieldGapPct).toFixed(1)}% below the national reference, indicating a moderate productivity gap.`
-  }
-
-  if (yieldGapPct >= 10) {
-    return `Maize yield is ${yieldGapPct.toFixed(1)}% above the national reference, providing a useful productivity reference for comparison.`
-  }
-
-  return `Maize yield in ${district} is close to the national reference for Season A 2024/25.`
+  const formatted = record.value.toLocaleString('en-RW', {
+    maximumFractionDigits: record.unit === '%' ? 1 : 0,
+  })
+  const unit = record.unit === 'MT' ? 'tonnes' : record.unit.toLowerCase()
+  return `${formatted} ${unit}`
 }
 
-const nationalYieldReference = getNationalMaizeYieldReference()
+function createInsight(crop: string, district: string, gap: number): string {
+  if (gap <= -20) {
+    return `${crop} yield in ${district} is ${Math.abs(gap).toFixed(1)}% below the same-period national reference. This is a productivity gap for further investigation.`
+  }
+  if (gap <= -10) {
+    return `${crop} yield in ${district} is ${Math.abs(gap).toFixed(1)}% below the same-period national reference.`
+  }
+  if (gap >= 10) {
+    return `${crop} yield in ${district} is ${gap.toFixed(1)}% above the same-period national reference.`
+  }
+  return `${crop} yield in ${district} is close to the same-period national reference.`
+}
 
-const districtInsights: DistrictInsight[] = getAgriculturalObservations().map(
-  (observation) => {
+export function getDistrictInsights(
+  crop: string,
+  season: string,
+  year: string,
+): DistrictInsight[] {
+  const seasonCode = toSeason(season)
+  if (!seasonCode) return []
+  const agriculturalYear = toYear(year)
+
+  return evidenceRecords.flatMap((districtYield) => {
+    if (
+      districtYield.indicator !== 'average_yield' ||
+      districtYield.geography.level !== 'district' ||
+      districtYield.status !== 'observed' ||
+      districtYield.value === null ||
+      normalize(districtYield.crop ?? '') !== normalize(crop) ||
+      districtYield.period.year !== agriculturalYear ||
+      districtYield.period.season !== seasonCode ||
+      !districtYield.referenceEvidenceId ||
+      districtYield.referenceValue === undefined ||
+      districtYield.referenceValue <= 0
+    ) {
+      return []
+    }
+
+    const nationalYieldRecord = evidenceRecords.find(
+      (record) => record.id === districtYield.referenceEvidenceId,
+    )
+    if (
+      !nationalYieldRecord ||
+      nationalYieldRecord.status !== 'observed' ||
+      nationalYieldRecord.value === null
+    ) {
+      return []
+    }
+
+    const gap =
+      ((districtYield.value - nationalYieldRecord.value) /
+        nationalYieldRecord.value) *
+      100
     const interventionSignal = calculateInterventionSignal({
-      yield: observation.yieldKilogramsPerHectare,
-      referenceYield: nationalYieldReference.value,
+      yield: districtYield.value,
+      referenceYield: nationalYieldRecord.value,
     })
-    const yieldGapPct = interventionSignal.yieldGapPct
-
-    return {
-      district: observation.district,
-      crop: observation.crop,
-      season: `Season ${observation.season}`,
-      year: observation.agriculturalYear,
-      source: observation.source,
-      nationalYieldReference,
-      insight: createInsight(observation.district, yieldGapPct),
-      evidenceLabel: 'View evidence',
-      totalProduction: formatTonnes(observation.productionTonnes),
-      cultivatedArea: formatArea(observation.cultivatedAreaHectares),
-      averageYield: formatYield(observation.yieldKilogramsPerHectare),
-      inputUse: 'Not yet available',
-      yieldGapPct,
-      interventionSignal,
+    const inPeriod = (record: EvidenceRecord) =>
+      record.dataset === districtYield.dataset &&
+      record.period.year === districtYield.period.year &&
+      record.period.season === districtYield.period.season &&
+      normalize(record.crop ?? '') === normalize(districtYield.crop ?? '') &&
+      record.geography.level === 'district' &&
+      record.geography.id === districtYield.geography.id
+    const productionRecord = evidenceRecords.find(
+      (record) => record.indicator === 'crop_production' && inPeriod(record),
+    )
+    const areaRecord = evidenceRecords.find(
+      (record) => record.indicator === 'cultivated_area' && inPeriod(record),
+    )
+    const nationalYieldReference: AgriculturalYieldReference = {
+      value: nationalYieldRecord.value,
+      unit: 'Kg/Ha',
+      crop: districtYield.crop ?? crop,
+      season: seasonCode as AgriculturalYieldReference['season'],
+      agriculturalYear,
+      geographyLevel: 'national',
+      source: nationalYieldRecord.source,
     }
-  },
-)
 
-export { districtInsights }
-
-const defaultInterventionSignal = calculateInterventionSignal({
-  yield: nationalYieldReference.value,
-  referenceYield: nationalYieldReference.value,
-})
-
-const defaultInsight: DistrictInsight = {
-  district: 'Rwanda',
-  crop: 'Maize',
-  source: {
-    kind: 'mock',
-    dataset: 'Mock national maize summary',
-  },
-  nationalYieldReference,
-  season: 'Season A',
-  year: '2024/25',
-  insight:
-    'Select a district on the map to see district-specific maize productivity evidence and intervention signals.',
-  evidenceLabel: 'View evidence',
-  totalProduction: '481,246 tonnes',
-  cultivatedArea: '244,095 ha',
-  averageYield: formatYield(nationalYieldReference.value),
-  inputUse: 'Not yet available',
-  yieldGapPct: 0,
-  interventionSignal: defaultInterventionSignal,
+    return [
+      {
+        district: districtYield.geography.name,
+        crop: districtYield.crop ?? crop,
+        source: districtYield.source,
+        nationalYieldReference,
+        season: `Season ${seasonCode}`,
+        year: agriculturalYear,
+        insight: createInsight(districtYield.crop ?? crop, districtYield.geography.name, gap),
+        evidenceLabel: 'View evidence',
+        totalProduction: formatValue(productionRecord),
+        cultivatedArea: formatValue(areaRecord),
+        averageYield: formatValue(districtYield),
+        inputUse: 'See connected input observations in Evidence Explorer',
+        yieldGapPct: gap,
+        interventionSignal,
+        districtYieldRecord: districtYield,
+        nationalYieldRecord,
+        ...(productionRecord ? { productionRecord } : {}),
+        ...(areaRecord ? { areaRecord } : {}),
+      },
+    ]
+  })
 }
 
-export function getDistrictInsight(districtName?: string): DistrictInsight {
-  if (!districtName) {
-    return defaultInsight
-  }
-
-  return (
-    districtInsights.find(
-      (district) =>
-        district.district.toLowerCase() === districtName.toLowerCase(),
-    ) ?? {
-      ...defaultInsight,
-      district: districtName,
-      insight: `Maize productivity data for ${districtName} is not available in the current development dataset.`,
-    }
+export function getDistrictInsight(
+  districtName: string | undefined,
+  crop = 'maize',
+  season = 'season-a',
+  year = '2024-25',
+): DistrictInsight | undefined {
+  if (!districtName) return undefined
+  return getDistrictInsights(crop, season, year).find(
+    (district) => normalize(district.district) === normalize(districtName),
   )
 }

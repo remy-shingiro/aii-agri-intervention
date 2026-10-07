@@ -20,11 +20,14 @@ const indicatorOptions: readonly {
   value: 'all' | EvidenceIndicator
 }[] = [
   { label: 'All indicators', value: 'all' },
-  { label: 'Average maize yield', value: 'average_yield' },
-  { label: 'Yield gap', value: 'yield_gap' },
-  { label: 'Cultivated maize area', value: 'cultivated_area' },
-  { label: 'Maize production', value: 'crop_production' },
-  { label: 'Irrigation practice', value: 'irrigation_practice' },
+  ...[...new Map(
+    evidenceRecords.map((record) => [record.indicator, record.label]),
+  )]
+    .sort(([first], [second]) => first.localeCompare(second))
+    .map(([value, label]) => ({
+      value: value as EvidenceIndicator,
+      label,
+    })),
 ]
 
 const selectClassName =
@@ -37,6 +40,24 @@ const districts = Array.from(
       .map((record) => record.geography.name),
   ),
 ).sort((first, second) => first.localeCompare(second))
+
+const crops = [...new Set(
+  evidenceRecords.flatMap((record) =>
+    record.crop && record.status === 'observed' ? [record.crop] : [],
+  ),
+)].sort((first, second) => first.localeCompare(second))
+
+const seasons = [...new Set(
+  evidenceRecords.flatMap((record) => record.period.season ? [record.period.season] : []),
+)].sort()
+
+const years = [...new Set(evidenceRecords.map((record) => record.period.year))]
+  .sort()
+  .reverse()
+
+function matchesSeason(recordSeason: string | undefined, selected: string): boolean {
+  return selected === 'none' ? recordSeason === undefined : recordSeason === selected
+}
 
 function FilterSelect({
   id,
@@ -88,16 +109,23 @@ export function EvidencePage({
   )
 
   const filteredRecords = evidenceRecords.filter((record) => {
-    const districtMatches =
-      district === 'all' ||
+    const districtMatches = district === 'all' ||
       record.geography.name === district ||
-      (Boolean(signalContext?.intervention) &&
-        record.geography.level === 'national')
+      (record.geography.level === 'national' &&
+        district !== 'Rwanda' &&
+        evidenceRecords.some((districtRecord) =>
+          districtRecord.geography.level === 'district' &&
+          districtRecord.geography.name === district &&
+          districtRecord.dataset === record.dataset &&
+          districtRecord.indicator === record.indicator &&
+          districtRecord.crop === record.crop &&
+          districtRecord.species === record.species &&
+          districtRecord.period.year === record.period.year &&
+          districtRecord.period.season === record.period.season,
+        ))
     const cropMatches =
-      crop === 'all' ||
-      record.crop?.toLowerCase() === crop ||
-      record.indicator === 'irrigation_practice'
-    const seasonMatches = record.period.season === season
+      crop === 'all' || record.crop?.toLowerCase() === crop
+    const seasonMatches = matchesSeason(record.period.season, season)
     const yearMatches = record.period.year === year
     const indicatorMatches =
       indicator === 'all' || record.indicator === indicator
@@ -115,7 +143,6 @@ export function EvidencePage({
     )
   })
 
-  const isHistoricalPeriod = year === '2023/24'
   const signalLabel =
     signalContext?.intervention === 'irrigation'
       ? 'Irrigation investigation signal'
@@ -182,7 +209,8 @@ export function EvidencePage({
           onChange={setDistrict}
           value={district}
         >
-          <option value="all">All districts</option>
+          <option value="all">All geographies</option>
+          <option value="Rwanda">National · Rwanda</option>
           {districts.map((name) => (
             <option key={name} value={name}>
               {name}
@@ -196,7 +224,11 @@ export function EvidencePage({
           value={crop}
         >
           <option value="all">All crops and practices</option>
-          <option value="maize">Maize</option>
+          {crops.map((name) => (
+            <option key={name} value={name.toLowerCase()}>
+              {name}
+            </option>
+          ))}
         </FilterSelect>
         <FilterSelect
           id="evidence-season"
@@ -204,9 +236,10 @@ export function EvidencePage({
           onChange={setSeason}
           value={season}
         >
-          <option value="A">Season A</option>
-          <option value="B">Season B</option>
-          <option value="C">Season C</option>
+          {seasons.map((value) => (
+            <option key={value} value={value}>Season {value}</option>
+          ))}
+          <option value="none">Annual / no SAS season</option>
         </FilterSelect>
         <FilterSelect
           id="evidence-year"
@@ -214,8 +247,9 @@ export function EvidencePage({
           onChange={setYear}
           value={year}
         >
-          <option value="2024/25">2024/25</option>
-          <option value="2023/24">2023/24</option>
+          {years.map((value) => (
+            <option key={value} value={value}>{value}</option>
+          ))}
         </FilterSelect>
         <FilterSelect
           id="evidence-indicator"
@@ -275,9 +309,8 @@ export function EvidencePage({
               No connected observation for these filters
             </h3>
             <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
-              {isHistoricalPeriod
-                ? 'NISR published SAS 2024 district tables, but those historical records are not connected to this explorer. No value is carried forward or estimated.'
-                : 'The currently connected district evidence covers maize, Season A, 2024/25. Other crops, seasons, and years remain unavailable here until their source records are connected.'}
+              No source row matches these exact filters. AII does not carry a
+              value from another crop, year, season, dataset, or geography.
             </p>
           </div>
         )}

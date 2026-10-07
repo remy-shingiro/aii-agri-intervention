@@ -1,8 +1,8 @@
 import { ArrowRight } from 'lucide-react'
 
-import { getNationalMaizeYieldReference } from '../data/agriculturalData'
-import { getDistrictInsight } from '../data/districtInsights'
 import { evidenceRecords } from '../../evidence/data/evidenceRecords'
+import type { EvidenceRecord } from '../../evidence/types/evidence.types'
+import { getDistrictInsight, getDistrictInsights } from '../data/districtInsights'
 import type { InterventionSignalLevel } from '../types/interventionSignal.types'
 
 interface AgriculturalInsightPanelProps {
@@ -35,8 +35,26 @@ function getSignalClasses(level: InterventionSignalLevel): string {
   }
 }
 
-function getSeasonLabel(season: string): string {
-  return season === 'season-a' ? 'Season A' : season.replace('-', ' ')
+function observedValue(record: EvidenceRecord | undefined): number | undefined {
+  return record?.status === 'observed' && record.value !== null
+    ? record.value
+    : undefined
+}
+
+function formatYield(value: number): string {
+  return `${(value / 1000).toFixed(2)} t/ha`
+}
+
+function formatYieldRecord(record: EvidenceRecord): string {
+  const value = observedValue(record)
+  return value === undefined ? 'Unavailable' : formatYield(value)
+}
+
+function formatValue(record: EvidenceRecord | undefined): string {
+  const value = observedValue(record)
+  if (value === undefined || !record) return 'Unavailable'
+  const formatted = value.toLocaleString('en-RW', { maximumFractionDigits: 1 })
+  return `${formatted} ${record.unit === 'MT' ? 'tonnes' : record.unit.toLowerCase()}`
 }
 
 export function AgriculturalInsightPanel({
@@ -46,42 +64,37 @@ export function AgriculturalInsightPanel({
   year,
   onOpenDistrictProfile,
 }: AgriculturalInsightPanelProps) {
-  const supportsSelectedPeriod =
-    crop === 'maize' && season === 'season-a' && year === '2024-25'
-  const candidate =
-    supportsSelectedPeriod && selectedDistrict
-      ? getDistrictInsight(selectedDistrict)
-      : undefined
-  const insight = candidate?.source.kind === 'nisr' ? candidate : undefined
-  const districtIrrigation =
-    supportsSelectedPeriod && selectedDistrict
-      ? evidenceRecords.find(
-          (record) =>
-            record.indicator === 'irrigation_practice' &&
-            record.geography.level === 'district' &&
-            record.geography.name.toLowerCase() ===
-              selectedDistrict.toLowerCase() &&
-            record.period.year === '2024/25' &&
-            record.period.season === 'A',
-        )
-      : undefined
-  const nationalIrrigation = evidenceRecords.find(
-    (record) =>
-      record.indicator === 'irrigation_practice' &&
-      record.geography.level === 'national' &&
-      record.period.year === '2024/25' &&
-      record.period.season === 'A',
-  )
-  const reference = getNationalMaizeYieldReference()
-  const yieldTable = reference.source.references.find((item) =>
-    item.table.includes('Table 19'),
-  )
+  const periodInsights = getDistrictInsights(crop, season, year)
+  const insight = selectedDistrict
+    ? getDistrictInsight(selectedDistrict, crop, season, year)
+    : undefined
+  const districtIrrigation = insight
+    ? evidenceRecords.find(
+        (record) =>
+          record.dataset === insight.source.dataset &&
+          record.indicator === 'irrigation_practice' &&
+          record.geography.level === 'district' &&
+          record.geography.id === insight.districtYieldRecord.geography.id &&
+          record.period.year === insight.districtYieldRecord.period.year &&
+          record.period.season === insight.districtYieldRecord.period.season,
+      )
+    : undefined
+  const nationalIrrigation = insight
+    ? evidenceRecords.find(
+        (record) =>
+          record.dataset === insight.source.dataset &&
+          record.indicator === 'irrigation_practice' &&
+          record.geography.level === 'national' &&
+          record.period.year === insight.districtYieldRecord.period.year &&
+          record.period.season === insight.districtYieldRecord.period.season,
+      )
+    : undefined
+  const districtIrrigationValue = observedValue(districtIrrigation)
+  const nationalIrrigationValue = observedValue(nationalIrrigation)
+  const supportsSelectedPeriod = periodInsights.length > 0
 
   return (
-    <aside
-      aria-label="District agricultural evidence"
-      className="min-w-0"
-    >
+    <aside aria-label="District agricultural evidence" className="min-w-0">
       <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
@@ -90,7 +103,7 @@ export function AgriculturalInsightPanel({
             </p>
             <h2 className="mt-1 text-base font-semibold tracking-tight text-slate-900">
               {insight
-                ? 'Intervention signal'
+                ? 'Productivity comparison'
                 : selectedDistrict && supportsSelectedPeriod
                   ? 'District data unavailable'
                   : supportsSelectedPeriod
@@ -117,74 +130,78 @@ export function AgriculturalInsightPanel({
 
             <div className="mt-5 border-y border-slate-200 py-4">
               <p className="text-xs font-medium text-slate-600">
-                Yield gap relative to national reference
+                Yield gap relative to same-period national reference
               </p>
               <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900 tabular-nums">
-                {insight.interventionSignal.yieldGapPct > 0 ? '+' : ''}
-                {insight.interventionSignal.yieldGapPct.toFixed(1)}%
+                {insight.yieldGapPct > 0 ? '+' : ''}
+                {insight.yieldGapPct.toFixed(1)}%
               </p>
               <p className="mt-2 text-xs leading-5 text-slate-500">
-                Calculated from district average yield and the NISR national
-                maize yield reference.
+                Derived from the observed district and national values in the
+                same NISR dataset, year, season, and unit.
               </p>
             </div>
 
             <dl className="grid grid-cols-2 divide-x divide-slate-200 py-4">
               <div className="pr-3">
-                <dt className="text-xs text-slate-500">District yield</dt>
+                <dt className="text-xs text-slate-500">District yield · observed</dt>
                 <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
-                  {insight.averageYield}
+                  {formatYieldRecord(insight.districtYieldRecord)}
                 </dd>
               </div>
               <div className="pl-4">
-                <dt className="text-xs text-slate-500">National reference</dt>
+                <dt className="text-xs text-slate-500">National reference · observed</dt>
                 <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
-                  {(insight.interventionSignal.referenceYield / 1000).toFixed(2)}{' '}
-                  t/ha
+                  {formatYieldRecord(insight.nationalYieldRecord)}
                 </dd>
               </div>
             </dl>
 
             <dl className="grid grid-cols-2 gap-x-3 gap-y-4 border-t border-slate-200 py-4">
               <div className="min-w-0">
-                <dt className="text-xs text-slate-500">
-                  District-wide irrigation practice
-                </dt>
+                <dt className="text-xs text-slate-500">Production · observed</dt>
                 <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
-                  {districtIrrigation?.status === 'observed' &&
-                  districtIrrigation.value !== null
-                    ? `${districtIrrigation.value.toFixed(1)}%`
-                    : 'Data unavailable'}
+                  {formatValue(insight.productionRecord)}
                 </dd>
-                <dd className="mt-1 text-[11px] leading-4 text-slate-500">
-                  SAS 2025 · Table 64 · observed
-                </dd>
+                {insight.productionRecord && (
+                  <dd className="mt-1 text-[11px] leading-4 text-slate-500">
+                    {insight.productionRecord.sourceReference.table}
+                  </dd>
+                )}
               </div>
               <div className="min-w-0">
-                <dt className="text-xs text-slate-500">
-                  National irrigation reference
-                </dt>
+                <dt className="text-xs text-slate-500">Cultivated area · observed</dt>
                 <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
-                  {nationalIrrigation?.status === 'observed' &&
-                  nationalIrrigation.value !== null
-                    ? `${nationalIrrigation.value.toFixed(1)}%`
-                    : 'Data unavailable'}
+                  {formatValue(insight.areaRecord)}
                 </dd>
-                <dd className="mt-1 text-[11px] leading-4 text-slate-500">
-                  SAS 2025 · Table 64 · observed
-                </dd>
+                {insight.areaRecord && (
+                  <dd className="mt-1 text-[11px] leading-4 text-slate-500">
+                    {insight.areaRecord.sourceReference.table}
+                  </dd>
+                )}
               </div>
               <div className="col-span-2 min-w-0 border-t border-slate-100 pt-3">
                 <dt className="text-xs text-slate-500">
-                  Difference · calculated percentage points
+                  District-wide irrigation practice · observed
                 </dt>
-                <dd className="mt-1 text-sm font-semibold text-slate-800 tabular-nums">
-                  {districtIrrigation?.status === 'observed' &&
-                  districtIrrigation.value !== null &&
-                  nationalIrrigation?.status === 'observed' &&
-                  nationalIrrigation.value !== null
-                    ? `${((districtIrrigation.value - nationalIrrigation.value) > 0 ? '+' : '') + (districtIrrigation.value - nationalIrrigation.value).toFixed(1)} pp`
-                    : 'Data unavailable'}
+                <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
+                  {districtIrrigationValue !== undefined
+                    ? `${districtIrrigationValue.toFixed(1)}%`
+                    : 'Unavailable'}
+                </dd>
+                {districtIrrigation && (
+                  <dd className="mt-1 text-[11px] leading-4 text-slate-500">
+                    {districtIrrigation.sourceReference.table}
+                  </dd>
+                )}
+                <dd className="mt-2 text-xs text-slate-500">
+                  National reference: {nationalIrrigationValue !== undefined
+                    ? `${nationalIrrigationValue.toFixed(1)}%`
+                    : 'Unavailable'}
+                  {districtIrrigationValue !== undefined &&
+                    nationalIrrigationValue !== undefined &&
+                    districtIrrigation?.unit === nationalIrrigation?.unit &&
+                    ` · Difference: ${(districtIrrigationValue - nationalIrrigationValue).toFixed(1)} percentage points`}
                 </dd>
               </div>
             </dl>
@@ -202,36 +219,38 @@ export function AgriculturalInsightPanel({
           <div className="mt-3">
             <p className="text-sm leading-6 text-slate-600">
               {supportsSelectedPeriod
-                ? 'Select a district on the map or use district search to review its yield and evidence.'
-                : 'Verified district yield observations are currently available for maize, Season A, 2024/25.'}
+                ? 'No observed district yield is connected for this selection. No district or national value is substituted.'
+                : 'There are no observed district yield rows for this crop, season, and agricultural year.'}
             </p>
-            {selectedDistrict && !supportsSelectedPeriod && (
+            {!selectedDistrict && supportsSelectedPeriod && (
               <p className="mt-2 text-sm font-medium text-slate-700">
-                No NISR observations are connected for {crop},{' '}
-                {getSeasonLabel(season)}, {year.replace('-', '/')}.
+                Select a district on the map or use district search to review
+                its evidence.
               </p>
             )}
           </div>
         )}
 
-        <div className="mt-5 border-t border-slate-200 pt-4">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-            Source
-          </p>
-          <a
-            className="mt-1 inline-block text-sm font-medium text-green-800 underline decoration-green-300 underline-offset-2 hover:text-green-950"
-            href={reference.source.sourceUrl}
-            rel="noreferrer"
-            target="_blank"
-          >
-            NISR Seasonal Agricultural Survey 2025
-          </a>
-          <p className="mt-1 text-xs leading-5 text-slate-500">
-            Season A · Agricultural year 2024/25
-            {yieldTable && ` · ${yieldTable.table.split(':')[0]}, p. ${yieldTable.page}`}
-            {' · Table 64 for district-wide irrigation practice'}
-          </p>
-        </div>
+        {insight && (
+          <div className="mt-5 border-t border-slate-200 pt-4">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              Source
+            </p>
+            <a
+              className="mt-1 inline-block text-sm font-medium text-green-800 underline decoration-green-300 underline-offset-2 hover:text-green-950"
+              href={insight.source.sourceUrl}
+              rel="noreferrer"
+              target="_blank"
+            >
+              {insight.source.report}
+            </a>
+            <p className="mt-1 text-xs leading-5 text-slate-500">
+              {insight.districtYieldRecord.sourceReference.table}
+              {insight.districtYieldRecord.sourceReference.page !== undefined &&
+                ` · p. ${insight.districtYieldRecord.sourceReference.page}`}
+            </p>
+          </div>
+        )}
       </section>
     </aside>
   )

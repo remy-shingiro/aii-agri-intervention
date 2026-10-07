@@ -428,15 +428,10 @@ export function DistrictProfilePage({
   onNavigateOverview,
   onNavigateMethodology,
 }: DistrictProfilePageProps) {
-  const hasConnectedPeriod =
-    crop === 'maize' && season === 'season-a' && year === '2024-25'
   const candidate = selectedDistrict
-    ? getDistrictInsight(selectedDistrict)
+    ? getDistrictInsight(selectedDistrict, crop, season, year)
     : undefined
-  const insight =
-    hasConnectedPeriod && candidate?.source.kind === 'nisr'
-      ? candidate
-      : undefined
+  const insight = candidate?.source.kind === 'nisr' ? candidate : undefined
 
   if (!selectedDistrict) {
     return (
@@ -530,9 +525,9 @@ export function DistrictProfilePage({
             No connected district observations for this period
           </h2>
           <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
-            AII currently connects district maize observations for Season A,
-            2024/25. No value is carried forward from another year, season, or
-            crop.
+            There is no observed district yield for this exact crop, season,
+            and agricultural year. AII does not carry a value from another
+            period, crop, dataset, or geography.
           </p>
         </section>
 
@@ -612,9 +607,10 @@ export function DistrictProfilePage({
               </span>
             </div>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              The signal compares district maize yield with the NISR national
-              reference. It indicates where further investigation may be useful;
-              it does not identify a cause.
+              The signal compares {insight.crop.toLowerCase()} yield with the
+              NISR national reference for the same dataset and period. It
+              indicates where further investigation may be useful; it does not
+              identify a cause.
             </p>
           </div>
 
@@ -672,8 +668,14 @@ export function DistrictProfilePage({
           </div>
         </dl>
         <p className="mt-2 text-xs leading-5 text-slate-500">
-          NISR SAS 2025 Annual Report · Production: Table 24, p. 61 · Area:
-          Table 13, p. 50.
+          NISR {source.dataset} report · Production:{' '}
+          {insight.productionRecord?.sourceReference.table ?? 'Unavailable'}
+          {insight.productionRecord?.sourceReference.page !== undefined &&
+            `, p. ${insight.productionRecord.sourceReference.page}`}
+          {' · Area: '}
+          {insight.areaRecord?.sourceReference.table ?? 'Unavailable'}
+          {insight.areaRecord?.sourceReference.page !== undefined &&
+            `, p. ${insight.areaRecord.sourceReference.page}`}
         </p>
       </section>
 
@@ -687,9 +689,9 @@ export function DistrictProfilePage({
           </h2>
         </div>
         <p className="border-l-2 border-slate-300 py-1 pl-4 text-sm leading-6 text-slate-600">
-          Historical SAS 2024 district values are published but are not
-          connected to this profile. A trend is unavailable until comparable
-          source records are added.
+          SAS 2024 and SAS 2025 observations are connected as distinct report
+          periods. This profile shows only the selected period; no trend is
+          calculated across different years or datasets.
         </p>
       </section>
 
@@ -703,9 +705,9 @@ export function DistrictProfilePage({
               Evidence behind the signal
             </h2>
             <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
-              Yield gap = (district yield − national reference) ÷ national
-              reference × 100. Both input yields are observed in SAS 2025 Table
-              19, p. 56; the gap is derived.
+              Yield gap percentage = (district yield minus national yield)
+              divided by national yield, multiplied by 100. Both inputs are
+              observed in the selected NISR report; the gap is derived.
             </p>
           </div>
           <EvidenceStatusBadge status="derived" />
@@ -736,8 +738,9 @@ export function DistrictProfilePage({
         >
           {source.report}
         </a>
-        , SAS 2025 Tables 13, 19, and 24. Irrigation context is reported in
-        Table 64. Data &amp; Methodology explains the comparison boundaries and
+        . The displayed table and page references appear alongside each
+        observation. Irrigation context uses a separate district-wide practice
+        table. Data &amp; Methodology explains the comparison boundaries and
         limitations.
       </p>
     </div>

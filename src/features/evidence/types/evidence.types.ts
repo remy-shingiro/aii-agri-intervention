@@ -14,22 +14,39 @@ export type EvidenceIndicator =
   | 'cultivated_area'
   | 'crop_production'
   | 'irrigation_practice'
+  | 'improved_seed_use'
+  | 'organic_fertilizer_use'
+  | 'inorganic_fertilizer_use'
+  | 'pesticide_use'
+  | 'erosion_control_practice'
+  | 'mechanical_equipment_use'
+  | 'agroforestry_practice'
+  | 'agricultural_association_membership'
+  | 'agricultural_extension_use'
+  | 'kitchen_garden_use'
+  | 'fertilizer_risk_awareness'
+  | 'pesticide_risk_awareness'
+  | 'livestock_ownership'
+  | 'beekeeping'
 
 export interface EvidenceRecord {
   readonly id: string
   readonly indicator: EvidenceIndicator
   readonly label: string
   readonly crop?: string
+  readonly sourceCrop?: string
+  readonly species?: string
   readonly value: number | null
   readonly unit: string
   readonly geography: {
-    readonly level: 'district' | 'national'
+    readonly level: 'district' | 'province' | 'national' | 'other'
     readonly id: string
     readonly name: string
   }
   readonly period: {
     readonly year: string
-    readonly season: AgriculturalSeason
+    readonly season?: AgriculturalSeason
+    readonly label?: string
   }
   readonly dataset: string
   readonly source: Extract<
@@ -45,6 +62,28 @@ export interface EvidenceRecord {
   readonly comparisonStatus?: 'derived'
   readonly derivedFromEvidenceIds?: readonly string[]
   readonly referenceEvidenceId?: string
+}
+
+export interface NISRDataInventoryRecord {
+  readonly dataset: string
+  readonly report: string
+  readonly table: string
+  readonly indicator: string
+  readonly crop?: string
+  readonly geographyLevel: 'national' | 'province' | 'district' | 'other'
+  readonly geography?: string
+  readonly year: string
+  readonly season?: AgriculturalSeason
+  readonly unit?: string
+  readonly available: boolean
+  readonly sourcePage?: number
+  readonly sourcePageLabel?: string
+  readonly sourceTable: string
+  readonly extractionStatus:
+    | 'extracted'
+    | 'unavailable'
+    | 'catalogued_not_connected'
+  readonly notes?: string
 }
 
 export interface EvidenceNavigationContext {

@@ -2,6 +2,7 @@ import { CalendarDays, ChevronDown, Leaf } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { DistrictSearchInput } from './DistrictSearchInput'
+import { normalizedEvidenceRecords } from '../../evidence/data/agriculturalEvidence'
 
 interface OverviewFilters {
   crop: string
@@ -32,24 +33,34 @@ interface DistrictGeoJson {
 
 const DISTRICT_SOURCE_URL = '/data/rwanda-districts.geojson'
 
-const cropOptions: FilterOption[] = [
-  { label: 'Maize', value: 'maize' },
-  { label: 'Beans', value: 'beans' },
-  { label: 'Rice', value: 'rice' },
-  { label: 'Wheat', value: 'wheat' },
-]
+const yieldObservations = normalizedEvidenceRecords.filter(
+  (record) =>
+    record.indicator === 'average_yield' &&
+    record.status === 'observed' &&
+    record.geography.level === 'district' &&
+    record.crop,
+)
 
-const seasonOptions: FilterOption[] = [
-  { label: 'Season A', value: 'season-a' },
-  { label: 'Season B', value: 'season-b' },
-  { label: 'Season C', value: 'season-c' },
-]
+const cropOptions: FilterOption[] = [...new Set(
+  yieldObservations.flatMap((record) => record.crop ? [record.crop] : []),
+)].sort((first, second) => first.localeCompare(second)).map((crop) => ({
+  label: crop,
+  value: crop.toLowerCase(),
+}))
 
-const yearOptions: FilterOption[] = [
-  { label: '2024/25', value: '2024-25' },
-  { label: '2023/24', value: '2023-24' },
-  { label: '2022/23', value: '2022-23' },
-]
+const seasonOptions: FilterOption[] = [...new Set(
+  yieldObservations.flatMap((record) => record.period.season ? [record.period.season] : []),
+)].sort().map((season) => ({
+  label: `Season ${season}`,
+  value: `season-${season.toLowerCase()}`,
+}))
+
+const yearOptions: FilterOption[] = [...new Set(
+  yieldObservations.map((record) => record.period.year),
+)].sort().reverse().map((year) => ({
+  label: year,
+  value: year.replace('/', '-'),
+}))
 
 export function OverviewHeader({
   districtSearch,
@@ -241,8 +252,8 @@ export function OverviewHeader({
 
         </div>
         <p className="mt-3 text-xs leading-5 text-slate-500">
-          Filters update the map immediately. Verified district yields are
-          currently available for maize, Season A, 2024/25.
+          Crop, season, and year options come from observed district yield rows
+          in the connected NISR evidence.
         </p>
       </div>
     </section>

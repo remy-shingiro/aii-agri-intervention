@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { AgriculturalInsightPanel } from '../components/AgriculturalInsightPanel'
 import { OverviewHeader } from '../components/OverviewHeader'
 import { RwandaMapPanel } from '../components/RwandaMapPanel'
-import { districtInsights } from '../data/districtInsights'
+import { getDistrictInsights } from '../data/districtInsights'
 import type { OverviewFilters } from '../types/overview.types'
 
 interface OverviewPageProps {
@@ -33,15 +33,8 @@ export function OverviewPage({
     onDistrictSelect(district)
   }
 
-  const hasObservations = districtInsights.some(
-    (district) =>
-      district.crop.toLowerCase() === filters.crop &&
-      district.season.toLowerCase() ===
-        (filters.season === 'season-a'
-          ? 'season a'
-          : filters.season.replace('-', ' ')) &&
-      district.year === filters.year.replace('-', '/'),
-  )
+  const hasObservations =
+    getDistrictInsights(filters.crop, filters.season, filters.year).length > 0
 
   const cropLabel = filters.crop[0].toUpperCase() + filters.crop.slice(1)
   const seasonLabel =
