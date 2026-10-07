@@ -1,0 +1,275 @@
+{
+  "browser": "Google Chrome via Chrome DevTools Protocol",
+  "appLoaded": true,
+  "mapLoaded": true,
+  "searchFilled": true,
+  "districtSelected": true,
+  "profileOpened": true,
+  "profileLoaded": true,
+  "mapHoverPreview": "Map preview for Kayonza",
+  "trailOpened": true,
+  "trailCheck": {
+    "expanded": "Hide signal evidence",
+    "yieldDistrict": true,
+    "yieldNational": true,
+    "yieldDifference": true,
+    "irrigationDistrict": true,
+    "irrigationNational": true,
+    "irrigationDifference": true,
+    "sourceLinks": [
+      "https://www.statistics.gov.rw/sites/default/files/documents/2025-12/SAS%202025%20Final%20report.pdf",
+      "https://www.statistics.gov.rw/sites/default/files/documents/2025-12/SAS%202025%20Final%20report.pdf",
+      "https://www.statistics.gov.rw/sites/default/files/documents/2025-12/SAS%202025%20Final%20report.pdf",
+      "https://www.statistics.gov.rw/sites/default/files/documents/2025-12/SAS%202025%20Final%20report.pdf"
+    ],
+    "evidenceIds": [
+      "sas-2025-season-a-nyarugenge-average_yield",
+      "sas-2025-season-a-rwanda-average_yield",
+      "sas-2025-season-a-nyarugenge-irrigation_practice",
+      "sas-2025-season-a-rwanda-irrigation_practice"
+    ]
+  },
+  "overviewWidths": [
+    {
+      "width": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "activePage": "Overview",
+      "mainWidth": 288
+    },
+    {
+      "width": 375,
+      "documentWidth": 360,
+      "horizontalOverflow": false,
+      "activePage": "Overview",
+      "mainWidth": 328
+    },
+    {
+      "width": 390,
+      "documentWidth": 375,
+      "horizontalOverflow": false,
+      "activePage": "Overview",
+      "mainWidth": 343
+    },
+    {
+      "width": 768,
+      "documentWidth": 753,
+      "horizontalOverflow": false,
+      "activePage": "Overview",
+      "mainWidth": 689
+    },
+    {
+      "width": 1024,
+      "documentWidth": 1009,
+      "horizontalOverflow": false,
+      "activePage": "Overview",
+      "mainWidth": 673
+    },
+    {
+      "width": 1280,
+      "documentWidth": 1265,
+      "horizontalOverflow": false,
+      "activePage": "Overview",
+      "mainWidth": 929
+    },
+    {
+      "width": 1440,
+      "documentWidth": 1425,
+      "horizontalOverflow": false,
+      "activePage": "Overview",
+      "mainWidth": 1089
+    }
+  ],
+  "profileWidths": [
+    {
+      "width": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "activePage": "District Profile",
+      "mainWidth": 288
+    },
+    {
+      "width": 375,
+      "documentWidth": 360,
+      "horizontalOverflow": false,
+      "activePage": "District Profile",
+      "mainWidth": 328
+    },
+    {
+      "width": 390,
+      "documentWidth": 375,
+      "horizontalOverflow": false,
+      "activePage": "District Profile",
+      "mainWidth": 343
+    },
+    {
+      "width": 768,
+      "documentWidth": 753,
+      "horizontalOverflow": false,
+      "activePage": "District Profile",
+      "mainWidth": 689
+    },
+    {
+      "width": 1024,
+      "documentWidth": 1009,
+      "horizontalOverflow": false,
+      "activePage": "District Profile",
+      "mainWidth": 673
+    },
+    {
+      "width": 1280,
+      "documentWidth": 1265,
+      "horizontalOverflow": false,
+      "activePage": "District Profile",
+      "mainWidth": 929
+    },
+    {
+      "width": 1440,
+      "documentWidth": 1425,
+      "horizontalOverflow": false,
+      "activePage": "District Profile",
+      "mainWidth": 1089
+    }
+  ],
+  "evidenceAction": true,
+  "evidenceLoaded": true,
+  "evidenceCheck": {
+    "district": "Nyarugenge",
+    "records": true,
+    "signalContext": true,
+    "recordCards": 4,
+    "sourceLinks": 4
+  },
+  "evidenceWidths": [
+    {
+      "width": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "activePage": "Evidence",
+      "mainWidth": 288
+    },
+    {
+      "width": 375,
+      "documentWidth": 360,
+      "horizontalOverflow": false,
+      "activePage": "Evidence",
+      "mainWidth": 328
+    },
+    {
+      "width": 390,
+      "documentWidth": 375,
+      "horizontalOverflow": false,
+      "activePage": "Evidence",
+      "mainWidth": 343
+    },
+    {
+      "width": 768,
+      "documentWidth": 753,
+      "horizontalOverflow": false,
+      "activePage": "Evidence",
+      "mainWidth": 689
+    },
+    {
+      "width": 1024,
+      "documentWidth": 1009,
+      "horizontalOverflow": false,
+      "activePage": "Evidence",
+      "mainWidth": 673
+    },
+    {
+      "width": 1280,
+      "documentWidth": 1265,
+      "horizontalOverflow": false,
+      "activePage": "Evidence",
+      "mainWidth": 929
+    },
+    {
+      "width": 1440,
+      "documentWidth": 1425,
+      "horizontalOverflow": false,
+      "activePage": "Evidence",
+      "mainWidth": 1089
+    }
+  ],
+  "profileNav": true,
+  "methodologyAction": true,
+  "methodologyLoaded": true,
+  "methodologyCheck": {
+    "ahs": true,
+    "eicv": true,
+    "sas2024": true,
+    "sas2025": true,
+    "boundaries": true
+  },
+  "methodologyWidths": [
+    {
+      "width": 320,
+      "documentWidth": 320,
+      "horizontalOverflow": false,
+      "activePage": "Data & Methodology",
+      "mainWidth": 288
+    },
+    {
+      "width": 375,
+      "documentWidth": 360,
+      "horizontalOverflow": false,
+      "activePage": "Data & Methodology",
+      "mainWidth": 328
+    },
+    {
+      "width": 390,
+      "documentWidth": 375,
+      "horizontalOverflow": false,
+      "activePage": "Data & Methodology",
+      "mainWidth": 343
+    },
+    {
+      "width": 768,
+      "documentWidth": 753,
+      "horizontalOverflow": false,
+      "activePage": "Data & Methodology",
+      "mainWidth": 689
+    },
+    {
+      "width": 1024,
+      "documentWidth": 1009,
+      "horizontalOverflow": false,
+      "activePage": "Data & Methodology",
+      "mainWidth": 673
+    },
+    {
+      "width": 1280,
+      "documentWidth": 1265,
+      "horizontalOverflow": false,
+      "activePage": "Data & Methodology",
+      "mainWidth": 929
+    },
+    {
+      "width": 1440,
+      "documentWidth": 1425,
+      "horizontalOverflow": false,
+      "activePage": "Data & Methodology",
+      "mainWidth": 1089
+    }
+  ],
+  "seasonChanged": true,
+  "unavailableProfileNav": true,
+  "unavailableLoaded": true,
+  "unavailableCheck": {
+    "explicit": true,
+    "seasonB": true,
+    "noConnected": true,
+    "zeroFallback": false
+  },
+  "browserEvents": [],
+  "conditionsNotMet": {
+    "seasonA": true,
+    "searchFilled": true,
+    "selected": true,
+    "opened": true,
+    "district": "Kayonza",
+    "conditionsNotMet": true,
+    "supportedBadge": false,
+    "rationale": true
+  }
+}
