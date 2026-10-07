@@ -24,11 +24,22 @@ export function createDistrictMapEvidenceLookup(
   filters: DistrictMapEvidenceFilters,
 ): ReadonlyMap<string, DistrictMapEvidenceSummary> {
   const summaries = new Map<string, DistrictMapEvidenceSummary>()
+  const matchingRecords = records.filter((record) =>
+    record.period.year === filters.year &&
+    record.period.season === filters.season &&
+    ((record.indicator === 'average_yield' &&
+      normalize(record.crop ?? '') === normalize(filters.crop)) ||
+      record.indicator === 'irrigation_practice'),
+  )
+  const datasets = new Set(matchingRecords.map((record) => record.dataset))
+  if (datasets.size !== 1) return summaries
+  const [dataset] = datasets
   let nationalYield: EvidenceRecord | undefined
   let nationalIrrigation: EvidenceRecord | undefined
 
-  for (const record of records) {
+  for (const record of matchingRecords) {
     if (
+      record.dataset !== dataset ||
       record.period.year !== filters.year ||
       record.period.season !== filters.season
     ) {
@@ -37,21 +48,29 @@ export function createDistrictMapEvidenceLookup(
 
     if (
       record.indicator === 'average_yield' &&
-      normalize(record.crop ?? '') === normalize(filters.crop)
+      normalize(record.crop ?? '') === normalize(filters.crop) &&
+      record.status === 'observed' &&
+      record.value !== null &&
+      Number.isFinite(record.value)
     ) {
       if (record.geography.level === 'national') {
         nationalYield = record
-      } else {
+      } else if (record.geography.level === 'district') {
         const key = normalize(record.geography.name)
         const current = summaries.get(key) ?? {}
         summaries.set(key, { ...current, districtYield: record })
       }
     }
 
-    if (record.indicator === 'irrigation_practice') {
+    if (
+      record.indicator === 'irrigation_practice' &&
+      record.status === 'observed' &&
+      record.value !== null &&
+      Number.isFinite(record.value)
+    ) {
       if (record.geography.level === 'national') {
         nationalIrrigation = record
-      } else {
+      } else if (record.geography.level === 'district') {
         const key = normalize(record.geography.name)
         const current = summaries.get(key) ?? {}
         summaries.set(key, { ...current, districtIrrigation: record })

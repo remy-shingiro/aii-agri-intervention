@@ -85,6 +85,9 @@ describe('agricultural data boundary', () => {
     const insight = getDistrictInsight('gAsAbO')
     const nationalReference = getNationalMaizeYieldReference()
 
+    expect(insight).toBeDefined()
+    if (!insight) return
+
     expect(insight).toMatchObject({
       district: 'Gasabo',
       season: 'Season A',
@@ -93,7 +96,7 @@ describe('agricultural data boundary', () => {
       nationalYieldReference: nationalReference,
       totalProduction: '5,216 tonnes',
       cultivatedArea: '3,298 ha',
-      averageYield: '1.58 t/ha',
+      averageYield: '1,582 kg/ha',
       interventionSignal: {
         level: 'attention',
         yield: 1582,
@@ -111,7 +114,7 @@ describe('agricultural data boundary', () => {
   it('provides the national benchmark with verified NISR provenance and dimensions', () => {
     const reference = getNationalMaizeYieldReference()
 
-    expect(reference).toBe(nisrMaizeSas2025NationalYieldReference)
+    expect(reference).toEqual(nisrMaizeSas2025NationalYieldReference)
     expect(reference).toEqual({
       value: 1985,
       unit: 'Kg/Ha',

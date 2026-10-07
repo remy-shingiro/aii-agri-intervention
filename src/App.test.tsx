@@ -65,7 +65,7 @@ describe('application shell', () => {
     fireEvent.keyDown(search, { key: 'Enter' })
 
     expect(
-      screen.getByRole('heading', { name: 'Intervention signal' }),
+      screen.getByRole('heading', { name: 'Productivity comparison' }),
     ).toBeInTheDocument()
     fireEvent.click(
       screen.getByRole('button', { name: 'Open district profile' }),
@@ -80,7 +80,7 @@ describe('application shell', () => {
     ).toBeInTheDocument()
   })
 
-  it('opens the Evidence explorer and shows an unavailable historical period', () => {
+  it('opens the Evidence explorer and shows connected SAS 2024 observations', () => {
     render(<App />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Evidence' }))
@@ -94,12 +94,8 @@ describe('application shell', () => {
       target: { value: '2023/24' },
     })
 
-    expect(screen.getByText('Unavailable')).toBeInTheDocument()
-    expect(
-      screen.getByRole('heading', {
-        name: 'No connected observation for these filters',
-      }),
-    ).toBeInTheDocument()
+    expect(screen.getAllByText('SAS 2024').length).toBeGreaterThan(0)
+    expect(screen.getByText('31 records')).toBeInTheDocument()
   })
 
   it('opens the Data & Methodology destination', () => {
@@ -112,7 +108,7 @@ describe('application shell', () => {
     ).toBeInTheDocument()
     expect(
       screen.getByText(
-        /EICV7 is part of AHS sampling design; it is not the agricultural dataset/,
+        /EICV7 is part of AHS 2024 sampling-frame and design context/,
       ),
     ).toBeInTheDocument()
   })

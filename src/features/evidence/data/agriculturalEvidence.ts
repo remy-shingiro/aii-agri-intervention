@@ -77,9 +77,14 @@ export function validateEvidenceRecords(
       !record.geography.id.trim() ||
       !record.geography.name.trim() ||
       !record.period.year.trim() ||
+      !record.source.report.trim() ||
+      record.source.dataset !== record.dataset ||
       !record.sourceReference.table.trim() ||
       record.source.kind !== 'nisr' ||
-      !record.source.sourceUrl.startsWith('https://')
+      !record.source.sourceUrl.startsWith('https://') ||
+      !record.source.references.some(
+        (reference) => reference.table === record.sourceReference.table,
+      )
     ) {
       errors.push(`Missing required provenance or observation field: ${record.id}`)
     }
@@ -162,6 +167,7 @@ export function findExactObservation(
     readonly crop?: string
     readonly year: string
     readonly season?: EvidenceRecord['period']['season']
+    readonly periodLabel?: string
   },
 ): EvidenceRecord | undefined {
   return records.find(
@@ -172,7 +178,9 @@ export function findExactObservation(
       normalize(record.geography.id) === normalize(requested.geographyId) &&
       normalize(record.crop ?? '') === normalize(requested.crop ?? '') &&
       record.period.year === requested.year &&
-      record.period.season === requested.season,
+      record.period.season === requested.season &&
+      (requested.periodLabel === undefined ||
+        record.period.label === requested.periodLabel),
   )
 }
 

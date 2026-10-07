@@ -7,11 +7,14 @@ describe('connected evidence records', () => {
     const yieldRecord = evidenceRecords.find(
       (record) =>
         record.geography.name === 'Gasabo' &&
+        record.dataset === 'SAS 2025' &&
         record.indicator === 'average_yield',
     )
     const yieldGapRecord = evidenceRecords.find(
       (record) =>
-        record.geography.name === 'Gasabo' && record.indicator === 'yield_gap',
+        record.geography.name === 'Gasabo' &&
+        record.dataset === 'SAS 2025' &&
+        record.indicator === 'yield_gap',
     )
 
     expect(yieldRecord).toMatchObject({
@@ -39,7 +42,10 @@ describe('connected evidence records', () => {
     const irrigationRecords = evidenceRecords.filter(
       (record) =>
         record.indicator === 'irrigation_practice' &&
-        record.geography.level === 'district',
+        record.geography.level === 'district' &&
+        record.dataset === 'SAS 2025' &&
+        record.period.year === '2024/25' &&
+        record.period.season === 'A',
     )
     const rubavuRecord = irrigationRecords.find(
       (record) => record.geography.name === 'Rubavu',
@@ -60,7 +66,9 @@ describe('connected evidence records', () => {
       evidenceRecords.find(
         (record) =>
           record.geography.level === 'national' &&
-          record.indicator === 'average_yield',
+          record.indicator === 'average_yield' &&
+          record.dataset === 'SAS 2025' &&
+          record.crop === 'Maize',
       ),
     ).toMatchObject({
       geography: { level: 'national', name: 'Rwanda' },
@@ -74,7 +82,8 @@ describe('connected evidence records', () => {
       evidenceRecords.find(
         (record) =>
           record.geography.level === 'national' &&
-          record.indicator === 'irrigation_practice',
+          record.indicator === 'irrigation_practice' &&
+          record.dataset === 'SAS 2025',
       ),
     ).toMatchObject({
       geography: { level: 'national', name: 'Rwanda' },

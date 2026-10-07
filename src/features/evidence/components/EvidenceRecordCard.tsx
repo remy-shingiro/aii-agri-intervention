@@ -47,11 +47,17 @@ export function EvidenceRecordCard({
           </h2>
           <p className="mt-1 text-xs text-slate-500">
             {record.geography.level === 'national'
-              ? 'National reference · '
-              : record.crop
-                ? `${record.crop} · `
-                : 'All crop activity · '}
-            Season {record.period.season} · {record.period.year}
+              ? 'National · '
+              : record.geography.level === 'province'
+                ? 'Province · '
+                : record.crop
+                  ? `${record.crop} · `
+                  : 'All crop activity · '}
+            {record.species ? `${record.species} · ` : ''}
+            {record.period.season
+              ? `Season ${record.period.season} · `
+              : `${record.period.label ?? 'Annual, no SAS season'} · `}
+            {record.period.year}
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
@@ -89,6 +95,12 @@ export function EvidenceRecordCard({
         )}
       </dl>
 
+      {record.sourceCrop && record.sourceCrop !== record.crop && (
+        <p className="mt-3 text-xs text-slate-500">
+          Source crop label: <span className="font-medium text-slate-700">{record.sourceCrop}</span>
+        </p>
+      )}
+
       {record.derivedFromEvidenceIds && (
         <p className="mt-3 break-words text-xs leading-5 text-slate-500">
           Derived from evidence records:{' '}
@@ -109,6 +121,7 @@ export function EvidenceRecordCard({
       <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-medium text-slate-700">{record.dataset}</p>
+          <p className="mt-1 text-[11px] text-slate-500">{record.source.report}</p>
           <a
             className="mt-1 inline-flex max-w-full items-center gap-1 text-xs leading-5 text-green-800 underline decoration-green-300 underline-offset-2 hover:text-green-950"
             href={record.source.sourceUrl}

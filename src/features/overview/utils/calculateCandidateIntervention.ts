@@ -53,12 +53,14 @@ function findRecord(
   geographyLevel: 'district' | 'national',
   geographyId: string,
   context: InterventionContext,
+  dataset?: string,
 ): EvidenceRecord | undefined {
   return records.find((record) => {
     if (
       record.indicator !== indicator ||
       record.geography.level !== geographyLevel ||
       normalize(record.geography.id) !== normalize(geographyId) ||
+      (dataset !== undefined && record.dataset !== dataset) ||
       !matchesPeriod(record, context)
     ) {
       return false
@@ -102,25 +104,41 @@ export function calculateInterventionSignals(
   context: InterventionContext,
 ): readonly InterventionSignal[] {
   const districtId = normalize(context.district).replaceAll(' ', '-')
-  const [districtYield, nationalYield, districtIrrigation, nationalIrrigation] =
-    [
-      findRecord(records, 'average_yield', 'district', districtId, context),
-      findRecord(records, 'average_yield', 'national', 'rwanda', context),
-      findRecord(
+  const districtYield = findRecord(
+    records,
+    'average_yield',
+    'district',
+    districtId,
+    context,
+  )
+  const nationalYield = findRecord(
+    records,
+    'average_yield',
+    'national',
+    'rwanda',
+    context,
+    districtYield?.dataset,
+  )
+  const districtIrrigation = districtYield
+    ? findRecord(
         records,
         'irrigation_practice',
         'district',
         districtId,
         context,
-      ),
-      findRecord(
+        districtYield.dataset,
+      )
+    : undefined
+  const nationalIrrigation = districtYield
+    ? findRecord(
         records,
         'irrigation_practice',
         'national',
         'rwanda',
         context,
-      ),
-    ]
+        districtYield.dataset,
+      )
+    : undefined
 
   const supportingRecords = [
     districtYield,

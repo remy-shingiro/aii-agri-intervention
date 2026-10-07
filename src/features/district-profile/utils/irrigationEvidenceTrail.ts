@@ -111,6 +111,9 @@ export function getIrrigationEvidenceTrail(
   const samePeriod = signalRecords.every((record) =>
     matchesPeriod(record, signal),
   )
+  const sameDataset = signalRecords.every(
+    (record) => record.dataset === districtYield.dataset,
+  )
   const validYieldPair =
     normalize(districtYield.crop ?? '') === normalize(signal.period.crop) &&
     normalize(nationalYield.crop ?? '') === normalize(signal.period.crop) &&
@@ -140,7 +143,7 @@ export function getIrrigationEvidenceTrail(
     districtIrrigation.sourceReference.table ===
       nationalIrrigation.sourceReference.table
 
-  if (!samePeriod || !validYieldPair || !validIrrigationPair) {
+  if (!samePeriod || !sameDataset || !validYieldPair || !validIrrigationPair) {
     return { status: 'insufficient_evidence' }
   }
 

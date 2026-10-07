@@ -59,17 +59,22 @@ function getCompleteObservations(): readonly AgriculturalObservation[] {
       return []
     }
 
-    const references = [area, yieldRecord, production].flatMap((record) =>
-      record.source.references.filter(
-        (reference) =>
-          !yieldRecord.source.references.some(
-            (existing) => existing.table === reference.table,
-          ),
-      ),
+    const references = [area, yieldRecord, production].flatMap(
+      (record, index, sourceRecords) =>
+        record.source.references.filter(
+          (reference) =>
+            !sourceRecords
+              .slice(0, index)
+              .some((prior) =>
+                prior.source.references.some(
+                  (existing) => existing.table === reference.table,
+                ),
+              ),
+        ),
     )
     const source = {
       ...yieldRecord.source,
-      references: [...yieldRecord.source.references, ...references],
+      references,
     }
 
     return [
@@ -86,6 +91,17 @@ function getCompleteObservations(): readonly AgriculturalObservation[] {
       },
     ]
   })
+}
+
+function getLegacyMaizeSeasonAObservations(): readonly AgriculturalObservation[] {
+  return getCompleteObservations().filter(
+    (observation) =>
+      observation.source.kind === 'nisr' &&
+      observation.source.dataset === 'SAS 2025' &&
+      observation.crop === 'Maize' &&
+      observation.season === 'A' &&
+      observation.agriculturalYear === '2024/25',
+  )
 }
 
 export function getNationalMaizeYieldReference(): AgriculturalYieldReference {
@@ -115,14 +131,14 @@ export function getNationalMaizeYieldReference(): AgriculturalYieldReference {
 }
 
 export function getAgriculturalObservations(): readonly AgriculturalObservation[] {
-  return getCompleteObservations()
+  return getLegacyMaizeSeasonAObservations()
 }
 
 export function getAgriculturalObservationsByDistrict(
   districtName: string,
 ): readonly AgriculturalObservation[] {
   const normalizedDistrictName = normalize(districtName)
-  return getCompleteObservations().filter(
+  return getLegacyMaizeSeasonAObservations().filter(
     (observation) => normalize(observation.district) === normalizedDistrictName,
   )
 }
@@ -130,7 +146,7 @@ export function getAgriculturalObservationsByDistrict(
 export function getAgriculturalObservationsByPeriod(
   period: AgriculturalObservationPeriod,
 ): readonly AgriculturalObservation[] {
-  return getCompleteObservations().filter(
+  return getLegacyMaizeSeasonAObservations().filter(
     (observation) =>
       observation.season === period.season &&
       observation.agriculturalYear === period.agriculturalYear,

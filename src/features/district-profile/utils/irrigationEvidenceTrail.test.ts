@@ -24,23 +24,35 @@ function getSupportingRecords(records = evidenceRecords) {
       (record) =>
         record.indicator === 'average_yield' &&
         record.geography.level === 'district' &&
-        record.geography.name === context.district,
+        record.geography.name === context.district &&
+        record.dataset === 'SAS 2025' &&
+        record.period.year === context.year &&
+        record.period.season === context.season,
     ),
     records.find(
       (record) =>
         record.indicator === 'average_yield' &&
-        record.geography.level === 'national',
+        record.geography.level === 'national' &&
+        record.dataset === 'SAS 2025' &&
+        record.period.year === context.year &&
+        record.period.season === context.season,
     ),
     records.find(
       (record) =>
         record.indicator === 'irrigation_practice' &&
         record.geography.level === 'district' &&
-        record.geography.name === context.district,
+        record.geography.name === context.district &&
+        record.dataset === 'SAS 2025' &&
+        record.period.year === context.year &&
+        record.period.season === context.season,
     ),
     records.find(
       (record) =>
         record.indicator === 'irrigation_practice' &&
-        record.geography.level === 'national',
+        record.geography.level === 'national' &&
+        record.dataset === 'SAS 2025' &&
+        record.period.year === context.year &&
+        record.period.season === context.season,
     ),
   ].filter((record): record is EvidenceRecord => record !== undefined)
 }

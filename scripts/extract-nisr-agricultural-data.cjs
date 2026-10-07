@@ -301,6 +301,7 @@ const CROP_MATCH_NAMES = new Map([
   ['sweet potato', 'Sweet potatoes'],
   ['irish potato', 'Irish potatoes'],
   ['groundnut', 'Ground nuts'],
+  ['vegetables', 'Vegetables'],
 ])
 
 function cropMatchName(sourceCrop) {
@@ -580,16 +581,35 @@ function addInventoryRecord(inventory, dataset, record) {
     sourcePage: record.sourceReference.page,
     sourceTable: record.sourceReference.table,
     extractionStatus: record.status === 'observed' ? 'extracted' : 'unavailable',
-    ...(record.status === 'unavailable' ? { notes: 'NISR table cell contains a dash; no value was imputed.' } : {}),
+    ...(record.status === 'unavailable' ? { notes: 'NISR does not report a value for this observation; none was imputed.' } : {}),
   })
 }
 
 function addTableCoverage(inventory, dataset, page) {
-  const pattern = /Table\s+(\d+)\s*[:.]\s*([^]*?)(?:\.{4,})\s*(?:([ivxlcdm]+)|(\d+))/gi
-  for (const tableEntry of page.text.matchAll(pattern)) {
-    const [, tableNumber, rawTitle, romanPage, numericPage] = tableEntry
+  const markers = [...page.text.matchAll(/\bTable\s+(\d+)\s*[:.]/gi)]
+  for (let index = 0; index < markers.length; index++) {
+    const marker = markers[index]
+    const tableNumber = marker[1]
+    if (Number(tableNumber) < 1) continue
+    const segmentStart = marker.index + marker[0].length
+    const segmentEnd = markers[index + 1]?.index ?? page.text.length
+    const segment = normalizeWhitespace(
+      page.text.slice(segmentStart, segmentEnd).split(/List of Tables/i)[0],
+    ).replace(/\.{2,}[\s\S]*$/, '')
+    const pageMatch = /\s+([ivxlcdm]+|\d+)\s*$/i.exec(segment)
+    const pageLabel = pageMatch?.[1]
+    const rawTitle = pageMatch
+      ? segment.slice(0, pageMatch.index)
+      : segment
+    const romanPage = pageLabel && /^[ivxlcdm]+$/i.test(pageLabel)
+      ? pageLabel
+      : undefined
+    const numericPage = pageLabel && /^\d+$/.test(pageLabel)
+      ? pageLabel
+      : undefined
     if (EXTRACTED_TABLES.get(dataset.id)?.has(Number(tableNumber))) continue
-    const title = normalizeWhitespace(rawTitle.replace(/[.\s]+$/, ''))
+    const title = normalizeWhitespace(rawTitle.replace(/[.\s·…]+$/, ''))
+    if (!title) continue
     const tableId = `${dataset.id}:${tableNumber}`
     if (inventory.some((record) => record._tableId === tableId)) continue
     const season = /\bSeason\s+([ABC])\b/i.exec(title)?.[1]?.toUpperCase()
@@ -610,7 +630,8 @@ function addTableCoverage(inventory, dataset, page) {
       ...(season ? { season } : {}),
       ...(unit ? { unit } : {}),
       available: true,
-      ...(numericPage ? { sourcePage: Number(numericPage) } : { sourcePageLabel: romanPage }),
+      ...(numericPage ? { sourcePage: Number(numericPage) } : {}),
+      ...(romanPage ? { sourcePageLabel: romanPage } : {}),
       sourceTable: `Table ${tableNumber}: ${title}`,
       extractionStatus: 'catalogued_not_connected',
       notes: 'The report lists this table, but this extraction does not parse its cell values.',
@@ -856,7 +877,13 @@ function extractPracticeTables(dataset, pages, districts, records, inventory) {
 function extractAhsSummary(dataset, pages, records, inventory) {
   const page = pages.find((item) => /^\s*\d+ Table 1:\s*Summary of AHS 2024 results/i.test(item.text))
   if (!page) throw new Error('AHS 2024 Table 1 summary was not found')
+  console.log('AHS Table 1 source header', JSON.stringify(page.text.slice(0, 1800)))
+  console.log('AHS Table 1 fragments', JSON.stringify(page.fragments.slice(0, 45).map(({ text, x, y }) => ({ text, x, y }))))
   const table = sourceTableReference(1, 'Summary of AHS 2024 results', page.printedPage)
+  for (const rowNumber of [12, 18, 19, 21, 23, 24, 31]) {
+    const row = page.fragments.find((fragment) => new RegExp(`^\\s*${rowNumber}\\s`).test(fragment.text))
+    if (row) console.log('AHS row fragments', rowNumber, JSON.stringify(page.fragments.filter((fragment) => Math.abs(fragment.y - row.y) < 0.8).map(({ text, x, y }) => ({ text: text.trim(), x, y }))))
+  }
   const geography = { level: 'national', name: 'Rwanda' }
   const period = {
     year: dataset.agriculturalYear,
@@ -864,17 +891,32 @@ function extractAhsSummary(dataset, pages, records, inventory) {
   }
 
   for (const summary of AHS_SUMMARY) {
-    let value = null
-    if (summary.kind === 'trend') {
-      const next = AHS_SUMMARY.find((candidate) => candidate.row === summary.row + 1)
-      const start = page.text.indexOf(`${summary.row} ${summary.label}`)
-      if (start < 0) throw new Error(`AHS Table 1 row ${summary.row} is missing`)
-      const end = next
-        ? page.text.indexOf(`${next.row} ${next.label}`, start + 1)
-        : page.text.indexOf('Source: NISR, AHS 2024', start)
-      const values = parseNumericCells(page.text.slice(start + summary.row.toString().length + summary.label.length, end < 0 ? undefined : end))
-      if (values.length >= 3) value = cellValue(values[2], 1, summary.label)
-      else if (values.length === 1) value = cellValue(values[0], 1, summary.label)
+    const next = AHS_SUMMARY.find((candidate) => candidate.row === summary.row + 1)
+    const start = page.text.indexOf(`${summary.row} ${summary.label}`)
+    if (start < 0) throw new Error(`AHS Table 1 row ${summary.row} is missing`)
+    const end = next
+      ? page.text.indexOf(`${next.row} ${next.label}`, start + 1)
+      : page.text.indexOf('Source: NISR, AHS 2024', start)
+    const rawValues = parseNumericCells(
+      page.text.slice(
+        start + summary.row.toString().length + summary.label.length,
+        end < 0 ? undefined : end,
+      ),
+    )
+    const selectedCell = rawValues.length >= 3
+      ? rawValues[2]
+      : rawValues.length === 1
+        ? rawValues[0]
+        : undefined
+    if (selectedCell === undefined && summary.kind !== 'unavailable') {
+      throw new Error(`AHS Table 1 row ${summary.row}: selected year cell is missing`)
+    }
+    const value = selectedCell === undefined
+      ? null
+      : cellValue(selectedCell, 1, summary.label)
+    if (summary.kind === 'unavailable' && value !== null) {
+      console.log('AHS unavailable row contains data', summary.row, JSON.stringify(rawValues), JSON.stringify(page.text.slice(start, end < 0 ? start + 600 : end)))
+      throw new Error(`AHS Table 1 row ${summary.row}: source is not unavailable`)
     }
     const record = makeRecord(dataset, {
       indicator: summary.indicator,

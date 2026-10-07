@@ -5,6 +5,7 @@ import { evidenceRecords } from '../data/evidenceRecords'
 import type {
   EvidenceIndicator,
   EvidenceNavigationContext,
+  EvidenceRecord,
 } from '../types/evidence.types'
 import { EvidenceRecordCard } from '../components/EvidenceRecordCard'
 import { EvidenceStatusBadge } from '../components/EvidenceStatusBadge'
@@ -12,6 +13,9 @@ import { EvidenceStatusBadge } from '../components/EvidenceStatusBadge'
 interface EvidencePageProps {
   context?: EvidenceNavigationContext
   selectedDistrict?: string
+  selectedCrop?: string
+  selectedSeason?: string
+  selectedYear?: string
   onOpenDistrictProfile: (district: string) => void
 }
 
@@ -54,6 +58,8 @@ const seasons = [...new Set(
 const years = [...new Set(evidenceRecords.map((record) => record.period.year))]
   .sort()
   .reverse()
+const datasets = [...new Set(evidenceRecords.map((record) => record.dataset))]
+  .sort((first, second) => first.localeCompare(second))
 
 function matchesSeason(recordSeason: string | undefined, selected: string): boolean {
   return selected === 'none' ? recordSeason === undefined : recordSeason === selected
@@ -95,18 +101,42 @@ function FilterSelect({
 export function EvidencePage({
   context,
   selectedDistrict,
+  selectedCrop,
+  selectedSeason,
+  selectedYear,
   onOpenDistrictProfile,
 }: EvidencePageProps) {
   const [signalContext, setSignalContext] = useState(context)
   const [district, setDistrict] = useState(context?.district ?? selectedDistrict ?? 'all')
   const [crop, setCrop] = useState(
-    context?.intervention ? 'all' : context?.crop.toLowerCase() ?? 'all',
+    context?.intervention
+      ? 'all'
+      : (context?.crop ?? selectedCrop)?.toLowerCase() ?? 'all',
   )
-  const [season, setSeason] = useState<string>(context?.season ?? 'A')
-  const [year, setYear] = useState(context?.year ?? '2024/25')
+  const [season, setSeason] = useState<string>(
+    context?.season ?? selectedSeason?.replace('season-', '').toUpperCase() ?? 'A',
+  )
+  const [year, setYear] = useState(
+    context?.year ?? selectedYear?.replace('-', '/') ?? '2024/25',
+  )
+  const [dataset, setDataset] = useState('all')
+  const [status, setStatus] = useState<'all' | EvidenceRecord['status']>('all')
   const [indicator, setIndicator] = useState<'all' | EvidenceIndicator>(
     context?.intervention ? 'all' : 'average_yield',
   )
+  const [visiblePage, setVisiblePage] = useState({ key: '', count: 50 })
+  const filterKey = JSON.stringify([
+    district,
+    crop,
+    season,
+    year,
+    dataset,
+    status,
+    indicator,
+    signalContext?.intervention,
+    signalContext?.evidenceIds,
+  ])
+  const visibleCount = visiblePage.key === filterKey ? visiblePage.count : 50
 
   const filteredRecords = evidenceRecords.filter((record) => {
     const districtMatches = district === 'all' ||
@@ -121,7 +151,9 @@ export function EvidencePage({
           districtRecord.crop === record.crop &&
           districtRecord.species === record.species &&
           districtRecord.period.year === record.period.year &&
-          districtRecord.period.season === record.period.season,
+          districtRecord.period.season === record.period.season &&
+          districtRecord.period.label === record.period.label &&
+          districtRecord.unit === record.unit,
         ))
     const cropMatches =
       crop === 'all' || record.crop?.toLowerCase() === crop
@@ -129,6 +161,8 @@ export function EvidencePage({
     const yearMatches = record.period.year === year
     const indicatorMatches =
       indicator === 'all' || record.indicator === indicator
+    const datasetMatches = dataset === 'all' || record.dataset === dataset
+    const statusMatches = status === 'all' || record.status === status
     const signalMatches =
       !signalContext?.intervention ||
       signalContext.evidenceIds?.includes(record.id) === true
@@ -139,6 +173,8 @@ export function EvidencePage({
       seasonMatches &&
       yearMatches &&
       indicatorMatches &&
+      datasetMatches &&
+      statusMatches &&
       signalMatches
     )
   })
@@ -147,6 +183,7 @@ export function EvidencePage({
     signalContext?.intervention === 'irrigation'
       ? 'Irrigation investigation signal'
       : signalContext?.intervention
+  const visibleRecords = filteredRecords.slice(0, visibleCount)
 
   return (
     <div className="space-y-7">
@@ -191,6 +228,8 @@ export function EvidencePage({
               setSeason('A')
               setYear('2024/25')
               setIndicator('average_yield')
+              setDataset('all')
+              setStatus('all')
             }}
             type="button"
           >
@@ -201,7 +240,7 @@ export function EvidencePage({
 
       <section
         aria-label="Evidence filters"
-        className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-5"
+        className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-7"
       >
         <FilterSelect
           id="evidence-district"
@@ -252,6 +291,17 @@ export function EvidencePage({
           ))}
         </FilterSelect>
         <FilterSelect
+          id="evidence-dataset"
+          label="Dataset"
+          onChange={setDataset}
+          value={dataset}
+        >
+          <option value="all">All NISR datasets</option>
+          {datasets.map((value) => (
+            <option key={value} value={value}>{value}</option>
+          ))}
+        </FilterSelect>
+        <FilterSelect
           id="evidence-indicator"
           label="Indicator"
           onChange={(value) => setIndicator(value as 'all' | EvidenceIndicator)}
@@ -262,6 +312,17 @@ export function EvidencePage({
               {option.label}
             </option>
           ))}
+        </FilterSelect>
+        <FilterSelect
+          id="evidence-status"
+          label="Evidence status"
+          onChange={(value) => setStatus(value as 'all' | EvidenceRecord['status'])}
+          value={status}
+        >
+          <option value="all">All statuses</option>
+          <option value="observed">Observed</option>
+          <option value="derived">Derived</option>
+          <option value="unavailable">Unavailable</option>
         </FilterSelect>
       </section>
 
@@ -285,12 +346,13 @@ export function EvidencePage({
           >
             <EvidenceStatusBadge status="observed" />
             <EvidenceStatusBadge status="derived" />
+            <EvidenceStatusBadge status="unavailable" />
           </div>
         </div>
 
         {filteredRecords.length > 0 ? (
           <div className="grid gap-3 lg:grid-cols-2">
-            {filteredRecords.map((record) => (
+            {visibleRecords.map((record) => (
               <EvidenceRecordCard
                 key={record.id}
                 onOpenDistrictProfile={onOpenDistrictProfile}
@@ -313,6 +375,18 @@ export function EvidencePage({
               value from another crop, year, season, dataset, or geography.
             </p>
           </div>
+        )}
+        {visibleCount < filteredRecords.length && (
+          <button
+            className="min-h-11 w-full rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2 sm:w-auto"
+            onClick={() =>
+              setVisiblePage({ key: filterKey, count: visibleCount + 50 })
+            }
+            type="button"
+          >
+            Show {Math.min(50, filteredRecords.length - visibleCount)} more
+            observations
+          </button>
         )}
       </section>
 

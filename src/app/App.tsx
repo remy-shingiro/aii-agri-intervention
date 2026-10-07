@@ -94,6 +94,9 @@ export function App() {
             setActivePage('District Profile')
           }}
           selectedDistrict={selectedDistrict}
+          selectedCrop={overviewFilters.crop}
+          selectedSeason={overviewFilters.season}
+          selectedYear={overviewFilters.year}
         />
       )}
 

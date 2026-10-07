@@ -2,25 +2,11 @@
   {
     "dataset": "SAS 2024",
     "report": "Seasonal Agricultural Survey, Annual Report 2024",
-    "table": "Table 0: Summary of Seasonal Agricultural Survey main indicators",
-    "indicator": "Summary of Seasonal Agricultural Survey main indicators",
-    "geographyLevel": "other",
-    "year": "2023/24",
-    "available": true,
-    "sourcePageLabel": "ix",
-    "sourceTable": "Table 0: Summary of Seasonal Agricultural Survey main indicators",
-    "extractionStatus": "catalogued_not_connected",
-    "notes": "The report lists this table, but this extraction does not parse its cell values."
-  },
-  {
-    "dataset": "SAS 2024",
-    "report": "Seasonal Agricultural Survey, Annual Report 2024",
     "table": "Table 1: List of Rwanda land cover classes",
     "indicator": "List of Rwanda land cover classes",
     "geographyLevel": "other",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 2,
     "sourceTable": "Table 1: List of Rwanda land cover classes",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -33,7 +19,6 @@
     "geographyLevel": "other",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 4,
     "sourceTable": "Table 2: List of strata",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -46,7 +31,6 @@
     "geographyLevel": "district",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 6,
     "sourceTable": "Table 3: Population size per district by stratum (Number of segments)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -59,7 +43,6 @@
     "geographyLevel": "district",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 7,
     "sourceTable": "Table 4: Allocation of sampled segments per district by stratum",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -72,7 +55,6 @@
     "geographyLevel": "other",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 22,
     "sourceTable": "Table 5: Main crops GVA in constant 2017 prices (Frw /ha)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -85,7 +67,6 @@
     "geographyLevel": "district",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 24,
     "sourceTable": "Table 6: 2024 Season A_Agricultural land use per district (,000Ha)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -98,7 +79,6 @@
     "geographyLevel": "district",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 25,
     "sourceTable": "Table 7: 2024 Season B_Agricultural land use per district (,000Ha)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -111,7 +91,6 @@
     "geographyLevel": "other",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 26,
     "sourceTable": "Table 8: 2024 Season A_Area under agricultural practices",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -124,7 +103,6 @@
     "geographyLevel": "other",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 27,
     "sourceTable": "Table 9: 2024 Season B_Area under agricultural practices",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -138,7 +116,6 @@
     "year": "2023/24",
     "unit": "Ha",
     "available": true,
-    "sourcePage": 31,
     "sourceTable": "Table 13: 2024 Season A_Harvested area by crop type and district (Ha)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -152,7 +129,6 @@
     "year": "2023/24",
     "unit": "Ha",
     "available": true,
-    "sourcePage": 32,
     "sourceTable": "Table 14: 2024 Season B_Harvested area by crop type and district (Ha)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -167,7 +143,6 @@
     "season": "C",
     "unit": "ha",
     "available": true,
-    "sourcePage": 33,
     "sourceTable": "Table 15: 2024 Season C _Harvested area by crop type per district (ha)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -181,7 +156,6 @@
     "year": "2023/24",
     "unit": "Kg/Ha",
     "available": true,
-    "sourcePage": 37,
     "sourceTable": "Table 19: 2024 Season A_Average yield of Large-Scale Farmers by crop type and district (Kg/Ha))",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -195,7 +169,6 @@
     "year": "2023/24",
     "unit": "Kg/Ha",
     "available": true,
-    "sourcePage": 38,
     "sourceTable": "Table 20: 2024 Season B_Average yield of Large-Scale Farmers by crop type and district (Kg/Ha)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -208,7 +181,6 @@
     "geographyLevel": "other",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 42,
     "sourceTable": "Table 24: 2024 Season A_the Use of production by farmers (in percentage)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -221,7 +193,6 @@
     "geographyLevel": "other",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 43,
     "sourceTable": "Table 25: 2024 Season B_the Use of production by farmers (in percentage)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -234,7 +205,6 @@
     "geographyLevel": "other",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 43,
     "sourceTable": "Table 26: 2024 Season C_ Use of production by farmers (in percentage)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -248,7 +218,6 @@
     "year": "2023/24",
     "unit": "%",
     "available": true,
-    "sourcePage": 44,
     "sourceTable": "Table 27: Sowing date per Season and District in 2024 (%)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -262,7 +231,6 @@
     "year": "2023/24",
     "unit": "%",
     "available": true,
-    "sourcePage": 45,
     "sourceTable": "Table 28: Sowing dates per Season and crop type in 2024 (%)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -270,14 +238,14 @@
   {
     "dataset": "SAS 2024",
     "report": "Seasonal Agricultural Survey, Annual Report 2024",
-    "table": "Table 29: Cultivated area by cropping system, per season and district (%) in 2024",
-    "indicator": "Cultivated area by cropping system, per season and district (%) in 2024",
+    "table": "Table 29: Cultivated area by cropping system, per season and district (%) in",
+    "indicator": "Cultivated area by cropping system, per season and district (%) in",
     "geographyLevel": "district",
     "year": "2023/24",
     "unit": "%",
     "available": true,
-    "sourcePage": 46,
-    "sourceTable": "Table 29: Cultivated area by cropping system, per season and district (%) in 2024",
+    "sourcePage": 2024,
+    "sourceTable": "Table 29: Cultivated area by cropping system, per season and district (%) in",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
   },
@@ -94024,7 +93992,6 @@
     "geographyLevel": "other",
     "year": "2024/25",
     "available": true,
-    "sourcePage": 17,
     "sourceTable": "Table 1: List of Rwanda land cover classes",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94037,7 +94004,6 @@
     "geographyLevel": "other",
     "year": "2024/25",
     "available": true,
-    "sourcePage": 19,
     "sourceTable": "Table 2: List of strata",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94050,7 +94016,6 @@
     "geographyLevel": "district",
     "year": "2024/25",
     "available": true,
-    "sourcePage": 21,
     "sourceTable": "Table 3: Population size per district by stratum (Number of segments)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94063,7 +94028,6 @@
     "geographyLevel": "district",
     "year": "2024/25",
     "available": true,
-    "sourcePage": 22,
     "sourceTable": "Table 4: Allocation of sampled segments per district by stratum",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94077,7 +94041,6 @@
     "year": "2024/25",
     "season": "A",
     "available": true,
-    "sourcePage": 27,
     "sourceTable": "Table 5: 2025 Season A Sampling Errors for major crops at the national level",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94091,7 +94054,6 @@
     "year": "2024/25",
     "season": "B",
     "available": true,
-    "sourcePage": 27,
     "sourceTable": "Table 6: 2025 Season B Sampling Errors for major crops at the national level",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94105,7 +94067,6 @@
     "year": "2024/25",
     "season": "C",
     "available": true,
-    "sourcePage": 27,
     "sourceTable": "Table 7: 2025 Season C Sampling Errors for major crops at the national level",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94118,7 +94079,6 @@
     "geographyLevel": "other",
     "year": "2024/25",
     "available": true,
-    "sourcePage": 45,
     "sourceTable": "Table 8: Main crops GVA in constant 2017 prices (Frw /ha)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94131,7 +94091,6 @@
     "geographyLevel": "district",
     "year": "2024/25",
     "available": true,
-    "sourcePage": 46,
     "sourceTable": "Table 9: 2025 Season A_Agricultural land use per district (,000Ha)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94144,7 +94103,6 @@
     "geographyLevel": "district",
     "year": "2024/25",
     "available": true,
-    "sourcePage": 47,
     "sourceTable": "Table 10: 2025 Season B_Agricultural land use per district (,000Ha)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94157,7 +94115,6 @@
     "geographyLevel": "other",
     "year": "2024/25",
     "available": true,
-    "sourcePage": 48,
     "sourceTable": "Table 11: 2025 Season A_Area under agricultural practices",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94170,7 +94127,6 @@
     "geographyLevel": "other",
     "year": "2024/25",
     "available": true,
-    "sourcePage": 49,
     "sourceTable": "Table 12: 2025 Season B_Area under agricultural practices",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94184,7 +94140,6 @@
     "year": "2024/25",
     "unit": "Ha",
     "available": true,
-    "sourcePage": 53,
     "sourceTable": "Table 16: 2025 Season A_Harvested area by crop type and district (Ha)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94198,7 +94153,6 @@
     "year": "2024/25",
     "unit": "Ha",
     "available": true,
-    "sourcePage": 54,
     "sourceTable": "Table 17: 2025 Season B_Harvested area by crop type and district (Ha)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94213,7 +94167,6 @@
     "season": "C",
     "unit": "ha",
     "available": true,
-    "sourcePage": 55,
     "sourceTable": "Table 18: 2025 Season C _Harvested area by crop type per district (ha)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94227,7 +94180,6 @@
     "year": "2024/25",
     "unit": "Kg/Ha",
     "available": true,
-    "sourcePage": 59,
     "sourceTable": "Table 22: 2025 Season A_Average yield of Large-Scale Farmers by crop type and district (Kg/Ha))",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94241,7 +94193,6 @@
     "year": "2024/25",
     "unit": "Kg/Ha",
     "available": true,
-    "sourcePage": 60,
     "sourceTable": "Table 23: 2025 Season B_Average yield of Large-Scale Farmers by crop type and district (Kg/Ha)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94254,7 +94205,6 @@
     "geographyLevel": "other",
     "year": "2024/25",
     "available": true,
-    "sourcePage": 64,
     "sourceTable": "Table 27: 2025 Season A_the Use of production by farmers (in percentage)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -94267,7 +94217,6 @@
     "geographyLevel": "other",
     "year": "2024/25",
     "available": true,
-    "sourcePage": 64,
     "sourceTable": "Table 28: 2025 Season B_the Use of production by farmers (in percentage)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -188019,7 +187968,6 @@
     "geographyLevel": "other",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 12,
     "sourceTable": "Table 2: Poverty status among agricultural households",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -188027,39 +187975,50 @@
   {
     "dataset": "AHS 2024",
     "report": "Agricultural Household Survey 2024 Main Report",
-    "table": "Table 3: Percentage of agricultural households, by province and livelihood activity (gender-disaggregated) 13 Table 4: Percentage of agricultural households practicing other livelihood activities that complement agriculture, by province",
-    "indicator": "Percentage of agricultural households, by province and livelihood activity (gender-disaggregated) 13 Table 4: Percentage of agricultural households practicing other livelihood activities that complement agriculture, by province",
+    "table": "Table 3: Percentage of agricultural households, by province and livelihood activity (gender-disaggregated)",
+    "indicator": "Percentage of agricultural households, by province and livelihood activity (gender-disaggregated)",
     "geographyLevel": "province",
     "year": "2023/24",
     "available": true,
     "sourcePage": 13,
-    "sourceTable": "Table 3: Percentage of agricultural households, by province and livelihood activity (gender-disaggregated) 13 Table 4: Percentage of agricultural households practicing other livelihood activities that complement agriculture, by province",
+    "sourceTable": "Table 3: Percentage of agricultural households, by province and livelihood activity (gender-disaggregated)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
   },
   {
     "dataset": "AHS 2024",
     "report": "Agricultural Household Survey 2024 Main Report",
-    "table": "Table 5: Table 5: Percentage of agricultural-household heads by marital status and province (gender-disaggregated)",
-    "indicator": "Table 5: Percentage of agricultural-household heads by marital status and province (gender-disaggregated)",
+    "table": "Table 4: Percentage of agricultural households practicing other livelihood activities that complement agriculture, by province",
+    "indicator": "Percentage of agricultural households practicing other livelihood activities that complement agriculture, by province",
     "geographyLevel": "province",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 14,
-    "sourceTable": "Table 5: Table 5: Percentage of agricultural-household heads by marital status and province (gender-disaggregated)",
+    "sourceTable": "Table 4: Percentage of agricultural households practicing other livelihood activities that complement agriculture, by province",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
   },
   {
     "dataset": "AHS 2024",
     "report": "Agricultural Household Survey 2024 Main Report",
-    "table": "Table 6: Agricultural households’ population by age group and province in 2024",
-    "indicator": "Agricultural households’ population by age group and province in 2024",
+    "table": "Table 5: Percentage of agricultural-household heads by marital status and province (gender-disaggregated)",
+    "indicator": "Percentage of agricultural-household heads by marital status and province (gender-disaggregated)",
     "geographyLevel": "province",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 14,
-    "sourceTable": "Table 6: Agricultural households’ population by age group and province in 2024",
+    "sourceTable": "Table 5: Percentage of agricultural-household heads by marital status and province (gender-disaggregated)",
+    "extractionStatus": "catalogued_not_connected",
+    "notes": "The report lists this table, but this extraction does not parse its cell values."
+  },
+  {
+    "dataset": "AHS 2024",
+    "report": "Agricultural Household Survey 2024 Main Report",
+    "table": "Table 6: Agricultural households’ population by age group and province in",
+    "indicator": "Agricultural households’ population by age group and province in",
+    "geographyLevel": "province",
+    "year": "2023/24",
+    "available": true,
+    "sourcePage": 2024,
+    "sourceTable": "Table 6: Agricultural households’ population by age group and province in",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
   },
@@ -188071,7 +188030,6 @@
     "geographyLevel": "province",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 15,
     "sourceTable": "Table 7: Percentage of agricultural households’ population aged 16 and above by sex, education level and province",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -188084,7 +188042,6 @@
     "geographyLevel": "other",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 16,
     "sourceTable": "Table 8: Demographic characteristics of Agricultural household members",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -188097,7 +188054,6 @@
     "geographyLevel": "other",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 17,
     "sourceTable": "Table 9: Farmers demographic characteristics (in percentage)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -188110,7 +188066,6 @@
     "geographyLevel": "province",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 18,
     "sourceTable": "Table 10: Distribution of farmers by sex, age group and province (in percentage)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -188123,7 +188078,6 @@
     "geographyLevel": "province",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 19,
     "sourceTable": "Table 11: Distribution of farmers by sex, education level and province (in percentage)",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -188131,13 +188085,25 @@
   {
     "dataset": "AHS 2024",
     "report": "Agricultural Household Survey 2024 Main Report",
-    "table": "Table 12: Percentage of agricultural households who accessed agricultural land by land ownership and province. 20 Table 13: Percentage of agricultural households by land use type and province",
-    "indicator": "Percentage of agricultural households who accessed agricultural land by land ownership and province. 20 Table 13: Percentage of agricultural households by land use type and province",
+    "table": "Table 12: Percentage of agricultural households who accessed agricultural land by land ownership and province",
+    "indicator": "Percentage of agricultural households who accessed agricultural land by land ownership and province",
     "geographyLevel": "province",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 21,
-    "sourceTable": "Table 12: Percentage of agricultural households who accessed agricultural land by land ownership and province. 20 Table 13: Percentage of agricultural households by land use type and province",
+    "sourcePage": 20,
+    "sourceTable": "Table 12: Percentage of agricultural households who accessed agricultural land by land ownership and province",
+    "extractionStatus": "catalogued_not_connected",
+    "notes": "The report lists this table, but this extraction does not parse its cell values."
+  },
+  {
+    "dataset": "AHS 2024",
+    "report": "Agricultural Household Survey 2024 Main Report",
+    "table": "Table 13: Percentage of agricultural households by land use type and province",
+    "indicator": "Percentage of agricultural households by land use type and province",
+    "geographyLevel": "province",
+    "year": "2023/24",
+    "available": true,
+    "sourceTable": "Table 13: Percentage of agricultural households by land use type and province",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
   },
@@ -188149,7 +188115,6 @@
     "geographyLevel": "province",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 21,
     "sourceTable": "Table 14: Size of total land cultivated by Household according to province, urban/rural, quintile and sex of household head",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -188162,7 +188127,6 @@
     "geographyLevel": "other",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 22,
     "sourceTable": "Table 15: Percentage of farmers with right to land",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -188175,7 +188139,6 @@
     "geographyLevel": "other",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 23,
     "sourceTable": "Table 16: Percentage of households growing staple crops by crop type and season",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -188188,7 +188151,6 @@
     "geographyLevel": "other",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 24,
     "sourceTable": "Table 17: Percentage of households producing major vegetables crops by season and vegetable types",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -188201,7 +188163,6 @@
     "geographyLevel": "province",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 24,
     "sourceTable": "Table 18: Percentage of agricultural households per types of fruits produced by province",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -188209,26 +188170,50 @@
   {
     "dataset": "AHS 2024",
     "report": "Agricultural Household Survey 2024 Main Report",
-    "table": "Table 19: Percentage of agricultural households who use inputs by province, rural/urban, and sex of HH head 26 Table 20: Percentage of crop growing households using Improved seeds by crop and province",
-    "indicator": "Percentage of agricultural households who use inputs by province, rural/urban, and sex of HH head 26 Table 20: Percentage of crop growing households using Improved seeds by crop and province",
+    "table": "Table 19: Percentage of agricultural households who use inputs by province, rural/urban, and sex of HH head",
+    "indicator": "Percentage of agricultural households who use inputs by province, rural/urban, and sex of HH head",
     "geographyLevel": "province",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 27,
-    "sourceTable": "Table 19: Percentage of agricultural households who use inputs by province, rural/urban, and sex of HH head 26 Table 20: Percentage of crop growing households using Improved seeds by crop and province",
+    "sourcePage": 26,
+    "sourceTable": "Table 19: Percentage of agricultural households who use inputs by province, rural/urban, and sex of HH head",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
   },
   {
     "dataset": "AHS 2024",
     "report": "Agricultural Household Survey 2024 Main Report",
-    "table": "Table 21: Percentage of agricultural households who use inorganic fertilizer by province and source of fertilizer 28 Table 22: Percentage of agricultural households by type of agricultural practice used",
-    "indicator": "Percentage of agricultural households who use inorganic fertilizer by province and source of fertilizer 28 Table 22: Percentage of agricultural households by type of agricultural practice used",
+    "table": "Table 20: Percentage of crop growing households using Improved seeds by crop and province",
+    "indicator": "Percentage of crop growing households using Improved seeds by crop and province",
+    "geographyLevel": "province",
+    "year": "2023/24",
+    "available": true,
+    "sourceTable": "Table 20: Percentage of crop growing households using Improved seeds by crop and province",
+    "extractionStatus": "catalogued_not_connected",
+    "notes": "The report lists this table, but this extraction does not parse its cell values."
+  },
+  {
+    "dataset": "AHS 2024",
+    "report": "Agricultural Household Survey 2024 Main Report",
+    "table": "Table 21: Percentage of agricultural households who use inorganic fertilizer by province and source of fertilizer",
+    "indicator": "Percentage of agricultural households who use inorganic fertilizer by province and source of fertilizer",
     "geographyLevel": "province",
     "year": "2023/24",
     "available": true,
     "sourcePage": 28,
-    "sourceTable": "Table 21: Percentage of agricultural households who use inorganic fertilizer by province and source of fertilizer 28 Table 22: Percentage of agricultural households by type of agricultural practice used",
+    "sourceTable": "Table 21: Percentage of agricultural households who use inorganic fertilizer by province and source of fertilizer",
+    "extractionStatus": "catalogued_not_connected",
+    "notes": "The report lists this table, but this extraction does not parse its cell values."
+  },
+  {
+    "dataset": "AHS 2024",
+    "report": "Agricultural Household Survey 2024 Main Report",
+    "table": "Table 22: Percentage of agricultural households by type of agricultural practice used",
+    "indicator": "Percentage of agricultural households by type of agricultural practice used",
+    "geographyLevel": "other",
+    "year": "2023/24",
+    "available": true,
+    "sourceTable": "Table 22: Percentage of agricultural households by type of agricultural practice used",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
   },
@@ -188240,7 +188225,6 @@
     "geographyLevel": "other",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 29,
     "sourceTable": "Table 23: Percentage of agricultural households by types of erosion control measures",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -188248,13 +188232,25 @@
   {
     "dataset": "AHS 2024",
     "report": "Agricultural Household Survey 2024 Main Report",
-    "table": "Table 24: Percentage of agricultural households who irrigated land by irrigation techniques and province 30 Table 25: Source of water used for irrigation (percentage) by province",
-    "indicator": "Percentage of agricultural households who irrigated land by irrigation techniques and province 30 Table 25: Source of water used for irrigation (percentage) by province",
+    "table": "Table 24: Percentage of agricultural households who irrigated land by irrigation techniques and province",
+    "indicator": "Percentage of agricultural households who irrigated land by irrigation techniques and province",
     "geographyLevel": "province",
     "year": "2023/24",
     "available": true,
     "sourcePage": 30,
-    "sourceTable": "Table 24: Percentage of agricultural households who irrigated land by irrigation techniques and province 30 Table 25: Source of water used for irrigation (percentage) by province",
+    "sourceTable": "Table 24: Percentage of agricultural households who irrigated land by irrigation techniques and province",
+    "extractionStatus": "catalogued_not_connected",
+    "notes": "The report lists this table, but this extraction does not parse its cell values."
+  },
+  {
+    "dataset": "AHS 2024",
+    "report": "Agricultural Household Survey 2024 Main Report",
+    "table": "Table 25: Source of water used for irrigation (percentage) by province",
+    "indicator": "Source of water used for irrigation (percentage) by province",
+    "geographyLevel": "province",
+    "year": "2023/24",
+    "available": true,
+    "sourceTable": "Table 25: Source of water used for irrigation (percentage) by province",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
   },
@@ -188266,7 +188262,6 @@
     "geographyLevel": "province",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 30,
     "sourceTable": "Table 26: Percentage of irrigated plots and reasons for not irrigated by province",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
@@ -188279,7 +188274,6 @@
     "geographyLevel": "other",
     "year": "2023/24",
     "available": true,
-    "sourcePage": 33,
     "sourceTable": "Table 27: Percentage of agricultural households who received extension services",
     "extractionStatus": "catalogued_not_connected",
     "notes": "The report lists this table, but this extraction does not parse its cell values."
