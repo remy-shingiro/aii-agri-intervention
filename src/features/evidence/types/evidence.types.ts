@@ -35,6 +35,8 @@ export type EvidenceIndicator =
   | 'irrigated_plot_share'
   | 'not_irrigated_reason_share'
   | 'extension_service_use'
+  | 'crop_household_prevalence'
+  | 'fruit_tree_presence'
 
 export interface EvidenceRecord {
   readonly id: string

@@ -34,9 +34,9 @@ const sourceCards = [
   {
     name: 'Agricultural Household Survey 2024',
     role: 'National and province household evidence',
-    period: 'Agricultural year 2023/24 · no SAS season',
+    period: 'Agricultural year 2023/24 · AHS seasons where reported',
     detail:
-      `AII connects ${ahsCoverage.records} observations from ${ahsCoverage.tables} AHS tables (${ahsCoverage.observed} observed, ${ahsCoverage.unavailable} unavailable), including national and five-province household indicators plus crop-specific seed-use values. AHS remains distinct from SAS.`,
+      `AII connects ${ahsCoverage.records} observations from ${ahsCoverage.tables} AHS tables (${ahsCoverage.observed} observed, ${ahsCoverage.unavailable} unavailable), including seasonal crop-growing shares, crop-specific seed use, fruit-growing, input, irrigation, and extension evidence at national and province levels. AHS remains distinct from SAS.`,
     href: 'https://www.statistics.gov.rw/data-sources/surveys/Agricultural-Household-Survey/agricultural-household-survey-2024',
   },
   {
@@ -153,7 +153,7 @@ export function DataMethodologyPage() {
             AHS reference period
           </p>
           <p className="mt-1 text-sm font-semibold text-slate-900">
-            2023/24 · Annual, no SAS season
+            2023/24 · AHS Seasons A, B, C where reported
           </p>
         </div>
         <div className="rounded-xl border border-slate-200 bg-white p-4">
@@ -199,6 +199,7 @@ export function DataMethodologyPage() {
                 {coverage.provinceRows > 0 && <div className="flex justify-between gap-3"><dt className="text-slate-500">Province rows</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.provinceRows.toLocaleString()}</dd></div>}
                 {coverage.nationalRows > 0 && <div className="flex justify-between gap-3"><dt className="text-slate-500">National rows</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.nationalRows.toLocaleString()}</dd></div>}
                 {coverage.crops > 0 && <div className="flex justify-between gap-3"><dt className="text-slate-500">Crop labels</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.crops}</dd></div>}
+                {coverage.seasons.length > 0 && <div className="flex justify-between gap-3"><dt className="text-slate-500">Reported seasons</dt><dd className="font-semibold text-slate-800">{coverage.seasons.join(', ')}</dd></div>}
               </dl>
             </article>
           ))}
@@ -207,7 +208,7 @@ export function DataMethodologyPage() {
           The generated inventory contains {nisrDataInventory.length.toLocaleString()} observation and table-catalog entries. {inventoryCatalogCount} report tables are catalogued but not cell-extracted; their presence in a report is not treated as connected evidence.
         </p>
         <p className="mt-2 text-xs leading-5 text-slate-500">
-          Connected indicators include seasonal crop cultivated area, yield, and production; seed, fertilizer, and pesticide use; irrigation practice; erosion control; agroforestry; and mechanical equipment. AHS 2024 adds province and national input, crop-specific seed-use, practice, erosion-control, irrigation, and extension records, plus national household context for association membership, kitchen gardens, risk awareness, livestock ownership by species, and beekeeping. AHS values are never expanded to district geography.
+          Connected indicators include SAS seasonal crop cultivated area, yield, and production; seed, fertilizer, and pesticide use; irrigation practice; erosion control; agroforestry; and mechanical equipment. AHS 2024 adds crop-growing shares for its reported A, B, and C seasons, crop-specific seed-use, fruit-growing, province and national inputs, practices, erosion-control measures, irrigation methods and water sources, irrigated plots, and extension services. National household context also covers association membership, kitchen gardens, risk awareness, livestock ownership by species, and beekeeping. AHS values are never expanded to district geography.
         </p>
       </MethodologySection>
 
@@ -228,7 +229,7 @@ export function DataMethodologyPage() {
               AII displays a district figure only when a NISR table reports
               that indicator for the district. SAS 2024 and SAS 2025 connected
               crop and practice tables contain district and national rows.
-              AHS Tables 1 and 19–27 contribute national and province values,
+              AHS Tables 1 and 16–27 contribute national and province values,
               including crop-specific seed-use values. AHS does not provide
               district observations in the connected tables, and no province
               value is copied down to districts.
@@ -320,7 +321,7 @@ export function DataMethodologyPage() {
           {[
             'SAS 2024 and SAS 2025 remain separate datasets for 2023/24 and 2024/25. AII does not calculate trends across them.',
             'Crop columns differ by season in the reports. A crop without an observed row in a selected period remains unavailable.',
-            'AHS 2024 uses an annual 2023/24 reference period without SAS seasons. Its connected records preserve table populations and province or national geography; no AHS district observations are connected.',
+            'AHS 2024 covers agricultural year 2023/24. Its crop-growing tables report AHS Seasons A, B, and C; the annual summary and other connected tables carry no season. No AHS district observations are connected.',
             'AHS crop-specific improved-seed percentages describe crop-growing households and are not crop yield or production values.',
             'AHS irrigation techniques, water sources, and plot reasons retain each table’s household or plot denominator. They are not merged with SAS farmer-practice percentages.',
             'District-wide irrigation practice covers agricultural activity across crops. It is not maize-specific or linked to the farmers represented by the yield estimate.',

@@ -400,6 +400,9 @@ const AHS_SUMMARY = [
 
 const AHS_PROVINCES = ['Kigali', 'South', 'West', 'North', 'East']
 const AHS_TABLE_TITLES = {
+  16: 'Percentage of households growing staple crops by crop type and season',
+  17: 'Percentage of households producing major vegetables crops by season and vegetable types',
+  18: 'Percentage of agricultural households per types of fruits produced by province',
   19: 'Percentage of agricultural households who use inputs by province, rural/urban, and sex of HH head',
   20: 'Percentage of crop growing households using Improved seeds by crop and province',
   21: 'Percentage of agricultural households who use inorganic fertilizer by province and source of fertilizer',
@@ -409,6 +412,20 @@ const AHS_TABLE_TITLES = {
   25: 'Source of water used for irrigation (percentage) by province',
   26: 'Percentage of irrigated plots and reasons for not irrigated by province',
   27: 'Percentage of agricultural households who received extension services',
+}
+const AHS_TABLE_SOURCE_PAGES = {
+  16: 23,
+  17: 24,
+  18: 24,
+  19: 26,
+  20: 27,
+  21: 28,
+  22: 28,
+  23: 29,
+  24: 30,
+  25: 30,
+  26: 30,
+  27: 33,
 }
 const AHS_GEOGRAPHIES = [
   ...AHS_PROVINCES.map((name) => ({ level: 'province', name })),
@@ -471,6 +488,21 @@ const AHS_EXTENSION_SERVICES = [
   'Nutrition and food security',
   'Smart Nkunganire program',
 ]
+const AHS_STAPLE_CROPS = [
+  'Maize', 'Paddy rice', 'Sorghum', 'Wheat', 'Irish potato', 'Sweet potato',
+  'Taro', 'Yams', 'Cassava', 'Bean', 'Bush bean', 'Climbing bean', 'Pea',
+  'Soybean', 'Groundnut', 'Banana', 'Cooking banana', 'Dessert banana',
+  'Banana for beer', 'Other crops',
+]
+const AHS_CROP_GROUPS = ['Cereals', 'Tubers and Roots', 'Legumes and pulses', 'Vegetables']
+const AHS_VEGETABLE_CROPS = [
+  'Tomato', 'Cabbage', 'Onion', 'Carrot', 'Eggplant', 'Sweet pepper',
+  'Amaranth', 'Sugar beet', 'Garlic', 'French beans', 'Pepper',
+]
+const AHS_FRUIT_CROPS = [
+  'Tree tomato', 'Pineapple', 'Avocado', 'Passion fruits', 'Mango', 'Papaya',
+  'Orange', 'Lemon', 'Guava', 'Mandarin', 'Jackfruits',
+]
 
 const EXTRACTED_TABLES = new Map([
   ['SAS 2024', new Set([
@@ -483,7 +515,7 @@ const EXTRACTED_TABLES = new Map([
     ...INPUT_TABLES['SAS 2025'].flatMap((group) => group.tables),
     ...DISTRICT_PRACTICE_TABLES['SAS 2025'],
   ])],
-  ['AHS 2024', new Set([1, 19, 20, 21, 22, 23, 24, 25, 26, 27])],
+  ['AHS 2024', new Set([1, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27])],
 ])
 
 function slug(value) {
@@ -555,6 +587,7 @@ function getTablePage(pages, tableNumber) {
 }
 
 function parseNumericCells(text) {
+  if (/^(?:n\/?a)$/i.test(text.trim())) return ['-']
   return [...text.matchAll(/(?:\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?|[-–—])/g)]
     .map((match) => match[0])
 }
@@ -814,6 +847,7 @@ function extractProductTables(dataset, pages, districts, records, inventory) {
 
 function cellValue(raw, tableNumber, district) {
   if (raw === undefined) throw new Error(`Table ${tableNumber}, ${district}: missing numeric cell`)
+  if (/^(?:-+|–|—|n\/?a)$/i.test(raw.trim())) return null
   if (/^[-–—]$/.test(raw)) return null
   const value = Number(raw.replaceAll(',', ''))
   if (!Number.isFinite(value)) throw new Error(`Table ${tableNumber}, ${district}: invalid value ${raw}`)
@@ -1013,7 +1047,6 @@ function extractAhsSummary(dataset, pages, records, inventory) {
 function extractAhsTableRows(pages, tableNumber) {
   const tablePattern = new RegExp(`\\bTable\\s+${tableNumber}\\s*:`, 'i')
   const matches = pages.filter((page) =>
-    page.printedPage !== undefined &&
     tablePattern.test(page.text) &&
     page.text.includes('Source: NISR, AHS 2024'),
   )
@@ -1056,7 +1089,10 @@ function extractAhsTableRows(pages, tableNumber) {
     const values = ordered
       .filter((fragment) => fragment.x >= 100)
       .map((fragment) => fragment.text.trim())
-      .filter((value) => parseNumericCells(value).length === 1 && parseNumericCells(value)[0] === value)
+      .filter((value) =>
+        /^(?:n\/?a)$/i.test(value) ||
+        (parseNumericCells(value).length === 1 && parseNumericCells(value)[0] === value),
+      )
     if (!values.length) {
       if (tableNumber === 27 && label) {
         if (/^Type of extension services received$/i.test(label)) {
@@ -1093,7 +1129,7 @@ function extractAhsProvinceTables(dataset, pages, records, inventory) {
         sourceReference: sourceTableReference(
           tableNumber,
           AHS_TABLE_TITLES[tableNumber],
-          extracted.page.printedPage,
+          extracted.page.printedPage ?? AHS_TABLE_SOURCE_PAGES[tableNumber],
         ),
       })
     }
@@ -1105,7 +1141,13 @@ function extractAhsProvinceTables(dataset, pages, records, inventory) {
       ...details,
       value: cellValue(details.rawValue, tableNumber, details.geography.name),
       unit: '%',
-      period,
+      period: details.season
+        ? {
+            ...period,
+            season: details.season,
+            label: `AHS 2024 reported Season ${details.season}; not a SAS observation`,
+          }
+        : period,
       sourceReference: table.sourceReference,
     })
     records.push(record)
@@ -1121,6 +1163,61 @@ function extractAhsProvinceTables(dataset, pages, records, inventory) {
       throw new Error(`AHS Table ${tableNumber}, ${row.label}: expected ${count} cells, found ${row.values.length}`)
     }
     return row.values
+  }
+
+  for (const [tableNumber, labels, groups] of [
+    [16, [...AHS_CROP_GROUPS, ...AHS_STAPLE_CROPS], new Set(AHS_CROP_GROUPS)],
+    [17, AHS_VEGETABLE_CROPS, new Set()],
+  ]) {
+    for (const sourceLabel of labels) {
+      const row = rowFor(tableNumber, sourceLabel)
+      const cells = requireCells(tableNumber, row, 3)
+      for (const [seasonIndex, season] of ['A', 'B', 'C'].entries()) {
+        const isGroup = groups.has(sourceLabel)
+        emit(tableNumber, {
+          indicator: 'crop_household_prevalence',
+          label: isGroup
+            ? 'Households growing a crop group'
+            : 'Households growing or producing this crop type',
+          ...(isGroup
+            ? { category: sourceLabel }
+            : { crop: cropMatchName(sourceLabel), sourceCrop: sourceLabel }),
+          geography: { level: 'national', name: 'Rwanda' },
+          season,
+          rawValue: cells[seasonIndex],
+        })
+      }
+    }
+  }
+
+  const fruitGeographies = [
+    { level: 'national', name: 'Rwanda' },
+    ...AHS_PROVINCES.map((name) => ({ level: 'province', name })),
+  ]
+  for (const sourceCrop of AHS_FRUIT_CROPS) {
+    const row = rowFor(18, sourceCrop)
+    const cells = requireCells(18, row, fruitGeographies.length)
+    for (let index = 0; index < fruitGeographies.length; index++) {
+      emit(18, {
+        indicator: 'crop_household_prevalence',
+        label: 'Agricultural households growing fruit by type',
+        crop: sourceCrop,
+        sourceCrop,
+        geography: fruitGeographies[index],
+        rawValue: cells[index],
+      })
+    }
+  }
+  const fruitTreeRow = getTable(18).rows.find((row) => !row.label && row.values.length === 6)
+  if (!fruitTreeRow) throw new Error('AHS Table 18 fruit-tree prevalence row is missing')
+  const fruitTreeCells = requireCells(18, fruitTreeRow, fruitGeographies.length)
+  for (let index = 0; index < fruitGeographies.length; index++) {
+    emit(18, {
+      indicator: 'fruit_tree_presence',
+      label: 'Agricultural households with at least one fruit tree',
+      geography: fruitGeographies[index],
+      rawValue: fruitTreeCells[index],
+    })
   }
 
   const inputIndicators = AHS_SUMMARY.filter((summary) =>
@@ -1381,30 +1478,11 @@ function main() {
   console.log(JSON.stringify({ datasets, inventoryRows: cleanInventory.length }, null, 2))
 }
 
-if (process.argv.includes('--inspect-ahs-tables')) {
-  const dataset = DATASETS.find((item) => item.id === 'AHS 2024')
-  const pages = getReportPages(dataset)
-  const tableArgument = process.argv.find((argument) => argument.startsWith('--inspect-ahs-table='))
-  const tableNumber = tableArgument ? Number(tableArgument.split('=')[1]) : undefined
-  if (tableNumber) {
-    console.log(JSON.stringify(extractAhsTableRows(pages, tableNumber).rows, null, 2))
-  } else {
-  const tablePattern = tableNumber
-    ? new RegExp(`\\bTable\\s+${tableNumber}\\s*:`, 'i')
-    : /\bTable\s+(?:19|20|21|22|23|24|25|26|27)\s*:/i
-  console.log(JSON.stringify(pages.filter((page) => tablePattern.test(page.text)).map((page) => ({
-    page: page.printedPage,
-    text: page.text,
-    fragments: page.fragments.map(({ text, x, y }) => ({ text, x, y })),
-  })), null, 2))
-  }
-} else {
-  try {
-    main()
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : error)
-    process.exitCode = 1
-  }
+try {
+  main()
+} catch (error) {
+  console.error(error instanceof Error ? error.message : error)
+  process.exitCode = 1
 }
 
 

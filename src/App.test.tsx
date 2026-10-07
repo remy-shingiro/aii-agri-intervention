@@ -80,6 +80,57 @@ describe('application shell', () => {
     ).toBeInTheDocument()
   })
 
+  it('uses the selected crop and period on profiles and fails closed for gaps', async () => {
+    render(<App />)
+
+    fireEvent.change(screen.getByLabelText('Crop'), {
+      target: { value: 'beans' },
+    })
+    fireEvent.change(screen.getByLabelText('Season'), {
+      target: { value: 'season-b' },
+    })
+    fireEvent.change(screen.getByLabelText('Year'), {
+      target: { value: '2023-24' },
+    })
+
+    const search = screen.getByRole('combobox', { name: 'Search district' })
+    fireEvent.change(search, { target: { value: 'Nyarugenge' } })
+    await waitFor(() => {
+      expect(
+        screen.getByRole('option', { name: 'Nyarugenge' }),
+      ).toBeInTheDocument()
+    })
+    fireEvent.keyDown(search, { key: 'ArrowDown' })
+    fireEvent.keyDown(search, { key: 'Enter' })
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Open district profile' }),
+    )
+
+    expect(screen.getByRole('heading', { name: 'Nyarugenge' })).toBeInTheDocument()
+    expect(screen.getByText(/Beans.*Season B.*2023\/24/)).toBeInTheDocument()
+    expect(screen.getByText(/614 kg\/ha/)).toBeInTheDocument()
+    expect(screen.getAllByText(/Table 17: 2024 Season B/)).toHaveLength(2)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Overview' }))
+    fireEvent.change(screen.getByLabelText('Crop'), {
+      target: { value: 'sorghum' },
+    })
+    fireEvent.change(screen.getByLabelText('Season'), {
+      target: { value: 'season-a' },
+    })
+    fireEvent.change(screen.getByLabelText('Year'), {
+      target: { value: '2024-25' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'District Profile' }))
+
+    expect(
+      screen.getByRole('heading', {
+        name: 'No connected district observations for this period',
+      }),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/614 kg\/ha/)).not.toBeInTheDocument()
+  })
+
   it('opens the Evidence explorer and shows connected SAS 2024 observations', () => {
     render(<App />)
 

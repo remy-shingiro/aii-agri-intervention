@@ -97,6 +97,14 @@ describe('normalized NISR agricultural evidence', () => {
   })
 
   it('keeps AHS crop, province, irrigation, and extension evidence at source geography', () => {
+    expect(findRecord('AHS 2024', 'crop_household_prevalence', 'Rwanda', 'A', 'Beans'))
+      .toMatchObject({ value: 89.8, sourceReference: { page: 23, table: expect.stringContaining('Table 16') } })
+    expect(findRecord('AHS 2024', 'crop_household_prevalence', 'Rwanda', 'C', 'Maize'))
+      .toMatchObject({ value: null, status: 'unavailable' })
+    expect(findRecord('AHS 2024', 'crop_household_prevalence', 'Rwanda', 'C', 'Tomato'))
+      .toMatchObject({ value: 41.8, sourceReference: { page: 24, table: expect.stringContaining('Table 17') } })
+    expect(findRecord('AHS 2024', 'crop_household_prevalence', 'South', undefined, 'Avocado'))
+      .toMatchObject({ value: 74.1, geography: { level: 'province' }, sourceReference: { page: 24 } })
     const southIrrigation = findRecord('AHS 2024', 'irrigation_practice', 'South', undefined)
     expect(southIrrigation).toMatchObject({
       value: 19.2,
@@ -106,6 +114,9 @@ describe('normalized NISR agricultural evidence', () => {
       sourceReference: { page: 28, table: expect.stringContaining('Table 22') },
     })
     expect(southIrrigation?.period.season).toBeUndefined()
+    expect(findRecord('AHS 2024', 'erosion_control_practice', 'South', undefined)?.value).toBe(94.1)
+    expect(findRecord('AHS 2024', 'agroforestry_practice', 'South', undefined)?.value).toBe(58.9)
+    expect(findRecord('AHS 2024', 'mechanical_equipment_use', 'South', undefined)?.value).toBe(0.1)
     expect(findRecord('AHS 2024', 'improved_seed_use', 'East', undefined, 'Maize')).toMatchObject({
       value: 75.1,
       sourceReference: { page: 27, table: expect.stringContaining('Table 20') },
@@ -126,6 +137,22 @@ describe('normalized NISR agricultural evidence', () => {
       undefined,
       'Post-harvest handling and storage',
     )).toMatchObject({ value: 15.2, sourceReference: { page: 33 } })
+    expect(findRecord(
+      'AHS 2024',
+      'irrigation_water_source_use',
+      'Rwanda',
+      undefined,
+      undefined,
+      'Lake/stream water',
+    )).toMatchObject({ value: 53.8, sourceReference: { page: 30 } })
+    expect(findRecord(
+      'AHS 2024',
+      'not_irrigated_reason_share',
+      'East',
+      undefined,
+      undefined,
+      'No water available',
+    )).toMatchObject({ value: 46.7, sourceReference: { page: 30 } })
     expect(findRecord('AHS 2024', 'improved_seed_use', 'Kigali', undefined, 'Wheat'))
       .toMatchObject({ value: null, status: 'unavailable' })
     expect(normalizedEvidenceRecords.some(
@@ -200,6 +227,7 @@ describe('normalized NISR agricultural evidence', () => {
     })).toBeUndefined()
     expect(comparisonFor(district, { ...national, dataset: 'SAS 2024' })).toBeUndefined()
     expect(comparisonFor(district, { ...national, unit: 'MT' })).toBeUndefined()
+    expect(comparisonFor(district, { ...national, category: 'different metric' })).toBeUndefined()
     expect(comparisonFor(district, {
       ...national,
       geography: { ...national.geography, level: 'province' },
@@ -226,7 +254,7 @@ describe('normalized NISR agricultural evidence', () => {
     })).toContain('Maize')
     expect(getAvailableCrops(normalizedEvidenceRecords, {
       year: '2023/24',
-    })).toHaveLength(8)
+    })).toHaveLength(19)
   })
 
   it('preserves the existing SAS 2025 irrigation signal and unavailable case', () => {

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 
 import { evidenceRecords } from '../data/evidenceRecords'
@@ -60,6 +60,34 @@ const years = [...new Set(evidenceRecords.map((record) => record.period.year))]
   .reverse()
 const datasets = [...new Set(evidenceRecords.map((record) => record.dataset))]
   .sort((first, second) => first.localeCompare(second))
+
+function comparisonKey(record: EvidenceRecord): string {
+  return JSON.stringify([
+    record.dataset,
+    record.indicator,
+    record.crop,
+    record.species,
+    record.category,
+    record.period.year,
+    record.period.season,
+    record.period.label,
+    record.unit,
+  ])
+}
+
+const districtObservationKeys = new Map<string, Set<string>>()
+for (const record of evidenceRecords) {
+  if (record.geography.level !== 'district') continue
+  const keys = districtObservationKeys.get(record.geography.name) ?? new Set<string>()
+  keys.add(comparisonKey(record))
+  districtObservationKeys.set(record.geography.name, keys)
+}
+
+function hasDistrictReference(record: EvidenceRecord, district: string): boolean {
+  return district !== 'Rwanda' &&
+    record.geography.level === 'national' &&
+    districtObservationKeys.get(district)?.has(comparisonKey(record)) === true
+}
 
 function matchesSeason(recordSeason: string | undefined, selected: string): boolean {
   return selected === 'none' ? recordSeason === undefined : recordSeason === selected
@@ -138,24 +166,10 @@ export function EvidencePage({
   ])
   const visibleCount = visiblePage.key === filterKey ? visiblePage.count : 50
 
-  const filteredRecords = evidenceRecords.filter((record) => {
+  const filteredRecords = useMemo(() => evidenceRecords.filter((record) => {
     const districtMatches = district === 'all' ||
       record.geography.name === district ||
-      (record.geography.level === 'national' &&
-        district !== 'Rwanda' &&
-        evidenceRecords.some((districtRecord) =>
-          districtRecord.geography.level === 'district' &&
-          districtRecord.geography.name === district &&
-          districtRecord.dataset === record.dataset &&
-          districtRecord.indicator === record.indicator &&
-          districtRecord.crop === record.crop &&
-          districtRecord.species === record.species &&
-          districtRecord.category === record.category &&
-          districtRecord.period.year === record.period.year &&
-          districtRecord.period.season === record.period.season &&
-          districtRecord.period.label === record.period.label &&
-          districtRecord.unit === record.unit,
-        ))
+      hasDistrictReference(record, district)
     const cropMatches =
       crop === 'all' || record.crop?.toLowerCase() === crop
     const seasonMatches = matchesSeason(record.period.season, season)
@@ -178,7 +192,7 @@ export function EvidencePage({
       statusMatches &&
       signalMatches
     )
-  })
+  }), [crop, dataset, district, indicator, season, signalContext, status, year])
 
   const signalLabel =
     signalContext?.intervention === 'irrigation'
