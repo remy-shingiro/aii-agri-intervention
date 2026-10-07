@@ -1,0 +1,29 @@
+[
+  {
+    "dataset": "SAS 2024",
+    "report": "Seasonal Agricultural Survey, Annual Report 2024",
+    "reportYear": 2024,
+    "agriculturalYear": "2023/24",
+    "rawFile": "data/raw/SAS/SAS 2024 Annual.pdf",
+    "sourceUrl": "https://www.statistics.gov.rw/sites/default/files/documents/2025-02/SAS%202024%20Annual.pdf",
+    "extraction": "scripts/extract-nisr-agricultural-data.cjs"
+  },
+  {
+    "dataset": "SAS 2025",
+    "report": "Seasonal Agricultural Survey, Annual Report, December 2025",
+    "reportYear": 2025,
+    "agriculturalYear": "2024/25",
+    "rawFile": "data/raw/SAS/SAS 2025 Final report.pdf",
+    "sourceUrl": "https://www.statistics.gov.rw/sites/default/files/documents/2025-12/SAS%202025%20Final%20report.pdf",
+    "extraction": "scripts/extract-nisr-agricultural-data.cjs"
+  },
+  {
+    "dataset": "AHS 2024",
+    "report": "Agricultural Household Survey 2024 Main Report",
+    "reportYear": 2024,
+    "agriculturalYear": "2023/24",
+    "rawFile": "data/raw/AHS/AHS 2024_Main report.pdf",
+    "sourceUrl": "https://www.statistics.gov.rw/sites/default/files/documents/2025-10/AHS%202024_Main%20report.pdf",
+    "extraction": "scripts/extract-nisr-agricultural-data.cjs"
+  }
+]
