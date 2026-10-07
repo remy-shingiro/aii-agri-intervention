@@ -398,6 +398,80 @@ const AHS_SUMMARY = [
   { row: 31, label: 'Percentage of agricultural households who did bee keeping', indicator: 'beekeeping' },
 ]
 
+const AHS_PROVINCES = ['Kigali', 'South', 'West', 'North', 'East']
+const AHS_TABLE_TITLES = {
+  19: 'Percentage of agricultural households who use inputs by province, rural/urban, and sex of HH head',
+  20: 'Percentage of crop growing households using Improved seeds by crop and province',
+  21: 'Percentage of agricultural households who use inorganic fertilizer by province and source of fertilizer',
+  22: 'Percentage of agricultural households by type of agricultural practice used',
+  23: 'Percentage of agricultural households by types of erosion control measures',
+  24: 'Percentage of agricultural households who irrigated land by irrigation techniques and province',
+  25: 'Source of water used for irrigation (percentage) by province',
+  26: 'Percentage of irrigated plots and reasons for not irrigated by province',
+  27: 'Percentage of agricultural households who received extension services',
+}
+const AHS_GEOGRAPHIES = [
+  ...AHS_PROVINCES.map((name) => ({ level: 'province', name })),
+  { level: 'national', name: 'Rwanda' },
+]
+
+const AHS_EROSION_MEASURES = [
+  'Ditches',
+  'Trees/Windbreak/Shelt',
+  'Bench (radical) terraces',
+  'Progressive terraces',
+  'Cover plants/Grasses',
+  'Water drainage',
+  'Mulching',
+  'Beds/Ridges',
+  'Water channel',
+  'Others',
+]
+
+const AHS_IRRIGATION_TECHNIQUES = [
+  'Traditional irrigation',
+  'Surface irrigation',
+  'Flood irrigation',
+  'Drip irrigation',
+  'Sprinkler irrigation',
+  'Pivot irrigation',
+]
+
+const AHS_IRRIGATION_WATER_SOURCES = [
+  'Rainwater harvesting',
+  'Water treatment plant',
+  'Underground water',
+  'Lake/stream water',
+  'Water from dams',
+  'Other sources',
+]
+
+const AHS_FERTILIZER_SOURCES = [
+  'Government (MINAGRI/RAB/District)',
+  'Agro-dealers',
+  'NGOs',
+  'Market',
+  'Agriculture cooperatives',
+  'Others sources',
+]
+
+const AHS_EXTENSION_SERVICES = [
+  'Improved cropping practices (spacing, intercropping, crop rotation, etc)',
+  'fertilizers application',
+  'Irrigation system',
+  'Post-harvest handling and storage',
+  'Erosion control measures',
+  'Horticulture skills',
+  'Animal health and feeding',
+  'Veterinary services',
+  'Agribusiness skills',
+  'Weather and climate information products/services',
+  'Financially literacy (Credit, Saving…..)',
+  'Integrated pest management',
+  'Nutrition and food security',
+  'Smart Nkunganire program',
+]
+
 const EXTRACTED_TABLES = new Map([
   ['SAS 2024', new Set([
     ...PRODUCT_TABLES['SAS 2024'].map((table) => table.table),
@@ -409,7 +483,7 @@ const EXTRACTED_TABLES = new Map([
     ...INPUT_TABLES['SAS 2025'].flatMap((group) => group.tables),
     ...DISTRICT_PRACTICE_TABLES['SAS 2025'],
   ])],
-  ['AHS 2024', new Set([1])],
+  ['AHS 2024', new Set([1, 19, 20, 21, 22, 23, 24, 25, 26, 27])],
 ])
 
 function slug(value) {
@@ -534,9 +608,10 @@ function makeRecord(dataset, details) {
     details.period.year === '2024/25' &&
     (!details.crop || details.crop.toLowerCase() === 'maize')
   const speciesSlug = details.species ? `-${slug(details.species)}` : ''
+  const categorySlug = details.category ? `-${slug(details.category)}` : ''
   const id = legacySas2025Id
     ? `sas-2025-season-a-${geographySlug}-${details.indicator}`
-    : `${slug(dataset.id)}-${periodSlug}-${slug(details.period.year)}-${geographySlug}-${details.indicator}${cropSlug}${speciesSlug}`
+    : `${slug(dataset.id)}-${periodSlug}-${slug(details.period.year)}-${geographySlug}-${details.indicator}${cropSlug}${speciesSlug}${categorySlug}`
   const sourceReference = details.sourceReference
   const value = details.value
 
@@ -546,6 +621,7 @@ function makeRecord(dataset, details) {
     label: details.label,
     ...(details.crop ? { crop: details.crop, sourceCrop: details.sourceCrop ?? details.crop } : {}),
     ...(details.species ? { species: details.species } : {}),
+    ...(details.category ? { category: details.category } : {}),
     value,
     unit: details.unit,
     geography: {
@@ -572,6 +648,7 @@ function addInventoryRecord(inventory, dataset, record) {
     table: record.sourceReference.table,
     indicator: record.label,
     ...(record.crop ? { crop: record.sourceCrop ?? record.crop } : {}),
+    ...(record.category ? { category: record.category } : {}),
     geographyLevel: record.geography.level,
     geography: record.geography.name,
     year: record.period.year,
@@ -933,6 +1010,286 @@ function extractAhsSummary(dataset, pages, records, inventory) {
   }
 }
 
+function extractAhsTableRows(pages, tableNumber) {
+  const tablePattern = new RegExp(`\\bTable\\s+${tableNumber}\\s*:`, 'i')
+  const matches = pages.filter((page) =>
+    page.printedPage !== undefined &&
+    tablePattern.test(page.text) &&
+    page.text.includes('Source: NISR, AHS 2024'),
+  )
+  if (matches.length !== 1) {
+    throw new Error(`Expected one AHS 2024 data page for Table ${tableNumber}; found ${matches.length}`)
+  }
+
+  const page = matches[0]
+  const caption = page.fragments.find((fragment) =>
+    fragment.text.trim().startsWith(`Table ${tableNumber}:`),
+  )
+  if (!caption) throw new Error(`AHS Table ${tableNumber} caption is missing`)
+  const source = page.fragments
+    .filter((fragment) =>
+      fragment.text.trim() === 'Source: NISR, AHS 2024' &&
+      fragment.y < caption.y,
+    )
+    .sort((first, second) => second.y - first.y)[0]
+  if (!source) throw new Error(`AHS Table ${tableNumber} source footer is missing`)
+
+  const groups = []
+  for (const fragment of page.fragments
+    .filter((item) => item.y < caption.y && item.y > source.y)
+    .sort((first, second) => second.y - first.y || first.x - second.x)) {
+    let group = groups.find((item) => Math.abs(item.y - fragment.y) < 0.8)
+    if (!group) {
+      group = { y: fragment.y, fragments: [] }
+      groups.push(group)
+    }
+    group.fragments.push(fragment)
+  }
+
+  const rows = []
+  let pendingLabel = ''
+  for (const group of groups) {
+    const ordered = group.fragments.sort((first, second) => first.x - second.x)
+    const label = normalizeWhitespace(
+      ordered.filter((fragment) => fragment.x < 100).map((fragment) => fragment.text).join(' '),
+    )
+    const values = ordered
+      .filter((fragment) => fragment.x >= 100)
+      .map((fragment) => fragment.text.trim())
+      .filter((value) => parseNumericCells(value).length === 1 && parseNumericCells(value)[0] === value)
+    if (!values.length) {
+      if (tableNumber === 27 && label) {
+        if (/^Type of extension services received$/i.test(label)) {
+          pendingLabel = ''
+        } else if (
+          rows.at(-1)?.label.startsWith('Improved cropping practices') &&
+          /^rotation, etc\)/i.test(label)
+        ) {
+          rows.at(-1).label = normalizeWhitespace(`${rows.at(-1).label} ${label}`)
+        } else {
+          pendingLabel = normalizeWhitespace(`${pendingLabel} ${label}`)
+        }
+      }
+      continue
+    }
+    rows.push({ label: normalizeWhitespace(`${pendingLabel} ${label}`), values })
+    pendingLabel = ''
+  }
+
+  return { page, rows }
+}
+
+function extractAhsProvinceTables(dataset, pages, records, inventory) {
+  const period = {
+    year: dataset.agriculturalYear,
+    label: 'AHS 2024 reference period; no SAS season is reported',
+  }
+  const tableCache = new Map()
+  const getTable = (tableNumber) => {
+    if (!tableCache.has(tableNumber)) {
+      const extracted = extractAhsTableRows(pages, tableNumber)
+      tableCache.set(tableNumber, {
+        ...extracted,
+        sourceReference: sourceTableReference(
+          tableNumber,
+          AHS_TABLE_TITLES[tableNumber],
+          extracted.page.printedPage,
+        ),
+      })
+    }
+    return tableCache.get(tableNumber)
+  }
+  const emit = (tableNumber, details) => {
+    const table = getTable(tableNumber)
+    const record = makeRecord(dataset, {
+      ...details,
+      value: cellValue(details.rawValue, tableNumber, details.geography.name),
+      unit: '%',
+      period,
+      sourceReference: table.sourceReference,
+    })
+    records.push(record)
+    addInventoryRecord(inventory, dataset, record)
+  }
+  const rowFor = (tableNumber, label) => {
+    const row = getTable(tableNumber).rows.find((candidate) => candidate.label.toLowerCase() === label.toLowerCase())
+    if (!row) throw new Error(`AHS Table ${tableNumber} row ${label} is missing`)
+    return row
+  }
+  const requireCells = (tableNumber, row, count) => {
+    if (row.values.length < count) {
+      throw new Error(`AHS Table ${tableNumber}, ${row.label}: expected ${count} cells, found ${row.values.length}`)
+    }
+    return row.values
+  }
+
+  const inputIndicators = AHS_SUMMARY.filter((summary) =>
+    ['improved_seed_use', 'organic_fertilizer_use', 'inorganic_fertilizer_use', 'pesticide_use'].includes(summary.indicator),
+  )
+  for (const province of AHS_PROVINCES) {
+    const row = rowFor(19, province)
+    const cells = requireCells(19, row, 5)
+    for (let index = 0; index < inputIndicators.length; index++) {
+      emit(19, {
+        ...inputIndicators[index],
+        geography: { level: 'province', name: province },
+        rawValue: cells[index],
+      })
+    }
+  }
+
+  const cropSeedRowLabels = [
+    'Maize', 'Paddy rice', 'Wheat', 'Beans', 'Irish potato', 'Soybean', 'Vegetables', 'Other crops',
+  ]
+  for (const sourceCrop of cropSeedRowLabels) {
+    const row = rowFor(20, sourceCrop)
+    const cells = requireCells(20, row, AHS_GEOGRAPHIES.length)
+    const crop = cropMatchName(sourceCrop)
+    for (let index = 0; index < AHS_GEOGRAPHIES.length; index++) {
+      emit(20, {
+        indicator: 'improved_seed_use',
+        label: 'Improved seed use among crop-growing households',
+        crop,
+        sourceCrop,
+        geography: AHS_GEOGRAPHIES[index],
+        rawValue: cells[index],
+      })
+    }
+  }
+
+  for (let index = 0; index < AHS_PROVINCES.length; index++) {
+    const row = rowFor(21, AHS_PROVINCES[index])
+    const cells = requireCells(21, row, AHS_FERTILIZER_SOURCES.length + 1)
+    for (let sourceIndex = 0; sourceIndex < AHS_FERTILIZER_SOURCES.length; sourceIndex++) {
+      emit(21, {
+        indicator: 'inorganic_fertilizer_source_use',
+        label: 'Agricultural households using inorganic fertilizer by source',
+        category: AHS_FERTILIZER_SOURCES[sourceIndex],
+        geography: { level: 'province', name: AHS_PROVINCES[index] },
+        rawValue: cells[sourceIndex],
+      })
+    }
+  }
+  const fertilizerNational = rowFor(21, 'Rwanda')
+  const fertilizerNationalCells = requireCells(21, fertilizerNational, AHS_FERTILIZER_SOURCES.length + 1)
+  for (let sourceIndex = 0; sourceIndex < AHS_FERTILIZER_SOURCES.length; sourceIndex++) {
+    emit(21, {
+      indicator: 'inorganic_fertilizer_source_use',
+      label: 'Agricultural households using inorganic fertilizer by source',
+      category: AHS_FERTILIZER_SOURCES[sourceIndex],
+      geography: { level: 'national', name: 'Rwanda' },
+      rawValue: fertilizerNationalCells[sourceIndex],
+    })
+  }
+
+  const provincePracticeIndicators = [
+    'erosion_control_practice',
+    'agroforestry_practice',
+    'irrigation_practice',
+    'mechanical_equipment_use',
+  ].map((indicator) => AHS_SUMMARY.find((summary) => summary.indicator === indicator))
+  if (provincePracticeIndicators.some((summary) => !summary)) {
+    throw new Error('AHS Table 22 indicator definition is missing')
+  }
+  for (const province of AHS_PROVINCES) {
+    const row = rowFor(22, province)
+    const cells = requireCells(22, row, provincePracticeIndicators.length + 1)
+    for (let index = 0; index < provincePracticeIndicators.length; index++) {
+      emit(22, {
+        ...provincePracticeIndicators[index],
+        geography: { level: 'province', name: province },
+        rawValue: cells[index],
+      })
+    }
+  }
+
+  for (const category of AHS_EROSION_MEASURES) {
+    const row = rowFor(23, category)
+    const cells = requireCells(23, row, 8)
+    for (let index = 0; index < AHS_PROVINCES.length; index++) {
+      emit(23, {
+        indicator: 'erosion_control_measure_use',
+        label: 'Agricultural households by erosion control measure',
+        category,
+        geography: { level: 'province', name: AHS_PROVINCES[index] },
+        rawValue: cells[index],
+      })
+    }
+    emit(23, {
+      indicator: 'erosion_control_measure_use',
+      label: 'Agricultural households by erosion control measure',
+      category,
+      geography: { level: 'national', name: 'Rwanda' },
+      rawValue: cells[7],
+    })
+  }
+
+  for (const [tableNumber, indicator, label, categories] of [
+    [24, 'irrigation_technique_use', 'Agricultural households by irrigation technique', AHS_IRRIGATION_TECHNIQUES],
+    [25, 'irrigation_water_source_use', 'Agricultural households by irrigation water source', AHS_IRRIGATION_WATER_SOURCES],
+  ]) {
+    const geographies = AHS_GEOGRAPHIES
+    for (const geography of geographies) {
+      const row = rowFor(tableNumber, geography.name)
+      const cells = requireCells(tableNumber, row, categories.length + 1)
+      for (let index = 0; index < categories.length; index++) {
+        emit(tableNumber, {
+          indicator,
+          label,
+          category: categories[index],
+          geography,
+          rawValue: cells[index],
+        })
+      }
+    }
+  }
+
+  for (const geography of AHS_GEOGRAPHIES) {
+    const row = rowFor(26, geography.name)
+    const cells = requireCells(26, row, 5)
+    emit(26, {
+      indicator: 'irrigated_plot_share',
+      label: 'Share of agricultural plots irrigated',
+      geography,
+      rawValue: cells[0],
+    })
+    for (let index = 0; index < 3; index++) {
+      emit(26, {
+        indicator: 'not_irrigated_reason_share',
+        label: 'Reported reason for not irrigating plots',
+        category: ['Not needed', 'Cannot afford', 'No water available'][index],
+        geography,
+        rawValue: cells[index + 1],
+      })
+    }
+  }
+
+  const extensionRow = rowFor(27, 'Households who receive extension services (%)')
+  const extensionCells = requireCells(27, extensionRow, 8)
+  for (let index = 0; index < AHS_PROVINCES.length; index++) {
+    emit(27, {
+      indicator: 'agricultural_extension_use',
+      label: 'Agricultural households with at least one member who received extension services',
+      geography: { level: 'province', name: AHS_PROVINCES[index] },
+      rawValue: extensionCells[index],
+    })
+  }
+  for (const category of AHS_EXTENSION_SERVICES) {
+    const row = getTable(27).rows.find((candidate) => candidate.label.toLowerCase().startsWith(category.slice(0, 32).toLowerCase()))
+    if (!row) throw new Error(`AHS Table 27 row for extension service ${category} is missing`)
+    const cells = requireCells(27, row, 8)
+    for (let index = 0; index < AHS_GEOGRAPHIES.length; index++) {
+      emit(27, {
+        indicator: 'extension_service_use',
+        label: 'Agricultural households receiving extension by service type',
+        category,
+        geography: AHS_GEOGRAPHIES[index],
+        rawValue: cells[index],
+      })
+    }
+  }
+}
+
 function readDistrictNames() {
   const source = fs.readFileSync(DISTRICT_METADATA_PATH, 'utf8')
   const names = [...source.matchAll(/district:\s*'([^']+)'/g)].map((match) => match[1])
@@ -943,6 +1300,7 @@ function readDistrictNames() {
 function validateRecords(records, districts) {
   const keys = new Set()
   const errors = []
+  const provinces = new Set(AHS_PROVINCES.map((province) => province.toLowerCase()))
   for (const record of records) {
     const required = [record.id, record.indicator, record.unit, record.dataset, record.sourceReference?.table, record.source?.sourceUrl]
     if (required.some((value) => typeof value !== 'string' || !value.trim())) errors.push(`Missing required record field: ${record.id}`)
@@ -952,11 +1310,12 @@ function validateRecords(records, districts) {
     if (record.unit === '%' && record.value !== null && record.value > 100) errors.push(`Percentage over 100: ${record.id}`)
     if (record.status !== (record.value === null ? 'unavailable' : 'observed')) errors.push(`Status/value mismatch: ${record.id}`)
     if (record.geography.level === 'district' && !districts.includes(record.geography.name)) errors.push(`Unknown district: ${record.geography.name}`)
+    if (record.geography.level === 'province' && !provinces.has(record.geography.name.toLowerCase())) errors.push(`Unknown province: ${record.geography.name}`)
     if (record.geography.level === 'national' && record.geography.name !== 'Rwanda') errors.push(`Invalid national geography: ${record.geography.name}`)
     if (record.period.season && !['A', 'B', 'C'].includes(record.period.season)) errors.push(`Invalid season: ${record.id}`)
     if (!record.period.year || !/^\d{4}\/\d{2}$/.test(record.period.year)) errors.push(`Invalid agricultural year: ${record.id}`)
     if (!record.source?.sourceUrl.startsWith('https://')) errors.push(`Invalid NISR source URL: ${record.id}`)
-    const key = [record.dataset, record.indicator, record.crop ?? '', record.species ?? '', record.geography.level, record.geography.id, record.period.year, record.period.season ?? ''].join('|')
+    const key = [record.dataset, record.indicator, record.crop ?? '', record.species ?? '', record.category ?? '', record.geography.level, record.geography.id, record.period.year, record.period.season ?? ''].join('|')
     if (keys.has(key)) errors.push(`Duplicate observation key: ${key}`)
     keys.add(key)
   }
@@ -974,6 +1333,7 @@ function main() {
     extractCatalog(inventory, dataset, pages)
     if (dataset.id === 'AHS 2024') {
       extractAhsSummary(dataset, pages, records, inventory)
+      extractAhsProvinceTables(dataset, pages, records, inventory)
       continue
     }
     extractProductTables(dataset, pages, districts, records, inventory)
@@ -1021,11 +1381,30 @@ function main() {
   console.log(JSON.stringify({ datasets, inventoryRows: cleanInventory.length }, null, 2))
 }
 
-try {
-  main()
-} catch (error) {
-  console.error(error instanceof Error ? error.message : error)
-  process.exitCode = 1
+if (process.argv.includes('--inspect-ahs-tables')) {
+  const dataset = DATASETS.find((item) => item.id === 'AHS 2024')
+  const pages = getReportPages(dataset)
+  const tableArgument = process.argv.find((argument) => argument.startsWith('--inspect-ahs-table='))
+  const tableNumber = tableArgument ? Number(tableArgument.split('=')[1]) : undefined
+  if (tableNumber) {
+    console.log(JSON.stringify(extractAhsTableRows(pages, tableNumber).rows, null, 2))
+  } else {
+  const tablePattern = tableNumber
+    ? new RegExp(`\\bTable\\s+${tableNumber}\\s*:`, 'i')
+    : /\bTable\s+(?:19|20|21|22|23|24|25|26|27)\s*:/i
+  console.log(JSON.stringify(pages.filter((page) => tablePattern.test(page.text)).map((page) => ({
+    page: page.printedPage,
+    text: page.text,
+    fragments: page.fragments.map(({ text, x, y }) => ({ text, x, y })),
+  })), null, 2))
+  }
+} else {
+  try {
+    main()
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : error)
+    process.exitCode = 1
+  }
 }
 
 

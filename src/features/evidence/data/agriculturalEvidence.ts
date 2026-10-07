@@ -42,6 +42,7 @@ export function comparisonFor(
     district.indicator !== national.indicator ||
     normalize(district.crop ?? '') !== normalize(national.crop ?? '') ||
     normalize(district.species ?? '') !== normalize(national.species ?? '') ||
+    normalize(district.category ?? '') !== normalize(national.category ?? '') ||
     district.period.year !== national.period.year ||
     district.period.season !== national.period.season ||
     district.period.label !== national.period.label ||
@@ -66,6 +67,7 @@ export function validateEvidenceRecords(
   ),
 ): readonly string[] {
   const errors: string[] = []
+  const knownProvinces = new Set(['kigali', 'south', 'west', 'north', 'east'])
   const observationKeys = new Set<string>()
 
   for (const record of records) {
@@ -111,6 +113,12 @@ export function validateEvidenceRecords(
     ) {
       errors.push(`Unknown district: ${record.geography.name}`)
     }
+    if (
+      record.geography.level === 'province' &&
+      !knownProvinces.has(normalize(record.geography.name))
+    ) {
+      errors.push(`Unknown province: ${record.geography.name}`)
+    }
 
     if (
       record.value !== null &&
@@ -144,6 +152,7 @@ export function validateEvidenceRecords(
       record.indicator,
       normalize(record.crop ?? ''),
       normalize(record.species ?? ''),
+      normalize(record.category ?? ''),
       record.geography.level,
       normalize(record.geography.id),
       record.period.year,

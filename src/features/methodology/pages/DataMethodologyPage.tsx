@@ -15,7 +15,10 @@ function datasetCoverage(dataset: string) {
     observed: records.filter((record) => record.status === 'observed').length,
     unavailable: records.filter((record) => record.status === 'unavailable').length,
     districtRows: records.filter((record) => record.geography.level === 'district').length,
+    provinceRows: records.filter((record) => record.geography.level === 'province').length,
+    nationalRows: records.filter((record) => record.geography.level === 'national').length,
     crops: new Set(records.flatMap((record) => record.crop ? [record.crop] : [])).size,
+    tables: new Set(records.map((record) => record.sourceReference.table)).size,
     seasons: [...new Set(records.flatMap((record) => record.period.season ? [record.period.season] : []))],
   }
 }
@@ -30,10 +33,10 @@ const inventoryCatalogCount = nisrDataInventory.filter(
 const sourceCards = [
   {
     name: 'Agricultural Household Survey 2024',
-    role: 'National household context',
+    role: 'National and province household evidence',
     period: 'Agricultural year 2023/24 · no SAS season',
     detail:
-      `AII connects ${ahsCoverage.records} Table 1 summary indicators at national level (${ahsCoverage.observed} observed and ${ahsCoverage.unavailable} unavailable). Province and crop tables are listed in the inventory but their values are not connected here. AHS remains distinct from SAS.`,
+      `AII connects ${ahsCoverage.records} observations from ${ahsCoverage.tables} AHS tables (${ahsCoverage.observed} observed, ${ahsCoverage.unavailable} unavailable), including national and five-province household indicators plus crop-specific seed-use values. AHS remains distinct from SAS.`,
     href: 'https://www.statistics.gov.rw/data-sources/surveys/Agricultural-Household-Survey/agricultural-household-survey-2024',
   },
   {
@@ -193,6 +196,8 @@ export function DataMethodologyPage() {
                 <div className="flex justify-between gap-3"><dt className="text-slate-500">Observed</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.observed.toLocaleString()}</dd></div>
                 <div className="flex justify-between gap-3"><dt className="text-slate-500">Unavailable</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.unavailable.toLocaleString()}</dd></div>
                 <div className="flex justify-between gap-3"><dt className="text-slate-500">District rows</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.districtRows.toLocaleString()}</dd></div>
+                {coverage.provinceRows > 0 && <div className="flex justify-between gap-3"><dt className="text-slate-500">Province rows</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.provinceRows.toLocaleString()}</dd></div>}
+                {coverage.nationalRows > 0 && <div className="flex justify-between gap-3"><dt className="text-slate-500">National rows</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.nationalRows.toLocaleString()}</dd></div>}
                 {coverage.crops > 0 && <div className="flex justify-between gap-3"><dt className="text-slate-500">Crop labels</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.crops}</dd></div>}
               </dl>
             </article>
@@ -202,7 +207,7 @@ export function DataMethodologyPage() {
           The generated inventory contains {nisrDataInventory.length.toLocaleString()} observation and table-catalog entries. {inventoryCatalogCount} report tables are catalogued but not cell-extracted; their presence in a report is not treated as connected evidence.
         </p>
         <p className="mt-2 text-xs leading-5 text-slate-500">
-          Connected indicators include crop cultivated area, yield, production, improved-seed use, organic and inorganic fertilizer use, pesticide use, irrigation, erosion control, mechanical equipment, and agroforestry. AHS 2024 adds national household percentages for agricultural association membership, extension, kitchen gardens, fertilizer and pesticide risk awareness, livestock ownership by species, and beekeeping. These AHS measures are not district observations.
+          Connected indicators include seasonal crop cultivated area, yield, and production; seed, fertilizer, and pesticide use; irrigation practice; erosion control; agroforestry; and mechanical equipment. AHS 2024 adds province and national input, crop-specific seed-use, practice, erosion-control, irrigation, and extension records, plus national household context for association membership, kitchen gardens, risk awareness, livestock ownership by species, and beekeeping. AHS values are never expanded to district geography.
         </p>
       </MethodologySection>
 
@@ -223,8 +228,10 @@ export function DataMethodologyPage() {
               AII displays a district figure only when a NISR table reports
               that indicator for the district. SAS 2024 and SAS 2025 connected
               crop and practice tables contain district and national rows.
-              AHS Table 1 contributes national summary values only. No
-              province value is copied down to districts.
+              AHS Tables 1 and 19–27 contribute national and province values,
+              including crop-specific seed-use values. AHS does not provide
+              district observations in the connected tables, and no province
+              value is copied down to districts.
             </p>
           </article>
           <article className="rounded-xl border border-slate-200 bg-white p-5">
@@ -313,12 +320,13 @@ export function DataMethodologyPage() {
           {[
             'SAS 2024 and SAS 2025 remain separate datasets for 2023/24 and 2024/25. AII does not calculate trends across them.',
             'Crop columns differ by season in the reports. A crop without an observed row in a selected period remains unavailable.',
-            'AHS 2024 Table 1 contributes national summary rows without a SAS season. The listed province and crop tables are catalogued but are not cell-extracted in this release.',
-            'The AHS 2024 Table 1 values for agroforestry, mechanical equipment, agricultural extension, two environmental-risk awareness indicators, and beekeeping are unavailable for 2024.',
-            'No province-level observations are currently connected. National and district records keep their published geography.',
+            'AHS 2024 uses an annual 2023/24 reference period without SAS seasons. Its connected records preserve table populations and province or national geography; no AHS district observations are connected.',
+            'AHS crop-specific improved-seed percentages describe crop-growing households and are not crop yield or production values.',
+            'AHS irrigation techniques, water sources, and plot reasons retain each table’s household or plot denominator. They are not merged with SAS farmer-practice percentages.',
             'District-wide irrigation practice covers agricultural activity across crops. It is not maize-specific or linked to the farmers represented by the yield estimate.',
             'A yield gap does not identify its cause. The irrigation screen is a same-period comparison for investigation, not evidence of causality or predicted impact.',
-            'Connected soil and environmental evidence is limited to reported practices such as erosion control and agroforestry. Soil quality, post-harvest loss, storage, processing, credit, and export indicators are not connected.',
+            'Soil/environment evidence covers reported practices and erosion-control methods, not soil quality or erosion outcomes. Post-harvest handling/storage appears as an AHS extension-service category; loss rates, storage capacity, processing, credit access, and export indicators are not connected.',
+            'AHS livestock evidence is ownership share by species. Livestock product volumes such as milk, meat, eggs, or honey are not connected.',
           ].map((limitation) => (
             <li
               className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-600"

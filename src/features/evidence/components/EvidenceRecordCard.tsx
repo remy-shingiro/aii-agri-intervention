@@ -45,6 +45,11 @@ export function EvidenceRecordCard({
           <h2 className="mt-1 text-base font-semibold text-slate-900">
             {record.geography.name}
           </h2>
+          {record.category && (
+            <p className="mt-1 break-words text-xs leading-5 text-slate-600">
+              Category: <span className="font-medium text-slate-800">{record.category}</span>
+            </p>
+          )}
           <p className="mt-1 text-xs text-slate-500">
             {record.geography.level === 'national'
               ? 'National · '

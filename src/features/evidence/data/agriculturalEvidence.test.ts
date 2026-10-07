@@ -19,6 +19,7 @@ function findRecord(
   geography: string,
   season: string | undefined,
   crop?: string,
+  category?: string,
 ) {
   return normalizedEvidenceRecords.find(
     (record) =>
@@ -26,7 +27,8 @@ function findRecord(
       record.indicator === indicator &&
       record.geography.name === geography &&
       record.period.season === season &&
-      record.crop === crop,
+      record.crop === crop &&
+      record.category === category,
   )
 }
 
@@ -90,8 +92,45 @@ describe('normalized NISR agricultural evidence', () => {
     expect(
       findRecord('AHS 2024', 'beekeeping', 'Rwanda', undefined),
     ).toMatchObject({ value: 4.8, status: 'observed' })
-    expect(normalizedEvidenceRecords.some((record) => record.geography.level === 'province')).toBe(false)
+    expect(normalizedEvidenceRecords.some((record) => record.geography.level === 'province')).toBe(true)
     expect(nisrDataInventory.some((record) => record.geographyLevel === 'province')).toBe(true)
+  })
+
+  it('keeps AHS crop, province, irrigation, and extension evidence at source geography', () => {
+    const southIrrigation = findRecord('AHS 2024', 'irrigation_practice', 'South', undefined)
+    expect(southIrrigation).toMatchObject({
+      value: 19.2,
+      unit: '%',
+      geography: { level: 'province', name: 'South' },
+      period: { year: '2023/24' },
+      sourceReference: { page: 28, table: expect.stringContaining('Table 22') },
+    })
+    expect(southIrrigation?.period.season).toBeUndefined()
+    expect(findRecord('AHS 2024', 'improved_seed_use', 'East', undefined, 'Maize')).toMatchObject({
+      value: 75.1,
+      sourceReference: { page: 27, table: expect.stringContaining('Table 20') },
+    })
+    expect(findRecord(
+      'AHS 2024',
+      'irrigation_technique_use',
+      'East',
+      undefined,
+      undefined,
+      'Flood irrigation',
+    )).toMatchObject({ value: 45.1, geography: { level: 'province' } })
+    expect(findRecord(
+      'AHS 2024',
+      'extension_service_use',
+      'South',
+      undefined,
+      undefined,
+      'Post-harvest handling and storage',
+    )).toMatchObject({ value: 15.2, sourceReference: { page: 33 } })
+    expect(findRecord('AHS 2024', 'improved_seed_use', 'Kigali', undefined, 'Wheat'))
+      .toMatchObject({ value: null, status: 'unavailable' })
+    expect(normalizedEvidenceRecords.some(
+      (record) => record.dataset === 'AHS 2024' && record.geography.level === 'district',
+    )).toBe(false)
   })
 
   it('preserves units and NISR provenance on every observed record', () => {
@@ -187,7 +226,7 @@ describe('normalized NISR agricultural evidence', () => {
     })).toContain('Maize')
     expect(getAvailableCrops(normalizedEvidenceRecords, {
       year: '2023/24',
-    })).toEqual([])
+    })).toHaveLength(8)
   })
 
   it('preserves the existing SAS 2025 irrigation signal and unavailable case', () => {

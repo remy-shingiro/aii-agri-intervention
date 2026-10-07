@@ -150,6 +150,7 @@ export function EvidencePage({
           districtRecord.indicator === record.indicator &&
           districtRecord.crop === record.crop &&
           districtRecord.species === record.species &&
+          districtRecord.category === record.category &&
           districtRecord.period.year === record.period.year &&
           districtRecord.period.season === record.period.season &&
           districtRecord.period.label === record.period.label &&

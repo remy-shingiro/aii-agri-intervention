@@ -28,6 +28,13 @@ export type EvidenceIndicator =
   | 'pesticide_risk_awareness'
   | 'livestock_ownership'
   | 'beekeeping'
+  | 'inorganic_fertilizer_source_use'
+  | 'erosion_control_measure_use'
+  | 'irrigation_technique_use'
+  | 'irrigation_water_source_use'
+  | 'irrigated_plot_share'
+  | 'not_irrigated_reason_share'
+  | 'extension_service_use'
 
 export interface EvidenceRecord {
   readonly id: string
@@ -36,6 +43,7 @@ export interface EvidenceRecord {
   readonly crop?: string
   readonly sourceCrop?: string
   readonly species?: string
+  readonly category?: string
   readonly value: number | null
   readonly unit: string
   readonly geography: {
@@ -70,6 +78,7 @@ export interface NISRDataInventoryRecord {
   readonly table: string
   readonly indicator: string
   readonly crop?: string
+  readonly category?: string
   readonly geographyLevel: 'national' | 'province' | 'district' | 'other'
   readonly geography?: string
   readonly year: string
