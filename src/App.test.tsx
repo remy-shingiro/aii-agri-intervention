@@ -4,10 +4,13 @@ import {
   fireEvent,
   render,
   screen,
+  within,
   waitFor,
 } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
+import { evidenceRecords } from './features/evidence/data/evidenceRecords'
+import { calculateNationalIntelligence } from './features/intelligence/nationalIntelligence'
 
 vi.mock('./features/overview/components/RwandaMapPanel', () => ({
   RwandaMapPanel: () => <div aria-label="Rwanda district map" role="region" />,
@@ -46,7 +49,51 @@ describe('application shell', () => {
     expect(
       screen.getByRole('region', { name: 'Rwanda district map' }),
     ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'National Agricultural Intelligence' }),
+    ).toBeInTheDocument()
     expect(screen.queryByText('481,246 tonnes')).not.toBeInTheDocument()
+  })
+
+  it('keeps the national scope when searching a district and follows crop filters', async () => {
+    render(<App />)
+
+    const districtsAnalyzedCard = screen
+      .getByRole('heading', { name: 'Districts analyzed' })
+      .closest('article')
+    expect(districtsAnalyzedCard).not.toBeNull()
+    if (!districtsAnalyzedCard) return
+
+    const initialCardText = districtsAnalyzedCard.textContent
+    const search = screen.getByRole('combobox', { name: 'Search district' })
+    fireEvent.change(search, { target: { value: 'Nyarugenge' } })
+    await waitFor(() => {
+      expect(
+        screen.getByRole('option', { name: 'Nyarugenge' }),
+      ).toBeInTheDocument()
+    })
+    expect(districtsAnalyzedCard).toHaveTextContent(initialCardText ?? '')
+
+    const sorghumSummary = calculateNationalIntelligence(evidenceRecords, {
+      crop: 'sorghum',
+      season: 'A',
+      year: '2024/25',
+    })
+    fireEvent.change(screen.getByLabelText('Crop'), {
+      target: { value: 'sorghum' },
+    })
+
+    expect(districtsAnalyzedCard).toHaveTextContent(
+      `of ${sorghumSummary.districtsInScope} districts with selected-period yield records`,
+    )
+    expect(districtsAnalyzedCard).toHaveTextContent(
+      `${sorghumSummary.insufficientEvidenceCount} lack a comparable reference`,
+    )
+    expect(
+      within(districtsAnalyzedCard).getByText(
+        String(sorghumSummary.districtsAnalyzed),
+      ),
+    ).toBeInTheDocument()
   })
 
   it('opens a district profile from keyboard district search', async () => {
