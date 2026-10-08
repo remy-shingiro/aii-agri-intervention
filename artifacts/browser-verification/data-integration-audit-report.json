@@ -1,0 +1,293 @@
+{
+  "browser": "Chrome headless via Chrome DevTools Protocol",
+  "overviewInitial": {
+    "title": "Rwanda Agricultural Overview",
+    "hasConnectedYield": false,
+    "hasDefaultMockTotal": false,
+    "cropOptions": [
+      "Banana for beer",
+      "Bananas",
+      "Beans",
+      "Bush bean",
+      "Cassava",
+      "Climbing bean",
+      "Cooking banana",
+      "Dessert banana",
+      "Fodder crops",
+      "Fruits",
+      "Ground nuts",
+      "Irish potatoes",
+      "Maize",
+      "Other cereals",
+      "Other crops",
+      "Paddy rice",
+      "Peas",
+      "Sorghum",
+      "Soya beans",
+      "Sweet potatoes",
+      "Vegetables",
+      "Wheat",
+      "Yams & Taro"
+    ]
+  },
+  "selectedOverview": {
+    "district": "Nyarugenge",
+    "productivityVisible": true,
+    "hasRealYieldFormatting": true
+  },
+  "profileSupported": {
+    "title": "Nyarugenge",
+    "signal": true,
+    "sourceLinks": [
+      "https://www.statistics.gov.rw/sites/default/files/documents/2025-12/SAS%202025%20Final%20report.pdf",
+      "https://www.statistics.gov.rw/sites/default/files/documents/2025-12/SAS%202025%20Final%20report.pdf",
+      "https://www.statistics.gov.rw/sites/default/files/documents/2025-12/SAS%202025%20Final%20report.pdf",
+      "https://www.statistics.gov.rw/sites/default/files/documents/2025-12/SAS%202025%20Final%20report.pdf"
+    ]
+  },
+  "evidenceTrailChecks": {
+    "districtYield": true,
+    "nationalYield": true,
+    "districtIrrigation": true,
+    "nationalIrrigation": true,
+    "sourceLinks": 4
+  },
+  "alternatePeriod": {
+    "productivityVisible": true,
+    "unavailable": false,
+    "filters": {
+      "crop": "beans",
+      "season": "season-b",
+      "year": "2023-24"
+    },
+    "insight": "DISTRICT EVIDENCE\n\nProductivity comparison\nModerate\n\nNyarugenge · Beans · Season B · 2023/24\n\nYield gap relative to same-period national reference\n\n-16.7%\n\nDerived from the observed district and national values in the same NISR dataset, year, season, and unit.\n\nDistrict yield · observed\n0.61 t/ha\nNational reference · observed\n0.74 t/ha\nProduction · observed\n988 tonnes\nTable 22: 2024 Season B_Crop production by crop type and district (MT)\nCultivated area · observed\n1,611 ha\nTable 11: 2024 Season B_Cultivated area by crop type and district (Ha)\nDistrict-wide irrigation practice · observed\n2.9%\nTable 62: 2024 Season B Percentage of farmers who practiced agricultural practices\nNational reference: 12.1% · Difference: -9.2 percentage points\nOpen district profile\n\nSOURCE\n\nSeasonal Agricultural Survey, Annual Report 2024\n\nTable 17: 2024 Season B_Average yield by crop type and district (Kg/Ha) · p. 35",
+    "observedBeansValue": true
+  },
+  "unavailableOverview": {
+    "unavailable": true,
+    "sorghumFallback": false
+  },
+  "evidenceSas": {
+    "count": "46 records",
+    "visibleSource": true,
+    "sourceLinkCount": 46,
+    "allOfficial": true
+  },
+  "evidenceAhs": {
+    "count": "20 records",
+    "hasAhs": true,
+    "hasAnnualNoSeason": true,
+    "valueVisible": true,
+    "cardGeographies": [
+      "Rwanda",
+      "Rwanda",
+      "Rwanda",
+      "Rwanda",
+      "Rwanda",
+      "Rwanda",
+      "Rwanda",
+      "Rwanda",
+      "Rwanda",
+      "Rwanda",
+      "Rwanda",
+      "Rwanda",
+      "Rwanda",
+      "Rwanda",
+      "Rwanda",
+      "Rwanda",
+      "Rwanda",
+      "Rwanda",
+      "Rwanda",
+      "Rwanda"
+    ],
+    "hasDistrictFallback": false
+  },
+  "methodology": {
+    "hasAhs": true,
+    "hasSas24": true,
+    "hasSas25": true,
+    "hasNoAhsSeason": true,
+    "hasEicvDistinction": true,
+    "beekeepingClaimFixed": true
+  },
+  "responsive": {
+    "overview": [
+      {
+        "width": 320,
+        "documentWidth": 320,
+        "horizontalOverflow": false,
+        "activePage": "Rwanda Agricultural Overview"
+      },
+      {
+        "width": 375,
+        "documentWidth": 360,
+        "horizontalOverflow": false,
+        "activePage": "Rwanda Agricultural Overview"
+      },
+      {
+        "width": 390,
+        "documentWidth": 375,
+        "horizontalOverflow": false,
+        "activePage": "Rwanda Agricultural Overview"
+      },
+      {
+        "width": 768,
+        "documentWidth": 753,
+        "horizontalOverflow": false,
+        "activePage": "Rwanda Agricultural Overview"
+      },
+      {
+        "width": 1024,
+        "documentWidth": 1009,
+        "horizontalOverflow": false,
+        "activePage": "Rwanda Agricultural Overview"
+      },
+      {
+        "width": 1280,
+        "documentWidth": 1265,
+        "horizontalOverflow": false,
+        "activePage": "Rwanda Agricultural Overview"
+      },
+      {
+        "width": 1440,
+        "documentWidth": 1425,
+        "horizontalOverflow": false,
+        "activePage": "Rwanda Agricultural Overview"
+      }
+    ],
+    "districtProfile": [
+      {
+        "width": 320,
+        "documentWidth": 320,
+        "horizontalOverflow": false,
+        "activePage": "Nyarugenge"
+      },
+      {
+        "width": 375,
+        "documentWidth": 360,
+        "horizontalOverflow": false,
+        "activePage": "Nyarugenge"
+      },
+      {
+        "width": 390,
+        "documentWidth": 375,
+        "horizontalOverflow": false,
+        "activePage": "Nyarugenge"
+      },
+      {
+        "width": 768,
+        "documentWidth": 753,
+        "horizontalOverflow": false,
+        "activePage": "Nyarugenge"
+      },
+      {
+        "width": 1024,
+        "documentWidth": 1009,
+        "horizontalOverflow": false,
+        "activePage": "Nyarugenge"
+      },
+      {
+        "width": 1280,
+        "documentWidth": 1265,
+        "horizontalOverflow": false,
+        "activePage": "Nyarugenge"
+      },
+      {
+        "width": 1440,
+        "documentWidth": 1425,
+        "horizontalOverflow": false,
+        "activePage": "Nyarugenge"
+      }
+    ],
+    "evidenceExplorer": [
+      {
+        "width": 320,
+        "documentWidth": 320,
+        "horizontalOverflow": false,
+        "activePage": "Evidence explorer"
+      },
+      {
+        "width": 375,
+        "documentWidth": 360,
+        "horizontalOverflow": false,
+        "activePage": "Evidence explorer"
+      },
+      {
+        "width": 390,
+        "documentWidth": 375,
+        "horizontalOverflow": false,
+        "activePage": "Evidence explorer"
+      },
+      {
+        "width": 768,
+        "documentWidth": 753,
+        "horizontalOverflow": false,
+        "activePage": "Evidence explorer"
+      },
+      {
+        "width": 1024,
+        "documentWidth": 1009,
+        "horizontalOverflow": false,
+        "activePage": "Evidence explorer"
+      },
+      {
+        "width": 1280,
+        "documentWidth": 1265,
+        "horizontalOverflow": false,
+        "activePage": "Evidence explorer"
+      },
+      {
+        "width": 1440,
+        "documentWidth": 1425,
+        "horizontalOverflow": false,
+        "activePage": "Evidence explorer"
+      }
+    ],
+    "methodology": [
+      {
+        "width": 320,
+        "documentWidth": 320,
+        "horizontalOverflow": false,
+        "activePage": "Data & Methodology"
+      },
+      {
+        "width": 375,
+        "documentWidth": 360,
+        "horizontalOverflow": false,
+        "activePage": "Data & Methodology"
+      },
+      {
+        "width": 390,
+        "documentWidth": 375,
+        "horizontalOverflow": false,
+        "activePage": "Data & Methodology"
+      },
+      {
+        "width": 768,
+        "documentWidth": 753,
+        "horizontalOverflow": false,
+        "activePage": "Data & Methodology"
+      },
+      {
+        "width": 1024,
+        "documentWidth": 1009,
+        "horizontalOverflow": false,
+        "activePage": "Data & Methodology"
+      },
+      {
+        "width": 1280,
+        "documentWidth": 1265,
+        "horizontalOverflow": false,
+        "activePage": "Data & Methodology"
+      },
+      {
+        "width": 1440,
+        "documentWidth": 1425,
+        "horizontalOverflow": false,
+        "activePage": "Data & Methodology"
+      }
+    ]
+  },
+  "runtimeOrConsoleErrors": [],
+  "failedLocalRequests": []
+}
