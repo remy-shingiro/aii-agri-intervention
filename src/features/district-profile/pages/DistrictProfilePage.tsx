@@ -3,15 +3,17 @@ import { ArrowLeft, ArrowRight, MapPin } from 'lucide-react'
 
 import { EvidenceStatusBadge } from '../../evidence/components/EvidenceStatusBadge'
 import { evidenceRecords } from '../../evidence/data/evidenceRecords'
-import type { AgriculturalSeason } from '../../../types/data-contract'
 import type {
-  InterventionSignal,
-  InterventionType,
-} from '../../../types/intervention'
+  AgriculturalSignal,
+  IrrigationInvestigationSignal,
+  ProductivityGapStatus,
+  ProductivityTrendSignal,
+} from '../../../types/agricultural-signal'
+import type { AgriculturalSeason } from '../../../types/data-contract'
+import type { InterventionSignal } from '../../../types/intervention'
 import type { EvidenceRecord } from '../../evidence/types/evidence.types'
 import { getDistrictInsight } from '../../overview/data/districtInsights'
-import type { InterventionSignalLevel } from '../../overview/types/interventionSignal.types'
-import { calculateInterventionSignals } from '../../overview/utils/calculateCandidateIntervention'
+import { calculateAgriculturalSignals } from '../../intelligence/agriculturalSignalEngine'
 import { getDistrictMetadata } from '../data/districtMetadata'
 import {
   getIrrigationEvidenceTrail,
@@ -23,17 +25,9 @@ interface DistrictProfilePageProps {
   season: string
   selectedDistrict?: string
   year: string
-  onOpenEvidence: (signal?: InterventionSignal) => void
+  onOpenEvidence: (signal?: AgriculturalSignal) => void
   onNavigateOverview: () => void
   onNavigateMethodology: () => void
-}
-
-const interventionLabels: Record<InterventionType, string> = {
-  irrigation: 'Irrigation',
-  soil_fertility: 'Soil fertility',
-  post_harvest: 'Post-harvest collection and storage',
-  processing: 'Processing and value addition',
-  export: 'Export opportunities',
 }
 
 function getCropLabel(value: string): string {
@@ -273,8 +267,8 @@ function InterventionAreas({
   onOpenEvidence,
   onNavigateMethodology,
 }: {
-  signals: readonly InterventionSignal[]
-  onOpenEvidence: (signal?: InterventionSignal) => void
+  signals: readonly IrrigationInvestigationSignal[]
+  onOpenEvidence: (signal?: AgriculturalSignal) => void
   onNavigateMethodology: () => void
 }) {
   return (
@@ -284,26 +278,21 @@ function InterventionAreas({
           className="text-base font-semibold text-slate-900"
           id="intervention-areas-heading"
         >
-          Potential Intervention Areas
+          Investigation Areas
         </h2>
         <p className="mt-1 text-sm leading-6 text-slate-600">
-          These deterministic evidence screens identify areas for further
-          investigation. They do not establish causes or recommend investment.
+          Evidence conditions identify areas for further investigation. They
+          do not establish causes or recommend investment.
         </p>
       </div>
 
       <div className="grid min-w-0 gap-3 md:grid-cols-2">
         {signals.map((signal) => {
-          const trail =
-            signal.intervention === 'irrigation'
-              ? getIrrigationEvidenceTrail(signal, evidenceRecords)
-              : undefined
+          const trail = getIrrigationEvidenceTrail(signal, evidenceRecords)
           const trailAvailable = trail?.status === 'available'
-          const supported =
-            signal.status === 'supported' &&
-            (signal.intervention !== 'irrigation' || trailAvailable)
+          const supported = signal.status === 'supported' && trailAvailable
           const insufficient =
-            signal.intervention === 'irrigation' && !trailAvailable
+            signal.status === 'insufficient_evidence' || !trailAvailable
 
           return (
             <article
@@ -312,11 +301,11 @@ function InterventionAreas({
                   ? 'border-green-200 bg-green-50/70'
                   : 'border-slate-200 bg-white'
               }`}
-              key={signal.intervention}
+              key={signal.id}
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <h3 className="min-w-0 text-sm font-semibold text-slate-900">
-                  {signal.title || interventionLabels[signal.intervention]}
+                  {signal.title}
                 </h3>
                 <span
                   className={`inline-flex min-h-7 shrink-0 items-center rounded-md px-2.5 py-1 text-xs font-semibold ring-1 ${
@@ -329,16 +318,11 @@ function InterventionAreas({
                     ? 'Investigation signal'
                     : insufficient
                       ? 'Insufficient connected NISR evidence'
-                      : signal.intervention === 'irrigation'
-                        ? 'Signal conditions not met'
-                        : 'Evidence insufficient'}
+                      : 'Signal conditions not met'}
                 </span>
               </div>
 
-              {(supported ||
-                (signal.intervention === 'irrigation' &&
-                  trailAvailable &&
-                  signal.status !== 'supported')) && (
+              {signal.rationale.length > 0 && (
                 <ul className="mt-3 space-y-1.5 text-sm leading-6 text-slate-700">
                   {signal.rationale.map((reason) => (
                     <li className="flex gap-2" key={reason}>
@@ -354,7 +338,7 @@ function InterventionAreas({
                 </ul>
               )}
 
-              {supported && trail?.status === 'available' ? (
+              {supported && trail.status === 'available' ? (
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-green-200 pt-3">
                   <p className="text-xs text-slate-600">
                     {trail.evidenceIds.length} connected NISR observations
@@ -367,19 +351,19 @@ function InterventionAreas({
                   unless all four same-period observations and their source
                   references are available.
                 </p>
-              ) : signal.intervention === 'irrigation' ? (
+              ) : signal.status === 'conditions_not_met' ? (
                 <p className="mt-3 border-t border-slate-200 pt-3 text-xs leading-5 text-slate-600">
                   The connected observations do not meet both conditions for
                   this investigation signal.
                 </p>
               ) : (
                 <p className="mt-4 border-t border-slate-200 pt-3 text-xs leading-5 text-slate-500">
-                  No connected evidence currently supports a district-specific
-                  intervention signal.
+                  The signal is withheld because all required observations and
+                  source references are not available.
                 </p>
               )}
 
-              {supported && trail?.status === 'available' && (
+              {supported && trail.status === 'available' && (
                 <IrrigationEvidenceTrailContent
                   irrigationDifference={trail.irrigationDifference}
                   onNavigateMethodology={onNavigateMethodology}
@@ -389,6 +373,26 @@ function InterventionAreas({
                   yieldDifference={trail.yieldDifference}
                 />
               )}
+              {!supported && trailAvailable && (
+                <button
+                  className="mt-3 inline-flex min-h-10 items-center gap-1 rounded-md px-2 text-xs font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+                  onClick={() => onOpenEvidence(signal)}
+                  type="button"
+                >
+                  View condition evidence
+                  <ArrowRight aria-hidden="true" className="size-3.5" />
+                </button>
+              )}
+              {!supported && insufficient && signal.evidenceIds.length > 0 && (
+                <button
+                  className="mt-3 inline-flex min-h-10 items-center gap-1 rounded-md px-2 text-xs font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+                  onClick={() => onOpenEvidence(signal)}
+                  type="button"
+                >
+                  View available evidence
+                  <ArrowRight aria-hidden="true" className="size-3.5" />
+                </button>
+              )}
             </article>
           )
         })}
@@ -397,26 +401,93 @@ function InterventionAreas({
   )
 }
 
-function getSignalLabel(level: InterventionSignalLevel): string {
-  switch (level) {
-    case 'attention':
-      return 'Attention'
-    case 'moderate':
-      return 'Moderate'
-    case 'near-reference':
-      return 'Near reference'
+function getSignalLabel(status: ProductivityGapStatus): string {
+  switch (status) {
+    case 'below_reference':
+      return 'Below national reference'
+    case 'at_reference':
+      return 'At national reference'
+    case 'above_reference':
+      return 'Above national reference'
+    case 'insufficient_evidence':
+      return 'Insufficient evidence'
   }
 }
 
-function getSignalClasses(level: InterventionSignalLevel): string {
-  switch (level) {
-    case 'attention':
-      return 'bg-red-50 text-red-800 ring-1 ring-red-200'
-    case 'moderate':
+function getSignalClasses(status: ProductivityGapStatus): string {
+  switch (status) {
+    case 'below_reference':
       return 'bg-amber-50 text-amber-900 ring-1 ring-amber-200'
-    case 'near-reference':
+    case 'at_reference':
+      return 'bg-slate-100 text-slate-800 ring-1 ring-slate-200'
+    case 'above_reference':
       return 'bg-green-50 text-green-800 ring-1 ring-green-200'
+    case 'insufficient_evidence':
+      return 'bg-slate-100 text-slate-700 ring-1 ring-slate-200'
   }
+}
+
+function getTrendLabel(status: ProductivityTrendSignal['status']): string {
+  switch (status) {
+    case 'improving':
+      return 'Improving'
+    case 'declining':
+      return 'Declining'
+    case 'relatively_stable':
+      return 'Relatively stable'
+    case 'insufficient_evidence':
+      return 'Insufficient evidence'
+  }
+}
+
+function ProductivityTrendSection({
+  signal,
+  onOpenEvidence,
+}: {
+  signal: ProductivityTrendSignal
+  onOpenEvidence: (signal?: AgriculturalSignal) => void
+}) {
+  return (
+    <section aria-labelledby="yield-trend-heading">
+      <div className="mb-3 flex flex-wrap items-center gap-3">
+        <h2
+          className="text-base font-semibold text-slate-900"
+          id="yield-trend-heading"
+        >
+          Productivity direction
+        </h2>
+        <span className="inline-flex min-h-7 items-center rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-800 ring-1 ring-slate-200">
+          {getTrendLabel(signal.status)}
+        </span>
+      </div>
+      <p className="border-l-2 border-slate-300 py-1 pl-4 text-sm leading-6 text-slate-600">
+        {signal.summary}{' '}
+        {signal.periodsUsed.length > 0
+          ? `Comparable years used: ${signal.periodsUsed.join(', ')}.`
+          : 'At least two comparable agricultural years are required.'}
+      </p>
+      {signal.netChange !== undefined && (
+        <p className="mt-2 text-sm text-slate-700">
+          Earliest to latest change: {signal.netChange > 0 ? '+' : ''}
+          {signal.netChange.toLocaleString('en-RW')} {signal.unit}
+        </p>
+      )}
+      {signal.evidenceIds.length > 0 && (
+        <button
+          className="mt-2 inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+          onClick={() => onOpenEvidence(signal)}
+          type="button"
+        >
+          View trend evidence
+          <ArrowRight aria-hidden="true" className="size-4" />
+        </button>
+      )}
+      <p className="mt-2 text-xs leading-5 text-slate-500">
+        Direction uses latest minus earliest comparable yield. It is not a
+        statistical significance test.
+      </p>
+    </section>
+  )
 }
 
 export function DistrictProfilePage({
@@ -465,10 +536,11 @@ export function DistrictProfilePage({
     year: year.replace('-', '/'),
     season: getSeasonCode(season),
   }
-  const interventionSignals = calculateInterventionSignals(
+  const [productivityGap, productivityTrend, irrigationSignal] = calculateAgriculturalSignals(
     evidenceRecords,
     period,
   )
+  const irrigationSignals = [irrigationSignal]
 
   if (!insight || insight.source.kind !== 'nisr') {
     const metadata = getDistrictMetadata(selectedDistrict)
@@ -522,19 +594,38 @@ export function DistrictProfilePage({
         >
           <EvidenceStatusBadge status="unavailable" />
           <h2 className="mt-3 text-base font-semibold text-slate-900">
-            No connected district observations for this period
+            Insufficient connected NISR evidence
           </h2>
           <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
-            There is no observed district yield for this exact crop, season,
-            and agricultural year. AII does not carry a value from another
+            {productivityGap.summary} AII does not carry a value from another
             period, crop, dataset, or geography.
           </p>
+          <ul className="mt-3 space-y-1 text-sm leading-6 text-slate-600">
+            {productivityGap.rationale.map((reason) => (
+              <li key={reason}>{reason}</li>
+            ))}
+          </ul>
+          {productivityGap.evidenceIds.length > 0 && (
+            <button
+              className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+              onClick={() => onOpenEvidence(productivityGap)}
+              type="button"
+            >
+              View available productivity evidence
+              <ArrowRight aria-hidden="true" className="size-4" />
+            </button>
+          )}
         </section>
+
+        <ProductivityTrendSection
+          onOpenEvidence={onOpenEvidence}
+          signal={productivityTrend}
+        />
 
         <InterventionAreas
           onNavigateMethodology={onNavigateMethodology}
           onOpenEvidence={onOpenEvidence}
-          signals={interventionSignals}
+          signals={irrigationSignals}
         />
       </div>
     )
@@ -542,7 +633,7 @@ export function DistrictProfilePage({
 
   const metadata = getDistrictMetadata(insight.district)
   const source = insight.source
-  const signal = insight.interventionSignal
+  const signal = productivityGap
 
   return (
     <div className="space-y-8">
@@ -598,29 +689,34 @@ export function DistrictProfilePage({
                 className="text-base font-semibold text-slate-900"
                 id="district-signal-heading"
               >
-                Productivity signal
+                Productivity Intelligence
               </h2>
               <span
-                className={`inline-flex min-h-7 items-center rounded-md px-2.5 py-1 text-xs font-semibold ${getSignalClasses(signal.level)}`}
+                className={`inline-flex min-h-7 items-center rounded-md px-2.5 py-1 text-xs font-semibold ${getSignalClasses(signal.status)}`}
               >
-                {getSignalLabel(signal.level)}
+                {getSignalLabel(signal.status)}
               </span>
             </div>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              The signal compares {insight.crop.toLowerCase()} yield with the
-              NISR national reference for the same dataset and period. It
-              indicates where further investigation may be useful; it does not
-              identify a cause.
+              {signal.summary} Observed NISR district and national yields are
+              compared directly; the result identifies a comparison, not a
+              cause.
             </p>
           </div>
 
           <div className="border-t border-slate-200 pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
             <p className="text-xs font-medium text-slate-600">
-              Yield gap relative to national reference
+              Absolute yield gap · derived
             </p>
             <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900 tabular-nums">
-              {signal.yieldGapPct > 0 ? '+' : ''}
-              {signal.yieldGapPct.toFixed(1)}%
+              {signal.absoluteGap?.toLocaleString('en-RW') ?? 'Unavailable'}{' '}
+              {signal.unit ?? ''}
+            </p>
+            <p className="mt-1 text-xs leading-5 text-slate-600">
+              Relative gap · derived:{' '}
+              {signal.relativeGapPct === undefined
+                ? 'Unavailable'
+                : `${signal.relativeGapPct > 0 ? '+' : ''}${signal.relativeGapPct.toFixed(1)}%`}
             </p>
           </div>
         </div>
@@ -629,19 +725,25 @@ export function DistrictProfilePage({
           <div className="py-3 sm:pr-4">
             <dt className="text-xs text-slate-500">District average yield</dt>
             <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
-              {insight.averageYield}
+              {signal.districtYield === undefined
+                ? 'Unavailable'
+                : `${signal.districtYield.toLocaleString('en-RW')} ${signal.unit}`}
             </dd>
           </div>
           <div className="border-t border-slate-200 py-3 sm:border-t-0 sm:pl-5">
             <dt className="text-xs text-slate-500">National yield reference</dt>
             <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
-              {(signal.referenceYield / 1000).toFixed(3)} t/ha
+              {signal.nationalYield === undefined
+                ? 'Unavailable'
+                : `${signal.nationalYield.toLocaleString('en-RW')} ${signal.unit}`}
             </dd>
           </div>
         </dl>
         <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
           <EvidenceSourceMetadata record={insight.districtYieldRecord} />
-          <EvidenceSourceMetadata record={insight.nationalYieldRecord} />
+          {insight.nationalYieldRecord && (
+            <EvidenceSourceMetadata record={insight.nationalYieldRecord} />
+          )}
         </div>
       </section>
 
@@ -683,21 +785,10 @@ export function DistrictProfilePage({
         </p>
       </section>
 
-      <section aria-labelledby="yield-trend-heading">
-        <div className="mb-3">
-          <h2
-            className="text-base font-semibold text-slate-900"
-            id="yield-trend-heading"
-          >
-            Yield trend
-          </h2>
-        </div>
-        <p className="border-l-2 border-slate-300 py-1 pl-4 text-sm leading-6 text-slate-600">
-          SAS 2024 and SAS 2025 observations are connected as distinct report
-          periods. This profile shows only the selected period; no trend is
-          calculated across different years or datasets.
-        </p>
-      </section>
+      <ProductivityTrendSection
+        onOpenEvidence={onOpenEvidence}
+        signal={productivityTrend}
+      />
 
       <section aria-labelledby="signal-evidence-heading">
         <div className="flex flex-wrap items-end justify-between gap-3">
@@ -709,16 +800,17 @@ export function DistrictProfilePage({
               Evidence behind the signal
             </h2>
             <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
-              Yield gap percentage = (district yield minus national yield)
-              divided by national yield, multiplied by 100. Both inputs are
-              observed in the selected NISR report; the gap is derived.
+              The district yield and national reference are observed in the
+              selected NISR report. Absolute gap = district yield minus
+              national yield; relative gap is calculated only when the national
+              yield is greater than zero.
             </p>
           </div>
           <EvidenceStatusBadge status="derived" />
         </div>
         <button
           className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
-          onClick={() => onOpenEvidence()}
+          onClick={() => onOpenEvidence(signal)}
           type="button"
         >
           View district evidence records
@@ -729,7 +821,7 @@ export function DistrictProfilePage({
       <InterventionAreas
         onNavigateMethodology={onNavigateMethodology}
         onOpenEvidence={onOpenEvidence}
-        signals={interventionSignals}
+        signals={irrigationSignals}
       />
 
       <p className="border-t border-slate-200 pt-4 text-xs leading-5 text-slate-500">

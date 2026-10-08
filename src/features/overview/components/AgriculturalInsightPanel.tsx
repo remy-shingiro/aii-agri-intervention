@@ -1,9 +1,10 @@
+import { useMemo } from 'react'
 import { ArrowRight } from 'lucide-react'
 
 import { evidenceRecords } from '../../evidence/data/evidenceRecords'
+import type { ProductivityGapStatus } from '../../../types/agricultural-signal'
 import type { EvidenceRecord } from '../../evidence/types/evidence.types'
-import { getDistrictInsight, getDistrictInsights } from '../data/districtInsights'
-import type { InterventionSignalLevel } from '../types/interventionSignal.types'
+import { getDistrictInsights } from '../data/districtInsights'
 
 interface AgriculturalInsightPanelProps {
   crop: string
@@ -13,25 +14,29 @@ interface AgriculturalInsightPanelProps {
   onOpenDistrictProfile: () => void
 }
 
-function getSignalLabel(level: InterventionSignalLevel): string {
-  switch (level) {
-    case 'attention':
-      return 'Attention'
-    case 'moderate':
-      return 'Moderate'
-    case 'near-reference':
-      return 'Near reference'
+function getSignalLabel(status: ProductivityGapStatus): string {
+  switch (status) {
+    case 'below_reference':
+      return 'Below national reference'
+    case 'at_reference':
+      return 'At national reference'
+    case 'above_reference':
+      return 'Above national reference'
+    case 'insufficient_evidence':
+      return 'Insufficient evidence'
   }
 }
 
-function getSignalClasses(level: InterventionSignalLevel): string {
-  switch (level) {
-    case 'attention':
-      return 'bg-red-50 text-red-800 ring-1 ring-red-200'
-    case 'moderate':
+function getSignalClasses(status: ProductivityGapStatus): string {
+  switch (status) {
+    case 'below_reference':
       return 'bg-amber-50 text-amber-900 ring-1 ring-amber-200'
-    case 'near-reference':
+    case 'at_reference':
+      return 'bg-slate-100 text-slate-800 ring-1 ring-slate-200'
+    case 'above_reference':
       return 'bg-green-50 text-green-800 ring-1 ring-green-200'
+    case 'insufficient_evidence':
+      return 'bg-slate-100 text-slate-700 ring-1 ring-slate-200'
   }
 }
 
@@ -45,7 +50,7 @@ function formatYield(value: number): string {
   return `${(value / 1000).toFixed(2)} t/ha`
 }
 
-function formatYieldRecord(record: EvidenceRecord): string {
+function formatYieldRecord(record: EvidenceRecord | undefined): string {
   const value = observedValue(record)
   return value === undefined ? 'Unavailable' : formatYield(value)
 }
@@ -64,10 +69,21 @@ export function AgriculturalInsightPanel({
   year,
   onOpenDistrictProfile,
 }: AgriculturalInsightPanelProps) {
-  const periodInsights = getDistrictInsights(crop, season, year)
-  const insight = selectedDistrict
-    ? getDistrictInsight(selectedDistrict, crop, season, year)
-    : undefined
+  const periodInsights = useMemo(
+    () => getDistrictInsights(crop, season, year),
+    [crop, season, year],
+  )
+  const insight = useMemo(
+    () =>
+      selectedDistrict
+        ? periodInsights.find(
+            (item) =>
+              item.district.trim().toLowerCase() ===
+              selectedDistrict.trim().toLowerCase(),
+          )
+        : undefined,
+    [periodInsights, selectedDistrict],
+  )
   const districtIrrigation = insight
     ? evidenceRecords.find(
         (record) =>
@@ -103,7 +119,9 @@ export function AgriculturalInsightPanel({
             </p>
             <h2 className="mt-1 text-base font-semibold tracking-tight text-slate-900">
               {insight
-                ? 'Productivity comparison'
+                ? insight.productivityGap.status === 'insufficient_evidence'
+                  ? 'Productivity evidence'
+                  : 'Productivity comparison'
                 : selectedDistrict && supportsSelectedPeriod
                   ? 'District data unavailable'
                   : supportsSelectedPeriod
@@ -114,9 +132,9 @@ export function AgriculturalInsightPanel({
 
           {insight && (
             <span
-              className={`inline-flex min-h-7 shrink-0 items-center rounded-md px-2.5 py-1 text-xs font-semibold ${getSignalClasses(insight.interventionSignal.level)}`}
+              className={`inline-flex min-h-7 shrink-0 items-center rounded-md px-2.5 py-1 text-xs font-semibold ${getSignalClasses(insight.productivityGap.status)}`}
             >
-              {getSignalLabel(insight.interventionSignal.level)}
+              {getSignalLabel(insight.productivityGap.status)}
             </span>
           )}
         </div>
@@ -130,15 +148,19 @@ export function AgriculturalInsightPanel({
 
             <div className="mt-5 border-y border-slate-200 py-4">
               <p className="text-xs font-medium text-slate-600">
-                Yield gap relative to same-period national reference
+                District − national yield · derived
               </p>
               <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900 tabular-nums">
-                {insight.yieldGapPct > 0 ? '+' : ''}
-                {insight.yieldGapPct.toFixed(1)}%
+                {insight.productivityGap.absoluteGap?.toLocaleString('en-RW') ?? 'Unavailable'}{' '}
+                {insight.productivityGap.unit ?? ''}
               </p>
               <p className="mt-2 text-xs leading-5 text-slate-500">
-                Derived from the observed district and national values in the
-                same NISR dataset, year, season, and unit.
+                Relative gap:{' '}
+                {insight.productivityGap.relativeGapPct === undefined
+                  ? 'Unavailable'
+                  : `${insight.productivityGap.relativeGapPct > 0 ? '+' : ''}${insight.productivityGap.relativeGapPct.toFixed(1)}%`}
+                {' · '}derived from the observed district and national values
+                in the same NISR dataset and period.
               </p>
             </div>
 

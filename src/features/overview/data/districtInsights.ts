@@ -2,10 +2,10 @@ import type {
   AgriculturalObservationSource,
   AgriculturalYieldReference,
 } from '../../../types/data-contract'
+import type { ProductivityGapSignal } from '../../../types/agricultural-signal'
 import { evidenceRecords } from '../../evidence/data/evidenceRecords'
 import type { EvidenceRecord } from '../../evidence/types/evidence.types'
-import type { InterventionSignal } from '../types/interventionSignal.types'
-import { calculateInterventionSignal } from '../utils/calculateInterventionSignal'
+import { calculateProductivityGap } from '../../intelligence/agriculturalSignalEngine'
 
 type NisrSource = Extract<
   AgriculturalObservationSource,
@@ -16,7 +16,7 @@ export interface DistrictInsight {
   district: string
   crop: string
   source: NisrSource
-  nationalYieldReference: AgriculturalYieldReference
+  nationalYieldReference?: AgriculturalYieldReference
   season: string
   year: string
   insight: string
@@ -25,10 +25,9 @@ export interface DistrictInsight {
   cultivatedArea: string
   averageYield: string
   inputUse: string
-  yieldGapPct: number
-  interventionSignal: InterventionSignal
+  productivityGap: ProductivityGapSignal
   districtYieldRecord: EvidenceRecord
-  nationalYieldRecord: EvidenceRecord
+  nationalYieldRecord?: EvidenceRecord
   productionRecord?: EvidenceRecord
   areaRecord?: EvidenceRecord
 }
@@ -49,6 +48,27 @@ function toSeason(value: string): string | undefined {
   })[value]
 }
 
+function periodKey(record: EvidenceRecord): string {
+  return [
+    record.dataset,
+    record.period.year,
+    record.period.season,
+    normalize(record.crop ?? ''),
+    normalize(record.geography.id),
+  ].join('|')
+}
+
+const recordsById = new Map(evidenceRecords.map((record) => [record.id, record]))
+const districtRecordsByPeriod = new Map<string, EvidenceRecord[]>()
+for (const record of evidenceRecords) {
+  if (record.geography.level !== 'district') continue
+  const key = periodKey(record)
+  const group = districtRecordsByPeriod.get(key) ?? []
+  group.push(record)
+  districtRecordsByPeriod.set(key, group)
+}
+const districtInsightsBySelection = new Map<string, DistrictInsight[]>()
+
 function formatValue(record: EvidenceRecord | undefined): string {
   if (record?.status !== 'observed' || record.value === null) {
     return 'Unavailable'
@@ -61,19 +81,6 @@ function formatValue(record: EvidenceRecord | undefined): string {
   return `${formatted} ${unit}`
 }
 
-function createInsight(crop: string, district: string, gap: number): string {
-  if (gap <= -20) {
-    return `${crop} yield in ${district} is ${Math.abs(gap).toFixed(1)}% below the same-period national reference. This is a productivity gap for further investigation.`
-  }
-  if (gap <= -10) {
-    return `${crop} yield in ${district} is ${Math.abs(gap).toFixed(1)}% below the same-period national reference.`
-  }
-  if (gap >= 10) {
-    return `${crop} yield in ${district} is ${gap.toFixed(1)}% above the same-period national reference.`
-  }
-  return `${crop} yield in ${district} is close to the same-period national reference.`
-}
-
 export function getDistrictInsights(
   crop: string,
   season: string,
@@ -82,8 +89,11 @@ export function getDistrictInsights(
   const seasonCode = toSeason(season)
   if (!seasonCode) return []
   const agriculturalYear = toYear(year)
+  const selectionKey = JSON.stringify([normalize(crop), seasonCode, agriculturalYear])
+  const cached = districtInsightsBySelection.get(selectionKey)
+  if (cached) return cached
 
-  return evidenceRecords.flatMap((districtYield) => {
+  const insights = evidenceRecords.flatMap((districtYield) => {
     if (
       districtYield.indicator !== 'average_yield' ||
       districtYield.geography.level !== 'district' ||
@@ -91,79 +101,68 @@ export function getDistrictInsights(
       districtYield.value === null ||
       normalize(districtYield.crop ?? '') !== normalize(crop) ||
       districtYield.period.year !== agriculturalYear ||
-      districtYield.period.season !== seasonCode ||
-      !districtYield.referenceEvidenceId ||
-      districtYield.referenceValue === undefined ||
-      districtYield.referenceValue <= 0
+      districtYield.period.season !== seasonCode
     ) {
       return []
     }
 
-    const nationalYieldRecord = evidenceRecords.find(
-      (record) => record.id === districtYield.referenceEvidenceId,
-    )
-    if (
-      !nationalYieldRecord ||
-      nationalYieldRecord.status !== 'observed' ||
-      nationalYieldRecord.value === null
-    ) {
-      return []
-    }
-
-    const gap =
-      ((districtYield.value - nationalYieldRecord.value) /
-        nationalYieldRecord.value) *
-      100
-    const interventionSignal = calculateInterventionSignal({
-      yield: districtYield.value,
-      referenceYield: nationalYieldRecord.value,
-    })
-    const inPeriod = (record: EvidenceRecord) =>
-      record.dataset === districtYield.dataset &&
-      record.period.year === districtYield.period.year &&
-      record.period.season === districtYield.period.season &&
-      normalize(record.crop ?? '') === normalize(districtYield.crop ?? '') &&
-      record.geography.level === 'district' &&
-      record.geography.id === districtYield.geography.id
-    const productionRecord = evidenceRecords.find(
-      (record) => record.indicator === 'crop_production' && inPeriod(record),
-    )
-    const areaRecord = evidenceRecords.find(
-      (record) => record.indicator === 'cultivated_area' && inPeriod(record),
-    )
-    const nationalYieldReference: AgriculturalYieldReference = {
-      value: nationalYieldRecord.value,
-      unit: 'Kg/Ha',
+    const productivityGap = calculateProductivityGap(evidenceRecords, {
+      district: districtYield.geography.name,
       crop: districtYield.crop ?? crop,
+      year: agriculturalYear,
       season: seasonCode as AgriculturalYieldReference['season'],
-      agriculturalYear,
-      geographyLevel: 'national',
-      source: nationalYieldRecord.source,
-    }
+    })
+    const nationalYieldRecord =
+      productivityGap.status === 'insufficient_evidence'
+        ? undefined
+        : recordsById.get(
+            productivityGap.observedEvidenceIds.find((id) => id !== districtYield.id) ?? '',
+          )
+
+    const supportingRecords = districtRecordsByPeriod.get(periodKey(districtYield)) ?? []
+    const productionRecord = supportingRecords.find(
+      (record) => record.indicator === 'crop_production',
+    )
+    const areaRecord = supportingRecords.find(
+      (record) => record.indicator === 'cultivated_area',
+    )
+    const nationalYieldReference: AgriculturalYieldReference | undefined =
+      nationalYieldRecord?.status === 'observed' && nationalYieldRecord.value !== null
+        ? {
+            value: nationalYieldRecord.value,
+            unit: 'Kg/Ha',
+            crop: districtYield.crop ?? crop,
+            season: seasonCode as AgriculturalYieldReference['season'],
+            agriculturalYear,
+            geographyLevel: 'national',
+            source: nationalYieldRecord.source,
+          }
+        : undefined
 
     return [
       {
         district: districtYield.geography.name,
         crop: districtYield.crop ?? crop,
         source: districtYield.source,
-        nationalYieldReference,
+        ...(nationalYieldReference ? { nationalYieldReference } : {}),
         season: `Season ${seasonCode}`,
         year: agriculturalYear,
-        insight: createInsight(districtYield.crop ?? crop, districtYield.geography.name, gap),
+        insight: productivityGap.summary,
         evidenceLabel: 'View evidence',
         totalProduction: formatValue(productionRecord),
         cultivatedArea: formatValue(areaRecord),
         averageYield: formatValue(districtYield),
         inputUse: 'See connected input observations in Evidence Explorer',
-        yieldGapPct: gap,
-        interventionSignal,
+        productivityGap,
         districtYieldRecord: districtYield,
-        nationalYieldRecord,
+        ...(nationalYieldRecord ? { nationalYieldRecord } : {}),
         ...(productionRecord ? { productionRecord } : {}),
         ...(areaRecord ? { areaRecord } : {}),
       },
     ]
   })
+  districtInsightsBySelection.set(selectionKey, insights)
+  return insights
 }
 
 export function getDistrictInsight(

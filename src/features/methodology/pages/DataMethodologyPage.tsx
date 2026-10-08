@@ -258,7 +258,7 @@ export function DataMethodologyPage() {
       <MethodologySection
         id="signal-method-heading"
         intro="Each step keeps the source observation separate from the calculation and the possible decision it informs."
-        title="How the district signal is made"
+        title="How an evidence signal is made"
       >
         <ol className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
           {signalSteps.map((step) => (
@@ -278,6 +278,85 @@ export function DataMethodologyPage() {
             </li>
           ))}
         </ol>
+      </MethodologySection>
+
+      <MethodologySection
+        id="intelligence-rules-heading"
+        intro="The intelligence engine applies explicit comparison rules to connected observed records. It does not predict outcomes or infer causes."
+        title="Agricultural intelligence calculations"
+      >
+        <div className="grid gap-3 lg:grid-cols-2">
+          <article className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+            <h3 className="text-sm font-semibold text-slate-900">
+              Productivity gap
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Absolute gap = district yield − national yield. Both observations
+              must match crop, season, agricultural year, NISR dataset, and
+              Kg/Ha unit. The status follows the direct comparison: below,
+              equal to, or above the national value. No severity threshold is
+              applied.
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              Relative gap = absolute gap ÷ national yield × 100. It is shown
+              only when the national yield is greater than zero; otherwise the
+              relative gap is unavailable.
+            </p>
+          </article>
+          <article className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+            <h3 className="text-sm font-semibold text-slate-900">
+              Productivity direction
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              At least two distinct agricultural years are required for the
+              same district, crop, season, yield indicator, and unit. Direction
+              is the latest comparable yield minus the earliest comparable
+              yield: a positive result is improving, a negative result is
+              declining, and an exact zero is relatively stable. Missing,
+              duplicate, or incompatible matching periods produce an
+              insufficient-evidence state.
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              This endpoint comparison is descriptive. It does not test
+              statistical significance and does not attribute change to a
+              cause.
+            </p>
+          </article>
+          <article className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+            <h3 className="text-sm font-semibold text-slate-900">
+              Irrigation investigation
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              The signal requires four observed records: district and national
+              maize yield, plus district-wide and national irrigation practice.
+              All records must share a compatible NISR dataset and period;
+              yield crop semantics, irrigation geography, units, and linked
+              national references are validated. The signal is supported only
+              when district yield and district-wide irrigation practice are
+              both below their respective national references.
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">
+              A complete comparison that does not meet both conditions is
+              labeled “Signal conditions not met.” Missing or incompatible
+              evidence is labeled “Insufficient connected NISR evidence.”
+            </p>
+          </article>
+          <article className="rounded-xl border-l-2 border-amber-500 bg-amber-50/60 p-4 sm:p-5">
+            <h3 className="text-sm font-semibold text-slate-900">
+              Interpretation boundary
+            </h3>
+            <p className="mt-2 text-sm leading-6 text-slate-700">
+              Signals identify evidence-supported areas for investigation. They
+              do not establish causal relationships or guarantee intervention
+              outcomes.
+            </p>
+            <p className="mt-2 text-sm leading-6 text-slate-700">
+              AII does not use predictive modelling or AI/ML for these
+              calculations. Each displayed result links to the connected
+              source evidence and shows its observed and derived components.
+            </p>
+          </article>
+        </div>
       </MethodologySection>
 
       <MethodologySection
@@ -319,7 +398,7 @@ export function DataMethodologyPage() {
       >
         <ul className="grid gap-2 sm:grid-cols-2">
           {[
-            'SAS 2024 and SAS 2025 remain separate datasets for 2023/24 and 2024/25. AII does not calculate trends across them.',
+            'SAS 2024 and SAS 2025 remain distinct reports for 2023/24 and 2024/25. Productivity direction compares only the same district, crop, season, yield indicator, and unit across those report periods.',
             'Crop columns differ by season in the reports. A crop without an observed row in a selected period remains unavailable.',
             'AHS 2024 covers agricultural year 2023/24. Its crop-growing tables report AHS Seasons A, B, and C; the annual summary and other connected tables carry no season. No AHS district observations are connected.',
             'AHS crop-specific improved-seed percentages describe crop-growing households and are not crop yield or production values.',

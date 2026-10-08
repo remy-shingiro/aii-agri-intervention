@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import type { AgriculturalSeason } from '../types/data-contract'
-import type { InterventionSignal } from '../types/intervention'
+import type { AgriculturalSignal } from '../types/agricultural-signal'
 import { AppShell } from '../components/layout/AppShell'
 import {
   navigationItems,
@@ -32,7 +32,7 @@ export function App() {
   const [evidenceContext, setEvidenceContext] =
     useState<EvidenceNavigationContext>()
 
-  const openProfileEvidence = (signal?: InterventionSignal) => {
+  const openProfileEvidence = (signal?: AgriculturalSignal) => {
     if (!selectedDistrict) {
       setEvidenceContext(undefined)
       setActivePage('Evidence')
@@ -41,10 +41,14 @@ export function App() {
 
     setEvidenceContext({
       district: selectedDistrict,
-      crop: signal?.period.crop ?? overviewFilters.crop,
+      crop: signal?.crop ?? overviewFilters.crop,
       year: signal?.period.year ?? overviewFilters.year.replace('-', '/'),
       season: signal?.period.season ?? getSeasonCode(overviewFilters.season),
-      intervention: signal?.intervention,
+      intervention:
+        signal?.signalType === 'irrigation_investigation'
+          ? signal.intervention
+          : undefined,
+      signalType: signal?.signalType,
       evidenceIds: signal?.evidenceIds,
     })
     setActivePage('Evidence')

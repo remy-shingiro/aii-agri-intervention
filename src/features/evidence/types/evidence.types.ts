@@ -5,6 +5,7 @@ import type {
 } from '../../../types/data-contract'
 
 import type { InterventionType } from '../../../types/intervention'
+import type { AgriculturalSignalType } from '../../../types/agricultural-signal'
 
 export type EvidenceStatus = 'observed' | 'derived' | 'unavailable'
 
@@ -103,5 +104,6 @@ export interface EvidenceNavigationContext {
   readonly year: string
   readonly season: AgriculturalSeason
   readonly intervention?: InterventionType
+  readonly signalType?: AgriculturalSignalType
   readonly evidenceIds?: readonly string[]
 }

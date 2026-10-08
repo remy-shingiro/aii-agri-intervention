@@ -97,17 +97,16 @@ describe('agricultural data boundary', () => {
       totalProduction: '5,216 tonnes',
       cultivatedArea: '3,298 ha',
       averageYield: '1,582 kg/ha',
-      interventionSignal: {
-        level: 'attention',
-        yield: 1582,
-        referenceYield: nationalReference.value,
+      productivityGap: {
+        signalType: 'productivity_gap',
+        status: 'below_reference',
+        districtYield: 1582,
+        nationalYield: nationalReference.value,
+        absoluteGap: 1582 - nationalReference.value,
       },
     })
-    expect(insight.yieldGapPct).toBeCloseTo(
+    expect(insight.productivityGap.relativeGapPct).toBeCloseTo(
       ((1582 - nationalReference.value) / nationalReference.value) * 100,
-    )
-    expect(insight.interventionSignal.yieldGapPct).toBeCloseTo(
-      insight.yieldGapPct,
     )
   })
 
@@ -145,7 +144,7 @@ describe('agricultural data boundary', () => {
       new URL('./districtInsights.ts', import.meta.url),
       new URL('./agriculturalData.ts', import.meta.url),
       new URL('./maizeObservations.ts', import.meta.url),
-      new URL('../utils/calculateInterventionSignal.ts', import.meta.url),
+      new URL('../../intelligence/agriculturalSignalEngine.ts', import.meta.url),
     ]
 
     for (const sourceUrl of calculationAndBoundaryFiles) {

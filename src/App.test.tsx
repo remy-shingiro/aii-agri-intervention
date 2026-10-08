@@ -75,7 +75,7 @@ describe('application shell', () => {
     expect(screen.queryByText('Improved seed use')).not.toBeInTheDocument()
     expect(
       screen.getByRole('heading', {
-        name: 'Potential Intervention Areas',
+        name: 'Investigation Areas',
       }),
     ).toBeInTheDocument()
   })
@@ -108,7 +108,7 @@ describe('application shell', () => {
 
     expect(screen.getByRole('heading', { name: 'Nyarugenge' })).toBeInTheDocument()
     expect(screen.getByText(/Beans.*Season B.*2023\/24/)).toBeInTheDocument()
-    expect(screen.getByText(/614 kg\/ha/)).toBeInTheDocument()
+    expect(screen.getByText(/614 Kg\/Ha/)).toBeInTheDocument()
     expect(screen.getAllByText(/Table 17: 2024 Season B/)).toHaveLength(2)
 
     fireEvent.click(screen.getByRole('button', { name: 'Overview' }))
@@ -125,7 +125,7 @@ describe('application shell', () => {
 
     expect(
       screen.getByRole('heading', {
-        name: 'No connected district observations for this period',
+        name: 'Insufficient connected NISR evidence',
       }),
     ).toBeInTheDocument()
     expect(screen.queryByText(/614 kg\/ha/)).not.toBeInTheDocument()
@@ -180,7 +180,9 @@ describe('application shell', () => {
       screen.getByRole('button', { name: 'Open district profile' }),
     )
 
-    expect(screen.getByRole('heading', { name: 'Irrigation' })).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'Irrigation investigation' }),
+    ).toBeInTheDocument()
     expect(screen.getByText('Investigation signal')).toBeInTheDocument()
 
     fireEvent.click(
@@ -190,9 +192,9 @@ describe('application shell', () => {
     expect(
       screen.getByRole('heading', { name: 'Irrigation investigation signal' }),
     ).toBeInTheDocument()
-    expect(screen.getByText(/1,338 Kg\/Ha/)).toBeInTheDocument()
-    expect(screen.getByText(/1,985 Kg\/Ha/)).toBeInTheDocument()
-    expect(screen.getByText(/-647 Kg\/Ha/)).toBeInTheDocument()
+    expect(screen.getAllByText(/1,338 Kg\/Ha/)).toHaveLength(2)
+    expect(screen.getAllByText(/1,985 Kg\/Ha/)).toHaveLength(2)
+    expect(screen.getAllByText(/-647 Kg\/Ha/)).toHaveLength(2)
     expect(screen.getByText(/8\.5 %/)).toBeInTheDocument()
     expect(screen.getByText(/13\.4 %/)).toBeInTheDocument()
     expect(screen.getByText(/-4\.9 percentage points/)).toBeInTheDocument()

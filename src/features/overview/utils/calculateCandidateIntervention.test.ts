@@ -100,29 +100,29 @@ describe('evidence-backed intervention screening', () => {
       'fixture-district-irrigation',
       'fixture-national-irrigation',
     ])
-    expect(signal.rationale.join(' ')).toContain(
-      'does not establish that lower irrigation caused the yield gap',
+    expect(signal.limitations.join(' ')).toContain(
+      'does not establish causality',
     )
   })
 
-  it('does not support irrigation when yield is below reference but irrigation is not', () => {
+  it('marks complete evidence conditions as unmet when irrigation is not below reference', () => {
     const signal = getIrrigationSignal(
       createFixtureRecords({ districtIrrigation: 20 }),
     )
 
-    expect(signal.status).toBe('insufficient_evidence')
+    expect(signal.status).toBe('conditions_not_met')
     expect(signal.rationale.join(' ')).toContain(
-      'irrigation practice is not below',
+      'irrigation practice is at or above',
     )
   })
 
-  it('does not support irrigation when irrigation is below reference but yield is not', () => {
+  it('marks complete evidence conditions as unmet when yield is not below reference', () => {
     const signal = getIrrigationSignal(
       createFixtureRecords({ districtYield: 2000 }),
     )
 
-    expect(signal.status).toBe('insufficient_evidence')
-    expect(signal.rationale.join(' ')).toContain('yield is not below')
+    expect(signal.status).toBe('conditions_not_met')
+    expect(signal.rationale.join(' ')).toContain('yield is at or above')
   })
 
   it('keeps irrigation insufficient when district irrigation evidence is missing', () => {
@@ -208,21 +208,13 @@ describe('evidence-backed intervention screening', () => {
     expect(nationalYield?.value).toBe(1985)
   })
 
-  it('keeps soil, post-harvest, processing, and export areas insufficient without connected evidence', () => {
+  it('keeps the existing compatibility adapter limited to its irrigation signal', () => {
     const signals = calculateInterventionSignals(
       createFixtureRecords(),
       context,
     )
 
-    expect(
-      signals
-        .filter((signal) => signal.intervention !== 'irrigation')
-        .map((signal) => [signal.intervention, signal.status]),
-    ).toEqual([
-      ['soil_fertility', 'insufficient_evidence'],
-      ['post_harvest', 'insufficient_evidence'],
-      ['processing', 'insufficient_evidence'],
-      ['export', 'insufficient_evidence'],
-    ])
+    expect(signals).toHaveLength(1)
+    expect(signals[0].intervention).toBe('irrigation')
   })
 })

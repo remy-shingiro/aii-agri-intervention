@@ -1,15 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Map } from 'maplibre-gl'
+import { Map, setWorkerUrl } from 'maplibre-gl'
 import type {
   DataDrivenPropertyValueSpecification,
   MapLayerMouseEvent,
 } from 'maplibre-gl'
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 import { evidenceRecords } from '../../evidence/data/evidenceRecords'
 import type { EvidenceRecord } from '../../evidence/types/evidence.types'
 import type { AgriculturalSeason } from '../../../types/data-contract'
+import type { ProductivityGapStatus } from '../../../types/agricultural-signal'
 import {
   createDistrictMapEvidenceLookup,
   type DistrictMapEvidenceSummary,
@@ -20,7 +22,6 @@ import {
   type DistrictLabelFeature,
 } from '../data/districtLabelAnchors'
 import { getDistrictInsights } from '../data/districtInsights'
-import { getInterventionSignalLevel } from '../utils/calculateInterventionSignal'
 import { AttentionLegend } from './AttentionLegend'
 import { RwandaMapControls } from './RwandaMapControls'
 import { RwandaMapNorthIndicator } from './RwandaMapNorthIndicator'
@@ -40,6 +41,8 @@ const DISTRICT_SOURCE_URL = '/data/rwanda-districts.geojson'
 const SOURCE_ID = 'rwanda-districts'
 const FILL_LAYER_ID = 'rwanda-district-fills'
 const OUTLINE_LAYER_ID = 'rwanda-district-outlines'
+
+setWorkerUrl(maplibreWorkerUrl)
 
 const PROVINCE_LABELS: Readonly<Record<string, string>> = {
   East: 'Eastern Province',
@@ -98,10 +101,6 @@ interface RwandaMapPanelProps {
   onDistrictSelect?: (districtName: string) => void
 }
 
-function getInsightFilters(crop: string, season: string, year: string) {
-  return getDistrictInsights(crop, season, year)
-}
-
 function getCropLabel(value: string): string {
   return value.replace(/\b\w/g, (letter) => letter.toUpperCase())
 }
@@ -144,24 +143,22 @@ function formatSigned(value: number, fractionDigits = 1): string {
   return `${sign}${Math.abs(value).toFixed(fractionDigits)}`
 }
 
-function getDistrictAttentionColor(yieldGapPct: number): string {
-  switch (getInterventionSignalLevel(yieldGapPct)) {
-    case 'attention':
-      return '#ef6a4a'
-    case 'moderate':
-      return '#f3a35c'
-    case 'near-reference':
-      return '#63b36b'
+function getProductivityGapColor(status: ProductivityGapStatus): string {
+  switch (status) {
+    case 'below_reference':
+      return '#e7c49d'
+    case 'at_reference':
+      return '#dbe5df'
+    case 'above_reference':
+      return '#a9cbb6'
+    case 'insufficient_evidence':
+      return '#f1f5f9'
   }
 }
 
 function createDistrictFillColorExpression(
-  crop: string,
-  season: string,
-  year: string,
+  matchingInsights: ReturnType<typeof getDistrictInsights>,
 ): DataDrivenPropertyValueSpecification<string> {
-  const matchingInsights = getInsightFilters(crop, season, year)
-
   if (matchingInsights.length === 0) {
     return '#dbe5df'
   }
@@ -172,13 +169,10 @@ function createDistrictFillColorExpression(
   ]
 
   for (const district of matchingInsights) {
-    const yieldGapPct = district.yieldGapPct
-
-    const color = Number.isFinite(yieldGapPct)
-      ? getDistrictAttentionColor(yieldGapPct)
-      : '#dbe5df'
-
-    expression.push(district.district.toLowerCase(), color)
+    expression.push(
+      district.district.toLowerCase(),
+      getProductivityGapColor(district.productivityGap.status),
+    )
   }
 
   expression.push('#dbe5df')
@@ -216,7 +210,11 @@ export function RwandaMapPanel({
     district: string
     province: string
   } | null>(null)
-  const hasObservations = getInsightFilters(crop, season, year).length > 0
+  const districtInsights = useMemo(
+    () => getDistrictInsights(crop, season, year),
+    [crop, season, year],
+  )
+  const hasObservations = districtInsights.length > 0
   const seasonCode = getSeasonCode(season)
   const summaryLookup = useMemo(
     () =>
@@ -231,6 +229,13 @@ export function RwandaMapPanel({
   )
   const hoveredSummary = hoveredDistrict
     ? summaryLookup.get(hoveredDistrict.district.trim().toLowerCase())
+    : undefined
+  const hoveredInsight = hoveredDistrict
+    ? districtInsights.find(
+        (item) =>
+          item.district.trim().toLowerCase() ===
+          hoveredDistrict.district.trim().toLowerCase(),
+      )
     : undefined
 
   const districtYield = getObservedValue(hoveredSummary?.districtYield)
@@ -316,9 +321,11 @@ export function RwandaMapPanel({
           source: SOURCE_ID,
           paint: {
             'fill-color': createDistrictFillColorExpression(
-              filtersRef.current.crop,
-              filtersRef.current.season,
-              filtersRef.current.year,
+              getDistrictInsights(
+                filtersRef.current.crop,
+                filtersRef.current.season,
+                filtersRef.current.year,
+              ),
             ),
             'fill-opacity': [
               'case',
@@ -671,9 +678,9 @@ export function RwandaMapPanel({
     map.setPaintProperty(
       FILL_LAYER_ID,
       'fill-color',
-      createDistrictFillColorExpression(crop, season, year),
+      createDistrictFillColorExpression(districtInsights),
     )
-  }, [crop, season, year, mapReady])
+  }, [districtInsights, mapReady])
 
   useEffect(() => {
     const map = mapRef.current
@@ -789,7 +796,7 @@ export function RwandaMapPanel({
 
   return (
     <section
-      aria-label="Rwanda district agricultural attention map"
+      aria-label="Rwanda district productivity comparison map"
       aria-describedby="district-map-help"
       className="relative h-[clamp(380px,58vh,620px)] min-w-0 overflow-hidden rounded-xl border border-slate-300 bg-slate-50 sm:h-[min(68vh,680px)]"
     >
@@ -882,9 +889,19 @@ export function RwandaMapPanel({
               </dd>
               <dt className="text-slate-500">Yield gap · derived</dt>
               <dd className="font-medium tabular-nums text-slate-700">
-                {districtYield !== undefined && nationalYield !== undefined
-                  ? `${formatSigned((districtYield - nationalYield) / 1000, 2)} t/ha`
+                {hoveredInsight?.productivityGap.absoluteGap !== undefined
+                  ? `${formatSigned(hoveredInsight.productivityGap.absoluteGap)} ${hoveredInsight.productivityGap.unit}`
                   : 'Data unavailable'}
+              </dd>
+              <dt className="text-slate-500">Comparison status</dt>
+              <dd className="font-medium text-slate-700">
+                {hoveredInsight?.productivityGap.status === 'below_reference'
+                  ? 'Below national reference'
+                  : hoveredInsight?.productivityGap.status === 'at_reference'
+                    ? 'At national reference'
+                    : hoveredInsight?.productivityGap.status === 'above_reference'
+                      ? 'Above national reference'
+                      : 'Insufficient evidence'}
               </dd>
             </dl>
             {hoveredSummary?.districtYield && (

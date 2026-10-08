@@ -3,20 +3,21 @@ interface AttentionLegendProps {
 }
 
 const legendItems = [
-  { color: '#ef6a4a', range: '≤ −20%', label: 'Attention' },
-  { color: '#f3a35c', range: '> −20% to ≤ −10%', label: 'Moderate' },
-  { color: '#63b36b', range: '> −10%', label: 'Near reference' },
+  { color: '#e7c49d', label: 'Below national reference' },
+  { color: '#dbe5df', label: 'At national reference' },
+  { color: '#a9cbb6', label: 'Above national reference' },
+  { color: '#f1f5f9', label: 'Insufficient comparison evidence' },
 ]
 
 export function AttentionLegend({ hasObservations }: AttentionLegendProps) {
   return (
     <div className="max-w-[235px] rounded-lg border border-slate-200 bg-white/95 px-3 py-3 shadow-sm sm:px-4">
       <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
-        Yield gap
+        District yield compared with national
       </p>
 
       {hasObservations ? (
-        <ul aria-label="Yield gap categories" className="space-y-1.5">
+        <ul aria-label="Productivity comparison categories" className="space-y-1.5">
           {legendItems.map((item) => (
             <li
               className="flex items-center gap-2"
@@ -27,16 +28,13 @@ export function AttentionLegend({ hasObservations }: AttentionLegendProps) {
                 className="size-3 shrink-0 rounded-sm"
                 style={{ backgroundColor: item.color }}
               />
-              <span className="text-xs font-medium tabular-nums text-slate-800">
-                {item.range}
-              </span>
               <span className="text-xs text-slate-600">{item.label}</span>
             </li>
           ))}
           <li className="flex items-center gap-2">
             <span
               aria-hidden="true"
-              className="size-3 shrink-0 rounded-sm border border-slate-300 bg-[#dbe5df]"
+              className="size-3 shrink-0 rounded-sm border border-slate-300 bg-white"
             />
             <span className="text-xs text-slate-700">No observation</span>
           </li>

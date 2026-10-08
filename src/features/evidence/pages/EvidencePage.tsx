@@ -135,9 +135,10 @@ export function EvidencePage({
   onOpenDistrictProfile,
 }: EvidencePageProps) {
   const [signalContext, setSignalContext] = useState(context)
+  const hasSignalContext = signalContext?.signalType !== undefined
   const [district, setDistrict] = useState(context?.district ?? selectedDistrict ?? 'all')
   const [crop, setCrop] = useState(
-    context?.intervention
+    hasSignalContext
       ? 'all'
       : (context?.crop ?? selectedCrop)?.toLowerCase() ?? 'all',
   )
@@ -145,12 +146,14 @@ export function EvidencePage({
     context?.season ?? selectedSeason?.replace('season-', '').toUpperCase() ?? 'A',
   )
   const [year, setYear] = useState(
-    context?.year ?? selectedYear?.replace('-', '/') ?? '2024/25',
+    context?.signalType === 'productivity_trend'
+      ? 'all'
+      : context?.year ?? selectedYear?.replace('-', '/') ?? '2024/25',
   )
   const [dataset, setDataset] = useState('all')
   const [status, setStatus] = useState<'all' | EvidenceRecord['status']>('all')
   const [indicator, setIndicator] = useState<'all' | EvidenceIndicator>(
-    context?.intervention ? 'all' : 'average_yield',
+    hasSignalContext ? 'all' : 'average_yield',
   )
   const [visiblePage, setVisiblePage] = useState({ key: '', count: 50 })
   const filterKey = JSON.stringify([
@@ -162,6 +165,7 @@ export function EvidencePage({
     status,
     indicator,
     signalContext?.intervention,
+    signalContext?.signalType,
     signalContext?.evidenceIds,
   ])
   const visibleCount = visiblePage.key === filterKey ? visiblePage.count : 50
@@ -173,13 +177,13 @@ export function EvidencePage({
     const cropMatches =
       crop === 'all' || record.crop?.toLowerCase() === crop
     const seasonMatches = matchesSeason(record.period.season, season)
-    const yearMatches = record.period.year === year
+    const yearMatches = year === 'all' || record.period.year === year
     const indicatorMatches =
       indicator === 'all' || record.indicator === indicator
     const datasetMatches = dataset === 'all' || record.dataset === dataset
     const statusMatches = status === 'all' || record.status === status
     const signalMatches =
-      !signalContext?.intervention ||
+      !hasSignalContext ||
       signalContext.evidenceIds?.includes(record.id) === true
 
     return (
@@ -192,12 +196,15 @@ export function EvidencePage({
       statusMatches &&
       signalMatches
     )
-  }), [crop, dataset, district, indicator, season, signalContext, status, year])
+  }), [crop, dataset, district, hasSignalContext, indicator, season, signalContext, status, year])
 
-  const signalLabel =
-    signalContext?.intervention === 'irrigation'
-      ? 'Irrigation investigation signal'
-      : signalContext?.intervention
+  const signalLabel = signalContext?.signalType
+    ? {
+        productivity_gap: 'Productivity gap',
+        productivity_trend: 'Productivity direction',
+        irrigation_investigation: 'Irrigation investigation signal',
+      }[signalContext.signalType]
+    : signalContext?.intervention
   const visibleRecords = filteredRecords.slice(0, visibleCount)
 
   return (
@@ -215,9 +222,9 @@ export function EvidencePage({
         </p>
       </header>
 
-      {signalContext?.intervention && (
+      {hasSignalContext && (
         <section
-          aria-label="Intervention evidence context"
+          aria-label="Agricultural signal evidence context"
           className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-green-200 bg-green-50/70 p-4 sm:p-5"
         >
           <div className="min-w-0">
@@ -226,12 +233,15 @@ export function EvidencePage({
             </p>
             <h2 className="mt-1 text-sm font-semibold text-slate-900">
               {signalContext.district} · {signalContext.crop} · Season{' '}
-              {signalContext.season} · {signalContext.year}
+              {signalContext.season} ·{' '}
+              {signalContext.signalType === 'productivity_trend'
+                ? 'comparable years'
+                : signalContext.year}
             </h2>
             <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
-              These records show the same-period district and national
-              observations used by the signal. The comparison identifies an
-              area for investigation; it does not establish cause or impact.
+              These connected NISR records are the inputs referenced by this
+              signal. The calculation identifies an evidence pattern; it does
+              not establish cause or impact.
             </p>
           </div>
           <button
@@ -301,6 +311,7 @@ export function EvidencePage({
           onChange={setYear}
           value={year}
         >
+          <option value="all">All referenced years</option>
           {years.map((value) => (
             <option key={value} value={value}>{value}</option>
           ))}

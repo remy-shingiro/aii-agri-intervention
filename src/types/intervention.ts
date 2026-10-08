@@ -1,24 +1,13 @@
-export type InterventionStatus = 'supported' | 'insufficient_evidence'
+import type { AgriculturalSignalPeriod, IrrigationInvestigationSignal } from './agricultural-signal'
 
-export type InterventionType =
-  | 'irrigation'
-  | 'soil_fertility'
-  | 'post_harvest'
-  | 'processing'
-  | 'export'
+/** Existing navigation and evidence-trail type for the supported irrigation signal. */
+export type InterventionStatus = IrrigationInvestigationSignal['status']
 
-export interface InterventionPeriod {
+/** Intervention domains remain catalogued, but only irrigation is implemented. */
+export type InterventionType = 'irrigation'
+
+export interface InterventionPeriod extends AgriculturalSignalPeriod {
   readonly crop: string
-  readonly year: string
-  readonly season: 'A' | 'B' | 'C'
 }
 
-/** A traceable evidence screen, not an investment or causal recommendation. */
-export interface InterventionSignal {
-  readonly intervention: InterventionType
-  readonly status: InterventionStatus
-  readonly title: string
-  readonly rationale: readonly string[]
-  readonly evidenceIds: readonly string[]
-  readonly period: InterventionPeriod
-}
+export type InterventionSignal = IrrigationInvestigationSignal

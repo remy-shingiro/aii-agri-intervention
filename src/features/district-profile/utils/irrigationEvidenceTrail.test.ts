@@ -165,7 +165,7 @@ describe('irrigation signal evidence trail', () => {
     ).find((item) => item.intervention === 'irrigation')!
     const trail = getIrrigationEvidenceTrail(signal, evidenceRecords)
 
-    expect(signal.status).toBe('insufficient_evidence')
+    expect(signal.status).toBe('conditions_not_met')
     expect(trail.status).toBe('available')
   })
 })
