@@ -16,6 +16,8 @@ vi.mock('./features/overview/components/RwandaMapPanel', () => ({
   RwandaMapPanel: () => <div aria-label="Rwanda district map" role="region" />,
 }))
 
+const lazyLoadWait = { timeout: 10_000 }
+
 describe('application shell', () => {
   beforeEach(() => {
     vi.stubGlobal(
@@ -37,7 +39,7 @@ describe('application shell', () => {
     vi.unstubAllGlobals()
   })
 
-  it('shows the Overview with filter context and the district map', () => {
+  it('shows the Overview with filter context and the district map', async () => {
     render(<App />)
 
     expect(
@@ -47,7 +49,11 @@ describe('application shell', () => {
     expect(screen.getByLabelText('Season')).toHaveValue('season-a')
     expect(screen.getByLabelText('Year')).toHaveValue('2024-25')
     expect(
-      screen.getByRole('region', { name: 'Rwanda district map' }),
+      await screen.findByRole(
+        'region',
+        { name: 'Rwanda district map' },
+        lazyLoadWait,
+      ),
     ).toBeInTheDocument()
     expect(
       screen.getByRole('heading', { name: 'National Agricultural Intelligence' }),
@@ -118,7 +124,9 @@ describe('application shell', () => {
       screen.getByRole('button', { name: 'Open district profile' }),
     )
 
-    expect(screen.getByRole('heading', { name: 'Kayonza' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Kayonza' }, lazyLoadWait),
+    ).toBeInTheDocument()
     expect(screen.queryByText('Improved seed use')).not.toBeInTheDocument()
     expect(
       screen.getByRole('heading', {
@@ -153,7 +161,9 @@ describe('application shell', () => {
       screen.getByRole('button', { name: 'Open district profile' }),
     )
 
-    expect(screen.getByRole('heading', { name: 'Nyarugenge' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Nyarugenge' }, lazyLoadWait),
+    ).toBeInTheDocument()
     expect(screen.getByText(/Beans.*Season B.*2023\/24/)).toBeInTheDocument()
     expect(screen.getByText(/614 Kg\/Ha/)).toBeInTheDocument()
     expect(screen.getAllByText(/Table 17: 2024 Season B/)).toHaveLength(2)
@@ -171,20 +181,28 @@ describe('application shell', () => {
     fireEvent.click(screen.getByRole('button', { name: 'District Profile' }))
 
     expect(
-      screen.getByRole('heading', {
-        name: 'Insufficient connected NISR evidence',
-      }),
+      await screen.findByRole(
+        'heading',
+        {
+          name: 'Insufficient connected NISR evidence',
+        },
+        lazyLoadWait,
+      ),
     ).toBeInTheDocument()
     expect(screen.queryByText(/614 kg\/ha/)).not.toBeInTheDocument()
   })
 
-  it('opens the Evidence explorer and shows connected SAS 2024 observations', () => {
+  it('opens the Evidence explorer and shows connected SAS 2024 observations', async () => {
     render(<App />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Evidence' }))
 
     expect(
-      screen.getByRole('heading', { name: 'Evidence explorer' }),
+      await screen.findByRole(
+        'heading',
+        { name: 'Evidence explorer' },
+        lazyLoadWait,
+      ),
     ).toBeInTheDocument()
     expect(screen.getByText('31 records')).toBeInTheDocument()
 
@@ -196,13 +214,17 @@ describe('application shell', () => {
     expect(screen.getByText('31 records')).toBeInTheDocument()
   })
 
-  it('opens the Data & Methodology destination', () => {
+  it('opens the Data & Methodology destination', async () => {
     render(<App />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Data & Methodology' }))
 
     expect(
-      screen.getByRole('heading', { name: 'Data & Methodology' }),
+      await screen.findByRole(
+        'heading',
+        { name: 'Data & Methodology' },
+        lazyLoadWait,
+      ),
     ).toBeInTheDocument()
     expect(
       screen.getByText(
@@ -228,7 +250,11 @@ describe('application shell', () => {
     )
 
     expect(
-      screen.getByRole('heading', { name: 'Irrigation investigation' }),
+      await screen.findByRole(
+        'heading',
+        { name: 'Irrigation investigation' },
+        lazyLoadWait,
+      ),
     ).toBeInTheDocument()
     expect(screen.getByText('Investigation signal')).toBeInTheDocument()
 
@@ -237,7 +263,13 @@ describe('application shell', () => {
     )
 
     expect(
-      screen.getByRole('heading', { name: 'Irrigation investigation signal' }),
+      await screen.findByRole(
+        'heading',
+        {
+          name: 'Irrigation investigation signal',
+        },
+        lazyLoadWait,
+      ),
     ).toBeInTheDocument()
     expect(screen.getAllByText(/1,338 Kg\/Ha/)).toHaveLength(2)
     expect(screen.getAllByText(/1,985 Kg\/Ha/)).toHaveLength(2)
@@ -251,7 +283,11 @@ describe('application shell', () => {
       screen.getByRole('button', { name: 'Open Evidence Explorer' }),
     )
     expect(
-      screen.getByRole('heading', { name: 'Evidence explorer' }),
+      await screen.findByRole(
+        'heading',
+        { name: 'Evidence explorer' },
+        lazyLoadWait,
+      ),
     ).toBeInTheDocument()
     expect(screen.getByLabelText('District')).toHaveValue('Nyarugenge')
     expect(screen.getByText('4 records')).toBeInTheDocument()
@@ -265,7 +301,11 @@ describe('application shell', () => {
     )
     fireEvent.click(screen.getByRole('button', { name: 'View Methodology' }))
     expect(
-      screen.getByRole('heading', { name: 'Data & Methodology' }),
+      await screen.findByRole(
+        'heading',
+        { name: 'Data & Methodology' },
+        lazyLoadWait,
+      ),
     ).toBeInTheDocument()
   })
 })

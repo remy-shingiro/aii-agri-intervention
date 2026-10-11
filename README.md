@@ -1,73 +1,42 @@
-# React + TypeScript + Vite
+# Agricultural Intervention Intelligence (AII)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+AII is a frontend-only Rwanda agricultural intelligence MVP. It presents NISR
+evidence through national signals, district profiles, an interactive district
+map, an evidence explorer, and a data and methodology view. Observed values,
+derived comparisons, and unavailable evidence remain distinct in the interface.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Install the locked dependencies and start the Vite development server:
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```sh
+npm ci
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+The available project checks are:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```sh
+npm run test
+npm run typecheck
+npm run lint
+npm run build
 ```
+
+`npm run preview` serves the latest production build locally.
+
+## Agricultural data
+
+Original NISR reports are kept in `data/raw/`. The processed observations,
+inventory, and source metadata are kept under `data/`; the browser loads the
+processed JSON as static assets. `npm run extract:nisr` runs the checked-in
+extraction script against the available source reports. Review source values
+and provenance before accepting regenerated data.
+
+## Production deployment
+
+`npm run build` creates the static site in `dist/`. Deploy the contents of that
+directory to a static hosting platform. The processed JSON assets total about
+20 MB uncompressed, so configure the host to serve `.json` files with gzip or
+Brotli compression. This repository does not currently include
+platform-specific deployment configuration.

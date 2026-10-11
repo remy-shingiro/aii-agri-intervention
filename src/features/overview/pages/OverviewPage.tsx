@@ -1,12 +1,92 @@
-import { useMemo, useState } from 'react'
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentProps,
+} from 'react'
 
 import { evidenceRecords } from '../../evidence/data/evidenceRecords'
 import type { AgriculturalSeason } from '../../../types/data-contract'
 import { calculateNationalIntelligence } from '../../intelligence/nationalIntelligence'
 import { AgriculturalInsightPanel } from '../components/AgriculturalInsightPanel'
 import { OverviewHeader } from '../components/OverviewHeader'
-import { RwandaMapPanel } from '../components/RwandaMapPanel'
+import { AsyncContentBoundary } from '../../../components/layout/AsyncContentBoundary'
 import type { OverviewFilters } from '../types/overview.types'
+
+const RwandaMapPanel = lazy(async () => {
+  const module = await import('../components/RwandaMapPanel')
+  return { default: module.RwandaMapPanel }
+})
+
+const mapPanelClassName =
+  'relative h-[clamp(380px,58vh,620px)] min-w-0 overflow-hidden rounded-xl border border-slate-300 bg-slate-50 sm:h-[min(68vh,680px)]'
+
+function DeferredDistrictMapPanel(
+  props: ComponentProps<typeof RwandaMapPanel>,
+) {
+  const panelRef = useRef<HTMLDivElement>(null)
+  const [isNearViewport, setIsNearViewport] = useState(
+    () => typeof IntersectionObserver === 'undefined',
+  )
+
+  useEffect(() => {
+    const panel = panelRef.current
+    if (!panel) return
+
+    if (!('IntersectionObserver' in window)) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setIsNearViewport(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '200px' },
+    )
+    observer.observe(panel)
+
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <div ref={panelRef}>
+      {isNearViewport ? (
+        <AsyncContentBoundary
+          className={mapPanelClassName}
+          message="The district map code could not be loaded. Other overview information remains available."
+        >
+          <Suspense
+            fallback={
+              <div
+                className={`${mapPanelClassName} flex items-center justify-center`}
+                role="status"
+              >
+                <p className="text-sm text-slate-500">
+                  Loading Rwanda district map…
+                </p>
+              </div>
+            }
+          >
+            <RwandaMapPanel {...props} />
+          </Suspense>
+        </AsyncContentBoundary>
+      ) : (
+        <div
+          className={`${mapPanelClassName} flex items-center justify-center`}
+          role="status"
+        >
+          <p className="px-6 text-center text-sm text-slate-500">
+            The interactive map loads as you reach it.
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
 
 interface OverviewPageProps {
   filters: OverviewFilters
@@ -257,7 +337,7 @@ export function OverviewPage({
             keyboard. The map can also be explored with pointer controls.
           </p>
 
-          <RwandaMapPanel
+          <DeferredDistrictMapPanel
             crop={filters.crop}
             districtSearch={districtSearch}
             season={filters.season}

@@ -1,16 +1,32 @@
-import normalizedObservations from '../../../../data/processed/agricultural-observations.json'
-import normalizedInventory from '../../../../data/processed/agricultural-data-inventory.json'
 import { districtMetadata } from '../../district-profile/data/districtMetadata'
 import type {
   EvidenceRecord,
   NISRDataInventoryRecord,
 } from '../types/evidence.types'
 
-export const normalizedEvidenceRecords =
-  normalizedObservations as unknown as readonly EvidenceRecord[]
+export let normalizedEvidenceRecords: readonly EvidenceRecord[] = []
 
-export const nisrDataInventory =
-  normalizedInventory as unknown as readonly NISRDataInventoryRecord[]
+export let nisrDataInventory: readonly NISRDataInventoryRecord[] = []
+export let nisrDataInventoryLoaded = false
+
+export function initializeNormalizedEvidenceRecords(records: unknown): void {
+  if (!Array.isArray(records)) {
+    throw new Error('The agricultural observations file is not a record list.')
+  }
+
+  normalizedEvidenceRecords = records as readonly EvidenceRecord[]
+}
+
+export function initializeNisrDataInventory(records: unknown): void {
+  if (!Array.isArray(records)) {
+    throw new Error(
+      'The agricultural data inventory file is not a record list.',
+    )
+  }
+
+  nisrDataInventory = records as readonly NISRDataInventoryRecord[]
+  nisrDataInventoryLoaded = true
+}
 
 export interface CompatibleComparison {
   readonly districtValue: number
