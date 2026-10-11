@@ -14,6 +14,7 @@ import type { InterventionSignal } from '../../../types/intervention'
 import type { EvidenceRecord } from '../../evidence/types/evidence.types'
 import { getDistrictInsight } from '../../overview/data/districtInsights'
 import { calculateAgriculturalSignals } from '../../intelligence/agriculturalSignalEngine'
+import { DistrictSeasonalPracticeProfile } from '../components/DistrictSeasonalPracticeProfile'
 import { getDistrictMetadata } from '../data/districtMetadata'
 import {
   getIrrigationEvidenceTrail,
@@ -25,7 +26,10 @@ interface DistrictProfilePageProps {
   season: string
   selectedDistrict?: string
   year: string
-  onOpenEvidence: (signal?: AgriculturalSignal) => void
+  onOpenEvidence: (
+    signal?: AgriculturalSignal,
+    evidenceIds?: readonly string[],
+  ) => void
   onNavigateOverview: () => void
   onNavigateMethodology: () => void
 }
@@ -617,6 +621,15 @@ export function DistrictProfilePage({
           )}
         </section>
 
+        <DistrictSeasonalPracticeProfile
+          district={selectedDistrict}
+          onOpenEvidence={(evidenceIds) =>
+            onOpenEvidence(undefined, evidenceIds)
+          }
+          season={period.season}
+          year={period.year}
+        />
+
         <ProductivityTrendSection
           onOpenEvidence={onOpenEvidence}
           signal={productivityTrend}
@@ -784,6 +797,15 @@ export function DistrictProfilePage({
             `, p. ${insight.areaRecord.sourceReference.page}`}
         </p>
       </section>
+
+      <DistrictSeasonalPracticeProfile
+        district={insight.district}
+        onOpenEvidence={(evidenceIds) =>
+          onOpenEvidence(undefined, evidenceIds)
+        }
+        season={period.season}
+        year={period.year}
+      />
 
       <ProductivityTrendSection
         onOpenEvidence={onOpenEvidence}

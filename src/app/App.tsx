@@ -49,7 +49,10 @@ export function App() {
   const [evidenceContext, setEvidenceContext] =
     useState<EvidenceNavigationContext>()
 
-  const openProfileEvidence = (signal?: AgriculturalSignal) => {
+  const openProfileEvidence = (
+    signal?: AgriculturalSignal,
+    evidenceIds?: readonly string[],
+  ) => {
     if (!selectedDistrict) {
       setEvidenceContext(undefined)
       setActivePage('Evidence')
@@ -58,7 +61,7 @@ export function App() {
 
     setEvidenceContext({
       district: selectedDistrict,
-      crop: signal?.crop ?? overviewFilters.crop,
+      crop: evidenceIds ? 'all' : signal?.crop ?? overviewFilters.crop,
       year: signal?.period.year ?? overviewFilters.year.replace('-', '/'),
       season: signal?.period.season ?? getSeasonCode(overviewFilters.season),
       intervention:
@@ -66,7 +69,7 @@ export function App() {
           ? signal.intervention
           : undefined,
       signalType: signal?.signalType,
-      evidenceIds: signal?.evidenceIds,
+      evidenceIds: signal?.evidenceIds ?? evidenceIds,
     })
     setActivePage('Evidence')
   }

@@ -127,7 +127,14 @@ describe('application shell', () => {
     expect(
       await screen.findByRole('heading', { name: 'Kayonza' }, lazyLoadWait),
     ).toBeInTheDocument()
-    expect(screen.queryByText('Improved seed use')).not.toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', {
+        name: 'District-wide seasonal practice profile',
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'Improved seed use' }),
+    ).toBeInTheDocument()
     expect(
       screen.getByRole('heading', {
         name: 'Investigation Areas',
@@ -168,6 +175,20 @@ describe('application shell', () => {
     expect(screen.getByText(/614 Kg\/Ha/)).toBeInTheDocument()
     expect(screen.getAllByText(/Table 17: 2024 Season B/)).toHaveLength(2)
 
+    expect(
+      screen.getByText('Selected period: 2023/24 · Season B'),
+    ).toBeInTheDocument()
+    const seedPractice = screen
+      .getByRole('heading', { name: 'Improved seed use' })
+      .closest('article')
+    expect(seedPractice).not.toBeNull()
+    if (!seedPractice) return
+    expect(seedPractice).toHaveTextContent('District-wide practice · all crop activity')
+    expect(within(seedPractice).getByText('15.3 %')).toBeInTheDocument()
+    expect(within(seedPractice).getByText('18 %')).toBeInTheDocument()
+    expect(
+      within(seedPractice).getByText('-2.7 percentage points'),
+    ).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Overview' }))
     fireEvent.change(screen.getByLabelText('Crop'), {
       target: { value: 'sorghum' },
@@ -190,6 +211,65 @@ describe('application shell', () => {
       ),
     ).toBeInTheDocument()
     expect(screen.queryByText(/614 kg\/ha/)).not.toBeInTheDocument()
+  })
+
+  it('opens only the selected district and national practice records in Evidence Explorer', async () => {
+    render(<App />)
+
+    fireEvent.change(screen.getByLabelText('Crop'), {
+      target: { value: 'beans' },
+    })
+    fireEvent.change(screen.getByLabelText('Season'), {
+      target: { value: 'season-b' },
+    })
+    fireEvent.change(screen.getByLabelText('Year'), {
+      target: { value: '2023-24' },
+    })
+
+    const search = screen.getByRole('combobox', { name: 'Search district' })
+    fireEvent.change(search, { target: { value: 'Nyarugenge' } })
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: 'Nyarugenge' })).toBeInTheDocument()
+    })
+    fireEvent.keyDown(search, { key: 'ArrowDown' })
+    fireEvent.keyDown(search, { key: 'Enter' })
+    fireEvent.click(screen.getByRole('button', { name: 'Open district profile' }))
+
+    expect(
+      await screen.findByRole('heading', { name: 'Nyarugenge' }, lazyLoadWait),
+    ).toBeInTheDocument()
+    const practice = screen
+      .getByRole('heading', { name: 'Improved seed use' })
+      .closest('article')
+    expect(practice).not.toBeNull()
+    if (!practice) return
+
+    fireEvent.click(
+      within(practice).getByRole('button', {
+        name: 'View provenance in Evidence Explorer',
+      }),
+    )
+    expect(
+      await screen.findByRole(
+        'heading',
+        { name: 'Evidence explorer' },
+        lazyLoadWait,
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByText('2 records')).toBeInTheDocument()
+    expect(screen.getByLabelText('Crop')).toHaveValue('all')
+    expect(
+      screen.getAllByRole('link', { name: /Table 31: 2024 Season B/ }),
+    ).toHaveLength(2)
+    const districtEvidenceCard = screen
+      .getByRole('heading', { name: 'Nyarugenge' })
+      .closest('article')
+    expect(districtEvidenceCard).not.toBeNull()
+    if (!districtEvidenceCard) return
+    expect(
+      within(districtEvidenceCard).getByText(/All crop activity/),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Rwanda' })).toBeInTheDocument()
   })
 
   it('opens the Evidence explorer and shows connected SAS 2024 observations', async () => {
@@ -277,7 +357,13 @@ describe('application shell', () => {
     expect(screen.getByText(/8\.5 %/)).toBeInTheDocument()
     expect(screen.getByText(/13\.4 %/)).toBeInTheDocument()
     expect(screen.getByText(/-4\.9 percentage points/)).toBeInTheDocument()
-    expect(screen.getAllByRole('link', { name: 'Open NISR source' })).toHaveLength(6)
+    expect(
+      within(
+        screen.getByRole('region', {
+          name: 'District-wide irrigation comparison',
+        }),
+      ).getAllByRole('link'),
+    ).toHaveLength(2)
 
     fireEvent.click(
       screen.getByRole('button', { name: 'Open Evidence Explorer' }),

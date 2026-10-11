@@ -136,9 +136,11 @@ export function EvidencePage({
 }: EvidencePageProps) {
   const [signalContext, setSignalContext] = useState(context)
   const hasSignalContext = signalContext?.signalType !== undefined
+  const hasEvidenceSelection =
+    hasSignalContext || signalContext?.evidenceIds !== undefined
   const [district, setDistrict] = useState(context?.district ?? selectedDistrict ?? 'all')
   const [crop, setCrop] = useState(
-    hasSignalContext
+    hasSignalContext || hasEvidenceSelection
       ? 'all'
       : (context?.crop ?? selectedCrop)?.toLowerCase() ?? 'all',
   )
@@ -153,7 +155,7 @@ export function EvidencePage({
   const [dataset, setDataset] = useState('all')
   const [status, setStatus] = useState<'all' | EvidenceRecord['status']>('all')
   const [indicator, setIndicator] = useState<'all' | EvidenceIndicator>(
-    hasSignalContext ? 'all' : 'average_yield',
+    hasSignalContext || hasEvidenceSelection ? 'all' : 'average_yield',
   )
   const [visiblePage, setVisiblePage] = useState({ key: '', count: 50 })
   const filterKey = JSON.stringify([
@@ -182,9 +184,9 @@ export function EvidencePage({
       indicator === 'all' || record.indicator === indicator
     const datasetMatches = dataset === 'all' || record.dataset === dataset
     const statusMatches = status === 'all' || record.status === status
-    const signalMatches =
-      !hasSignalContext ||
-      signalContext.evidenceIds?.includes(record.id) === true
+    const evidenceSelectionMatches =
+      !hasEvidenceSelection ||
+      signalContext?.evidenceIds?.includes(record.id) === true
 
     return (
       districtMatches &&
@@ -194,9 +196,9 @@ export function EvidencePage({
       indicatorMatches &&
       datasetMatches &&
       statusMatches &&
-      signalMatches
+      evidenceSelectionMatches
     )
-  }), [crop, dataset, district, hasSignalContext, indicator, season, signalContext, status, year])
+  }), [crop, dataset, district, hasEvidenceSelection, indicator, season, signalContext, status, year])
 
   const signalLabel = signalContext?.signalType
     ? {
@@ -261,6 +263,16 @@ export function EvidencePage({
             Clear signal context
           </button>
         </section>
+      )}
+
+      {!hasSignalContext && hasEvidenceSelection && (
+        <p
+          className="rounded-xl border border-green-200 bg-green-50/70 p-4 text-sm leading-6 text-slate-700"
+          role="status"
+        >
+          Showing the district and national source records selected in the
+          District Profile.
+        </p>
       )}
 
       <section
