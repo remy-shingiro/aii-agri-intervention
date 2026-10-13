@@ -14,6 +14,7 @@ import type { InterventionSignal } from '../../../types/intervention'
 import type { EvidenceRecord } from '../../evidence/types/evidence.types'
 import { getDistrictInsight } from '../../overview/data/districtInsights'
 import { calculateAgriculturalSignals } from '../../intelligence/agriculturalSignalEngine'
+import { DistrictCropPortfolio } from '../components/DistrictCropPortfolio'
 import { DistrictSeasonalPracticeProfile } from '../components/DistrictSeasonalPracticeProfile'
 import { getDistrictMetadata } from '../data/districtMetadata'
 import {
@@ -630,6 +631,15 @@ export function DistrictProfilePage({
           year={period.year}
         />
 
+        <DistrictCropPortfolio
+          district={selectedDistrict}
+          onOpenEvidence={(evidenceIds) =>
+            onOpenEvidence(undefined, evidenceIds)
+          }
+          season={period.season}
+          year={period.year}
+        />
+
         <ProductivityTrendSection
           onOpenEvidence={onOpenEvidence}
           signal={productivityTrend}
@@ -799,6 +809,15 @@ export function DistrictProfilePage({
       </section>
 
       <DistrictSeasonalPracticeProfile
+        district={insight.district}
+        onOpenEvidence={(evidenceIds) =>
+          onOpenEvidence(undefined, evidenceIds)
+        }
+        season={period.season}
+        year={period.year}
+      />
+
+      <DistrictCropPortfolio
         district={insight.district}
         onOpenEvidence={(evidenceIds) =>
           onOpenEvidence(undefined, evidenceIds)

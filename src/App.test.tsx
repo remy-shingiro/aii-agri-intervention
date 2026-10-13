@@ -172,8 +172,13 @@ describe('application shell', () => {
       await screen.findByRole('heading', { name: 'Nyarugenge' }, lazyLoadWait),
     ).toBeInTheDocument()
     expect(screen.getByText(/Beans.*Season B.*2023\/24/)).toBeInTheDocument()
-    expect(screen.getByText(/614 Kg\/Ha/)).toBeInTheDocument()
-    expect(screen.getAllByText(/Table 17: 2024 Season B/)).toHaveLength(2)
+    expect(screen.getAllByText(/614 Kg\/Ha/)).toHaveLength(2)
+    const productivityEvidence = screen.getByRole('region', {
+      name: 'Productivity Intelligence',
+    })
+    expect(
+      within(productivityEvidence).getAllByText(/Table 17: 2024 Season B/),
+    ).toHaveLength(2)
 
     expect(
       screen.getByText('Selected period: 2023/24 · Season B'),
@@ -210,7 +215,62 @@ describe('application shell', () => {
         lazyLoadWait,
       ),
     ).toBeInTheDocument()
+    expect(screen.getByText(/Sorghum.*Season A.*2024\/25/)).toBeInTheDocument()
     expect(screen.queryByText(/614 kg\/ha/)).not.toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', {
+        name: 'District crop portfolio & productivity',
+      }),
+    ).toBeInTheDocument()
+    const maizePortfolio = screen
+      .getByRole('heading', { name: 'Maize', level: 3 })
+      .closest('article')
+    expect(maizePortfolio).not.toBeNull()
+    if (!maizePortfolio) return
+    expect(maizePortfolio).toHaveTextContent('1,338 Kg/Ha')
+  })
+
+  it('opens matching crop portfolio observations in Evidence Explorer', async () => {
+    render(<App />)
+
+    const search = screen.getByRole('combobox', { name: 'Search district' })
+    fireEvent.change(search, { target: { value: 'Nyarugenge' } })
+    await waitFor(() => {
+      expect(
+        screen.getByRole('option', { name: 'Nyarugenge' }),
+      ).toBeInTheDocument()
+    })
+    fireEvent.keyDown(search, { key: 'ArrowDown' })
+    fireEvent.keyDown(search, { key: 'Enter' })
+    fireEvent.click(screen.getByRole('button', { name: 'Open district profile' }))
+
+    const maizePortfolio = await screen.findByRole(
+      'heading',
+      { name: 'Maize', level: 3 },
+      lazyLoadWait,
+    )
+    const maizeCard = maizePortfolio.closest('article')
+    expect(maizeCard).not.toBeNull()
+    if (!maizeCard) return
+
+    fireEvent.click(
+      within(maizeCard).getByRole('button', {
+        name: 'View crop evidence in Evidence Explorer',
+      }),
+    )
+    expect(
+      await screen.findByRole(
+        'heading',
+        { name: 'Evidence explorer' },
+        lazyLoadWait,
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByText('6 records')).toBeInTheDocument()
+    expect(screen.getByLabelText('Crop')).toHaveValue('all')
+    expect(screen.getByLabelText('District')).toHaveValue('Nyarugenge')
+    expect(
+      screen.getAllByRole('link', { name: /Table 19: 2025 Season A/ }),
+    ).toHaveLength(2)
   })
 
   it('opens only the selected district and national practice records in Evidence Explorer', async () => {
@@ -351,9 +411,9 @@ describe('application shell', () => {
         lazyLoadWait,
       ),
     ).toBeInTheDocument()
-    expect(screen.getAllByText(/1,338 Kg\/Ha/)).toHaveLength(2)
-    expect(screen.getAllByText(/1,985 Kg\/Ha/)).toHaveLength(2)
-    expect(screen.getAllByText(/-647 Kg\/Ha/)).toHaveLength(2)
+    expect(screen.getAllByText(/1,338 Kg\/Ha/)).toHaveLength(3)
+    expect(screen.getAllByText(/1,985 Kg\/Ha/)).toHaveLength(3)
+    expect(screen.getAllByText(/-647 Kg\/Ha/)).toHaveLength(3)
     expect(screen.getByText(/8\.5 %/)).toBeInTheDocument()
     expect(screen.getByText(/13\.4 %/)).toBeInTheDocument()
     expect(screen.getByText(/-4\.9 percentage points/)).toBeInTheDocument()
