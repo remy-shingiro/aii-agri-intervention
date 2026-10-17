@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, FileSearch } from 'lucide-react'
 
 import { evidenceRecords } from '../../evidence/data/evidenceRecords'
 import type { ProductivityGapStatus } from '../../../types/agricultural-signal'
@@ -12,6 +12,7 @@ interface AgriculturalInsightPanelProps {
   selectedDistrict?: string
   year: string
   onOpenDistrictProfile: () => void
+  onOpenEvidence: () => void
 }
 
 function getSignalLabel(status: ProductivityGapStatus): string {
@@ -68,6 +69,7 @@ export function AgriculturalInsightPanel({
   selectedDistrict,
   year,
   onOpenDistrictProfile,
+  onOpenEvidence,
 }: AgriculturalInsightPanelProps) {
   const periodInsights = useMemo(
     () => getDistrictInsights(crop, season, year),
@@ -110,14 +112,17 @@ export function AgriculturalInsightPanel({
   const supportsSelectedPeriod = periodInsights.length > 0
 
   return (
-    <aside aria-label="District agricultural evidence" className="min-w-0">
-      <section className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6">
+    <aside
+      aria-label="District agricultural evidence"
+      className="min-w-0 xl:h-full"
+    >
+      <section className="h-full rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-green-800">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-agri-700">
               {selectedDistrict ? 'District evidence' : 'Data in view'}
             </p>
-            <h2 className="mt-1 text-base font-semibold tracking-tight text-slate-900">
+            <h2 className="mt-1 text-lg font-bold tracking-tight text-forest-950">
               {insight
                 ? insight.productivityGap.status === 'insufficient_evidence'
                   ? 'Productivity evidence'
@@ -150,8 +155,9 @@ export function AgriculturalInsightPanel({
               <p className="text-xs font-medium text-slate-600">
                 District − national yield · derived
               </p>
-              <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900 tabular-nums">
-                {insight.productivityGap.absoluteGap?.toLocaleString('en-RW') ?? 'Unavailable'}{' '}
+              <p className="mt-1 text-3xl font-bold tracking-tight text-forest-950 tabular-nums">
+                {insight.productivityGap.absoluteGap?.toLocaleString('en-RW') ??
+                  'Unavailable'}{' '}
                 {insight.productivityGap.unit ?? ''}
               </p>
               <p className="mt-2 text-xs leading-5 text-slate-500">
@@ -159,21 +165,25 @@ export function AgriculturalInsightPanel({
                 {insight.productivityGap.relativeGapPct === undefined
                   ? 'Unavailable'
                   : `${insight.productivityGap.relativeGapPct > 0 ? '+' : ''}${insight.productivityGap.relativeGapPct.toFixed(1)}%`}
-                {' · '}derived from the observed district and national values
-                in the same NISR dataset and period.
+                {' · '}derived from the observed district and national values in
+                the same NISR dataset and period.
               </p>
             </div>
 
             <dl className="grid grid-cols-2 divide-x divide-slate-200 py-4">
               <div className="pr-3">
-                <dt className="text-xs text-slate-500">District yield · observed</dt>
-                <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
+                <dt className="text-xs text-slate-500">
+                  District yield · observed
+                </dt>
+                <dd className="mt-1 text-lg font-bold text-forest-950 tabular-nums">
                   {formatYieldRecord(insight.districtYieldRecord)}
                 </dd>
               </div>
               <div className="pl-4">
-                <dt className="text-xs text-slate-500">National reference · observed</dt>
-                <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
+                <dt className="text-xs text-slate-500">
+                  National reference · observed
+                </dt>
+                <dd className="mt-1 text-lg font-bold text-forest-950 tabular-nums">
                   {formatYieldRecord(insight.nationalYieldRecord)}
                 </dd>
               </div>
@@ -181,8 +191,10 @@ export function AgriculturalInsightPanel({
 
             <dl className="grid grid-cols-2 gap-x-3 gap-y-4 border-t border-slate-200 py-4">
               <div className="min-w-0">
-                <dt className="text-xs text-slate-500">Production · observed</dt>
-                <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
+                <dt className="text-xs text-slate-500">
+                  Production · observed
+                </dt>
+                <dd className="mt-1 text-lg font-bold text-forest-950 tabular-nums">
                   {formatValue(insight.productionRecord)}
                 </dd>
                 {insight.productionRecord && (
@@ -192,7 +204,9 @@ export function AgriculturalInsightPanel({
                 )}
               </div>
               <div className="min-w-0">
-                <dt className="text-xs text-slate-500">Cultivated area · observed</dt>
+                <dt className="text-xs text-slate-500">
+                  Cultivated area · observed
+                </dt>
                 <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
                   {formatValue(insight.areaRecord)}
                 </dd>
@@ -217,7 +231,8 @@ export function AgriculturalInsightPanel({
                   </dd>
                 )}
                 <dd className="mt-2 text-xs text-slate-500">
-                  National reference: {nationalIrrigationValue !== undefined
+                  National reference:{' '}
+                  {nationalIrrigationValue !== undefined
                     ? `${nationalIrrigationValue.toFixed(1)}%`
                     : 'Unavailable'}
                   {districtIrrigationValue !== undefined &&
@@ -228,14 +243,27 @@ export function AgriculturalInsightPanel({
               </div>
             </dl>
 
-            <button
-              className="mt-1 inline-flex min-h-11 w-full items-center justify-between rounded-lg border border-slate-300 px-3.5 text-sm font-semibold text-slate-800 transition-colors hover:border-green-700 hover:bg-green-50 hover:text-green-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
-              onClick={onOpenDistrictProfile}
-              type="button"
-            >
-              Open district profile
-              <ArrowRight aria-hidden="true" className="size-4" />
-            </button>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+              <button
+                className="inline-flex min-h-11 items-center justify-between rounded-lg bg-forest-950 px-3.5 text-sm font-semibold text-white transition-colors hover:bg-forest-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-agri-700 focus-visible:ring-offset-2"
+                onClick={onOpenDistrictProfile}
+                type="button"
+              >
+                Open district profile
+                <ArrowRight aria-hidden="true" className="size-4" />
+              </button>
+              <button
+                className="inline-flex min-h-11 items-center justify-between rounded-lg border border-slate-300 px-3.5 text-sm font-semibold text-forest-950 transition-colors hover:border-agri-700 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-agri-700 focus-visible:ring-offset-2"
+                onClick={onOpenEvidence}
+                type="button"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <FileSearch aria-hidden="true" className="size-4" />
+                  View evidence
+                </span>
+                <ArrowRight aria-hidden="true" className="size-4" />
+              </button>
+            </div>
           </>
         ) : (
           <div className="mt-3">

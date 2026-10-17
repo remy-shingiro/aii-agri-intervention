@@ -798,7 +798,7 @@ export function RwandaMapPanel({
     <section
       aria-label="Rwanda district productivity comparison map"
       aria-describedby="district-map-help"
-      className="relative h-[clamp(380px,58vh,620px)] min-w-0 overflow-hidden rounded-xl border border-slate-300 bg-slate-50 sm:h-[min(68vh,680px)]"
+      className="relative h-[clamp(360px,60vh,660px)] min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 sm:h-[min(68vh,700px)]"
     >
       <div
         ref={mapContainerRef}
@@ -899,7 +899,8 @@ export function RwandaMapPanel({
                   ? 'Below national reference'
                   : hoveredInsight?.productivityGap.status === 'at_reference'
                     ? 'At national reference'
-                    : hoveredInsight?.productivityGap.status === 'above_reference'
+                    : hoveredInsight?.productivityGap.status ===
+                        'above_reference'
                       ? 'Above national reference'
                       : 'Insufficient evidence'}
               </dd>

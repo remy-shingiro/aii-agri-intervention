@@ -61,7 +61,7 @@ export function App() {
 
     setEvidenceContext({
       district: selectedDistrict,
-      crop: evidenceIds ? 'all' : signal?.crop ?? overviewFilters.crop,
+      crop: evidenceIds ? 'all' : (signal?.crop ?? overviewFilters.crop),
       year: signal?.period.year ?? overviewFilters.year.replace('-', '/'),
       season: signal?.period.season ?? getSeasonCode(overviewFilters.season),
       intervention:
@@ -106,6 +106,7 @@ export function App() {
               selectedDistrict={selectedDistrict}
               onDistrictSelect={setSelectedDistrict}
               onOpenDistrictProfile={() => setActivePage('District Profile')}
+              onOpenEvidence={() => openProfileEvidence()}
             />
           )}
 

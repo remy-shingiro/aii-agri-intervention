@@ -22,7 +22,7 @@ const RwandaMapPanel = lazy(async () => {
 })
 
 const mapPanelClassName =
-  'relative h-[clamp(380px,58vh,620px)] min-w-0 overflow-hidden rounded-xl border border-slate-300 bg-slate-50 sm:h-[min(68vh,680px)]'
+  'relative h-[clamp(360px,60vh,660px)] min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 sm:h-[min(68vh,700px)]'
 
 function DeferredDistrictMapPanel(
   props: ComponentProps<typeof RwandaMapPanel>,
@@ -94,6 +94,7 @@ interface OverviewPageProps {
   onFilterChange: (filter: keyof OverviewFilters, value: string) => void
   onDistrictSelect: (district: string | undefined) => void
   onOpenDistrictProfile: () => void
+  onOpenEvidence: () => void
 }
 
 export function OverviewPage({
@@ -102,14 +103,17 @@ export function OverviewPage({
   onFilterChange,
   onDistrictSelect,
   onOpenDistrictProfile,
+  onOpenEvidence,
 }: OverviewPageProps) {
   const [districtSearch, setDistrictSearch] = useState('')
   const nationalIntelligence = useMemo(() => {
-    const seasonCode = ({
-      'season-a': 'A',
-      'season-b': 'B',
-      'season-c': 'C',
-    } as const)[filters.season] as AgriculturalSeason | undefined
+    const seasonCode = (
+      {
+        'season-a': 'A',
+        'season-b': 'B',
+        'season-c': 'C',
+      } as const
+    )[filters.season] as AgriculturalSeason | undefined
     return calculateNationalIntelligence(evidenceRecords, {
       crop: filters.crop,
       season: seasonCode,
@@ -133,9 +137,9 @@ export function OverviewPage({
   const seasonLabel =
     filters.season === 'season-a'
       ? 'Season A'
-      : filters.season.replace('-', ' ').replace(/\b\w/g, (letter) =>
-          letter.toUpperCase(),
-        )
+      : filters.season
+          .replace('-', ' ')
+          .replace(/\b\w/g, (letter) => letter.toUpperCase())
   const yearLabel = filters.year.replace('-', '/')
 
   const intelligenceMetrics: readonly {
@@ -211,7 +215,7 @@ export function OverviewPage({
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <OverviewHeader
         districtSearch={districtSearch}
         filters={filters}
@@ -220,15 +224,75 @@ export function OverviewPage({
         onFilterChange={onFilterChange}
       />
 
-      <section aria-labelledby="national-intelligence-heading" className="space-y-3">
+      <section
+        aria-labelledby="overview-map-heading"
+        className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
+      >
+        <header className="mb-3 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+          <div className="min-w-0">
+            <h2
+              id="overview-map-heading"
+              className="text-base font-bold tracking-tight text-forest-950 sm:text-lg"
+            >
+              {hasObservations
+                ? `${cropLabel} yield comparison by district`
+                : 'District map'}
+            </h2>
+            <p className="mt-1 text-xs leading-5 text-slate-600">
+              {selectedDistrict
+                ? `${selectedDistrict} selected · choose another district on the map or search above`
+                : 'Select a district on the map or with the search above to inspect its evidence.'}
+            </p>
+          </div>
+          <p className="rounded-full bg-sage-50 px-3 py-1.5 text-xs font-semibold text-forest-900">
+            Rwanda <span aria-hidden="true">·</span> {seasonLabel}{' '}
+            <span aria-hidden="true">·</span> {yearLabel}
+          </p>
+        </header>
+
+        <p id="district-map-help" className="sr-only">
+          Use the district search field above to select a district with a
+          keyboard. The map can also be explored with pointer controls.
+        </p>
+
+        <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-stretch">
+          <DeferredDistrictMapPanel
+            crop={filters.crop}
+            districtSearch={districtSearch}
+            season={filters.season}
+            selectedDistrict={selectedDistrict}
+            year={filters.year}
+            onDistrictSelect={handleDistrictSelect}
+          />
+
+          <AgriculturalInsightPanel
+            crop={filters.crop}
+            season={filters.season}
+            selectedDistrict={selectedDistrict}
+            year={filters.year}
+            onOpenDistrictProfile={onOpenDistrictProfile}
+            onOpenEvidence={onOpenEvidence}
+          />
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="national-intelligence-heading"
+        className="space-y-3"
+      >
         <div>
-          <h2
-            className="text-base font-semibold tracking-tight text-slate-900"
-            id="national-intelligence-heading"
-          >
-            National Agricultural Intelligence
-          </h2>
-          <p className="mt-1 max-w-4xl text-xs leading-5 text-slate-500">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <h2
+              className="text-base font-bold tracking-tight text-forest-950"
+              id="national-intelligence-heading"
+            >
+              National Agricultural Intelligence
+            </h2>
+            <p className="text-xs font-medium text-slate-500">
+              {cropLabel} · {seasonLabel} · {yearLabel}
+            </p>
+          </div>
+          <p className="mt-1 max-w-4xl text-xs leading-5 text-slate-600">
             Signals summarize connected NISR evidence for the selected crop and
             period. They identify areas for further investigation and do not
             establish causality.
@@ -237,42 +301,37 @@ export function OverviewPage({
 
         <section
           aria-label="National agricultural intelligence metrics"
-          className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4"
+          className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-3"
         >
-          {intelligenceMetrics.map((metric) => (
+          {intelligenceMetrics.map((metric, index) => (
             <article
-              className="min-w-0 border-l-2 border-slate-300 bg-white px-4 py-3"
+              className={`min-w-0 rounded-xl border bg-white p-4 shadow-sm ${
+                index === 1 ? 'border-amber-200' : 'border-slate-200'
+              }`}
               key={metric.label}
             >
-              <h3 className="text-xs font-semibold text-slate-600">
+              <h3 className="text-xs font-bold text-slate-600">
                 {metric.label}
               </h3>
-              <p className="mt-1 text-2xl font-semibold tabular-nums text-slate-900">
+              <p className="mt-1 text-2xl font-bold tabular-nums text-forest-950">
                 {metric.value.toLocaleString('en-RW')}
               </p>
-              <p className="mt-1 text-xs leading-5 text-slate-500">
+              <p className="mt-1 text-xs leading-5 text-slate-600">
                 {metric.detail}
               </p>
             </article>
           ))}
-          <article className="min-w-0 border-l-2 border-slate-300 bg-white px-4 py-3">
-            <h3 className="text-xs font-semibold text-slate-600">
-              Productivity direction (same crop and season)
-            </h3>
-            <p className="mt-2 text-xs leading-5 text-slate-700">
-              {directionSummary}
-            </p>
-            <p className="mt-1 text-xs leading-5 text-slate-500">
-              Compares earliest and latest connected periods; this is not a
-              significance test.
-            </p>
-          </article>
         </section>
 
-        <details className="rounded-lg border border-slate-200 bg-white px-4 py-3">
-          <summary className="min-h-10 cursor-pointer py-2 text-sm font-semibold text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2">
-            View districts and NISR sources
+        <details className="rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm">
+          <summary className="min-h-10 cursor-pointer py-2 text-sm font-semibold text-forest-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-agri-700 focus-visible:ring-offset-2">
+            View district groupings, productivity direction and NISR sources
           </summary>
+          <p className="border-t border-slate-200 py-3 text-sm leading-6 text-slate-700">
+            Productivity direction (same crop and season): {directionSummary}.
+            This compares earliest and latest connected periods; it is not a
+            significance test.
+          </p>
           <dl className="grid gap-x-5 gap-y-3 border-t border-slate-200 pt-3 text-sm sm:grid-cols-2 xl:grid-cols-3">
             {districtSignalGroups.map(({ label, districts }) => (
               <div className="min-w-0" key={label}>
@@ -286,7 +345,7 @@ export function OverviewPage({
             ))}
           </dl>
           <div className="mt-3 border-t border-slate-200 pt-3">
-            <h3 className="text-sm font-medium text-slate-600">
+            <h3 className="text-sm font-semibold text-slate-700">
               Connected source references
             </h3>
             {nationalIntelligence.sourceReferences.length > 0 ? (
@@ -296,7 +355,7 @@ export function OverviewPage({
                     key={`${reference.dataset}:${reference.table}:${reference.page ?? ''}`}
                   >
                     <a
-                      className="text-green-800 underline decoration-green-700/40 underline-offset-2 hover:text-green-950"
+                      className="text-agri-700 underline decoration-green-700/40 underline-offset-2 hover:text-forest-950"
                       href={reference.sourceUrl}
                       rel="noreferrer"
                       target="_blank"
@@ -315,46 +374,6 @@ export function OverviewPage({
           </div>
         </details>
       </section>
-      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_340px] xl:items-start">
-        <section aria-labelledby="overview-map-heading" className="min-w-0">
-          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-            <h2
-              id="overview-map-heading"
-              className="text-base font-semibold tracking-tight text-slate-900"
-            >
-              {hasObservations
-                ? `${cropLabel} yield comparison by district`
-                : 'District map'}
-            </h2>
-
-            <p className="text-xs text-slate-500">
-              Rwanda | {seasonLabel} | {yearLabel}
-            </p>
-          </div>
-
-          <p id="district-map-help" className="sr-only">
-            Use the district search field above to select a district with a
-            keyboard. The map can also be explored with pointer controls.
-          </p>
-
-          <DeferredDistrictMapPanel
-            crop={filters.crop}
-            districtSearch={districtSearch}
-            season={filters.season}
-            selectedDistrict={selectedDistrict}
-            year={filters.year}
-            onDistrictSelect={handleDistrictSelect}
-          />
-        </section>
-
-        <AgriculturalInsightPanel
-          crop={filters.crop}
-          season={filters.season}
-          selectedDistrict={selectedDistrict}
-          year={filters.year}
-          onOpenDistrictProfile={onOpenDistrictProfile}
-        />
-      </div>
     </div>
   )
 }

@@ -41,26 +41,39 @@ const yieldObservations = normalizedEvidenceRecords.filter(
     record.crop,
 )
 
-const cropOptions: FilterOption[] = [...new Set(
-  yieldObservations.flatMap((record) => record.crop ? [record.crop] : []),
-)].sort((first, second) => first.localeCompare(second)).map((crop) => ({
-  label: crop,
-  value: crop.toLowerCase(),
-}))
+const cropOptions: FilterOption[] = [
+  ...new Set(
+    yieldObservations.flatMap((record) => (record.crop ? [record.crop] : [])),
+  ),
+]
+  .sort((first, second) => first.localeCompare(second))
+  .map((crop) => ({
+    label: crop.replace(/\b\w/g, (letter) => letter.toUpperCase()),
+    value: crop.toLowerCase(),
+  }))
 
-const seasonOptions: FilterOption[] = [...new Set(
-  yieldObservations.flatMap((record) => record.period.season ? [record.period.season] : []),
-)].sort().map((season) => ({
-  label: `Season ${season}`,
-  value: `season-${season.toLowerCase()}`,
-}))
+const seasonOptions: FilterOption[] = [
+  ...new Set(
+    yieldObservations.flatMap((record) =>
+      record.period.season ? [record.period.season] : [],
+    ),
+  ),
+]
+  .sort()
+  .map((season) => ({
+    label: `Season ${season}`,
+    value: `season-${season.toLowerCase()}`,
+  }))
 
-const yearOptions: FilterOption[] = [...new Set(
-  yieldObservations.map((record) => record.period.year),
-)].sort().reverse().map((year) => ({
-  label: year,
-  value: year.replace('/', '-'),
-}))
+const yearOptions: FilterOption[] = [
+  ...new Set(yieldObservations.map((record) => record.period.year)),
+]
+  .sort()
+  .reverse()
+  .map((year) => ({
+    label: year,
+    value: year.replace('/', '-'),
+  }))
 
 export function OverviewHeader({
   districtSearch,
@@ -110,34 +123,37 @@ export function OverviewHeader({
   }, [])
 
   return (
-    <section className="space-y-6">
+    <section className="space-y-4">
       <div className="space-y-2">
-        <p className="text-sm font-semibold uppercase tracking-wider text-green-700">
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-agri-700">
           Agricultural intelligence
         </p>
 
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl lg:text-4xl">
+          <h1 className="text-3xl font-bold tracking-tight text-forest-950 sm:text-4xl">
             Rwanda Agricultural Overview
           </h1>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500 sm:text-base">
-            Review available district observations and identify where further
-            investigation may be warranted.
+          <p className="mt-2 text-base font-semibold tracking-tight text-forest-900 sm:text-lg">
+            Find the gaps. Understand the evidence.
+          </p>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
+            Explore Rwanda’s agricultural productivity through published NISR
+            statistics, with every finding linked to its source.
           </p>
         </div>
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
         <div
           role="group"
           aria-label="Agricultural observation filters"
-          className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(200px,1.4fr)_repeat(3,minmax(120px,1fr))] xl:items-end"
+          className="grid grid-cols-2 gap-3 xl:grid-cols-[minmax(220px,1.5fr)_repeat(3,minmax(130px,1fr))] xl:items-end"
         >
-          <div className="min-w-0">
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <div className="col-span-2 min-w-0 xl:col-span-1">
+            <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-600">
               District
-            </label>
+            </p>
 
             <DistrictSearchInput
               districts={districts}
@@ -148,7 +164,7 @@ export function OverviewHeader({
             />
           </div>
 
-          <div>
+          <div className="min-w-0">
             <label
               className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500"
               htmlFor="crop-filter"
@@ -183,7 +199,7 @@ export function OverviewHeader({
             </div>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <label
               className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500"
               htmlFor="season-filter"
@@ -215,7 +231,7 @@ export function OverviewHeader({
             </div>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <label
               className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500"
               htmlFor="year-filter"
@@ -249,7 +265,6 @@ export function OverviewHeader({
               />
             </div>
           </div>
-
         </div>
         <p className="mt-3 text-xs leading-5 text-slate-500">
           Crop, season, and year options come from observed district yield rows

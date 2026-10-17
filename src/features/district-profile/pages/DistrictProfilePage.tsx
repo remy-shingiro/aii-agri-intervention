@@ -14,6 +14,7 @@ import type { InterventionSignal } from '../../../types/intervention'
 import type { EvidenceRecord } from '../../evidence/types/evidence.types'
 import { getDistrictInsight } from '../../overview/data/districtInsights'
 import { calculateAgriculturalSignals } from '../../intelligence/agriculturalSignalEngine'
+import { DistrictComparisonBar } from '../components/DistrictComparisonBar'
 import { DistrictCropPortfolio } from '../components/DistrictCropPortfolio'
 import { DistrictSeasonalPracticeProfile } from '../components/DistrictSeasonalPracticeProfile'
 import { getDistrictMetadata } from '../data/districtMetadata'
@@ -53,9 +54,17 @@ function formatValue(record: EvidenceRecord): string {
   }).format(record.value)} ${record.unit}`
 }
 
+function observedNumber(record: EvidenceRecord): number | undefined {
+  return record.status === 'observed' &&
+    record.value !== null &&
+    Number.isFinite(record.value)
+    ? record.value
+    : undefined
+}
+
 function EvidenceSourceMetadata({ record }: { record: EvidenceRecord }) {
   return (
-    <div className="min-w-0 rounded-lg bg-slate-50 p-3">
+    <div className="min-w-0 rounded-lg bg-warm-50 p-3">
       <dl className="grid min-w-0 gap-x-3 gap-y-1 text-xs sm:grid-cols-[auto_minmax(0,1fr)]">
         <dt className="font-medium text-slate-500">Dataset</dt>
         <dd className="min-w-0 break-words text-slate-700">
@@ -66,6 +75,10 @@ function EvidenceSourceMetadata({ record }: { record: EvidenceRecord }) {
           {record.sourceReference.table}
           {record.sourceReference.page !== undefined &&
             ` · p. ${record.sourceReference.page}`}
+        </dd>
+        <dt className="font-medium text-slate-500">Report</dt>
+        <dd className="min-w-0 break-words text-slate-700">
+          {record.source.report}
         </dd>
         <dt className="font-medium text-slate-500">Period</dt>
         <dd className="text-slate-700">
@@ -118,40 +131,57 @@ function ComparisonEvidence({
   return (
     <section
       aria-label={heading}
-      className="min-w-0 rounded-xl border border-slate-200 bg-white p-4"
+      className="min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
     >
       <h4 className="text-sm font-semibold text-slate-900">{heading}</h4>
-      <dl className="mt-3 grid min-w-0 gap-x-4 gap-y-3 sm:grid-cols-2">
-        <div className="min-w-0">
-          <dt className="text-xs text-slate-500">
-            District · Observed · {district.geography.name}
-          </dt>
-          <dd className="mt-1 break-words text-lg font-semibold tabular-nums text-slate-900">
-            {formatValue(district)}
-          </dd>
-        </div>
-        <div className="min-w-0 border-t border-slate-100 pt-3 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
-          <dt className="text-xs text-slate-500">
-            National reference · Observed
-          </dt>
-          <dd className="mt-1 break-words text-lg font-semibold tabular-nums text-slate-900">
-            {formatValue(national)}
-          </dd>
-        </div>
-        <div className="min-w-0 border-t border-slate-100 pt-3 sm:col-span-2">
-          <dt className="text-xs text-slate-500">
-            Difference · Derived (district − national)
-          </dt>
-          <dd className="mt-1 flex flex-wrap items-center gap-2 break-words text-base font-semibold tabular-nums text-slate-900">
-            {formattedDifference} {differenceUnit}
-            <EvidenceStatusBadge status="derived" />
-          </dd>
-        </div>
-      </dl>
-      <div className="mt-4 grid min-w-0 gap-2 border-t border-slate-100 pt-3">
-        <EvidenceSourceMetadata record={district} />
-        <EvidenceSourceMetadata record={national} />
+      <div className="mt-3">
+        <DistrictComparisonBar
+          difference={difference}
+          differenceUnit={differenceUnit}
+          districtName={district.geography.name}
+          districtValue={observedNumber(district)}
+          label={heading}
+          nationalValue={observedNumber(national)}
+          scaleMaximum={district.unit === '%' ? 100 : undefined}
+          unit={district.unit}
+        />
       </div>
+      <details className="mt-3 border-t border-slate-100 pt-2">
+        <summary className="min-h-9 cursor-pointer content-center text-xs font-semibold text-green-800 underline decoration-green-300 underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2">
+          Observed values and source records
+        </summary>
+        <dl className="mt-3 grid min-w-0 gap-x-4 gap-y-3 sm:grid-cols-2">
+          <div className="min-w-0">
+            <dt className="text-xs text-slate-500">
+              District · Observed · {district.geography.name}
+            </dt>
+            <dd className="mt-1 break-words text-lg font-semibold tabular-nums text-slate-900">
+              {formatValue(district)}
+            </dd>
+          </div>
+          <div className="min-w-0 border-t border-slate-100 pt-3 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
+            <dt className="text-xs text-slate-500">
+              National reference · Observed
+            </dt>
+            <dd className="mt-1 break-words text-lg font-semibold tabular-nums text-slate-900">
+              {formatValue(national)}
+            </dd>
+          </div>
+          <div className="min-w-0 border-t border-slate-100 pt-3 sm:col-span-2">
+            <dt className="text-xs text-slate-500">
+              Difference · Derived (district − national)
+            </dt>
+            <dd className="mt-1 flex flex-wrap items-center gap-2 break-words text-base font-semibold tabular-nums text-slate-900">
+              {formattedDifference} {differenceUnit}
+              <EvidenceStatusBadge status="derived" />
+            </dd>
+          </div>
+        </dl>
+        <div className="mt-4 grid min-w-0 gap-2 border-t border-slate-100 pt-3">
+          <EvidenceSourceMetadata record={district} />
+          <EvidenceSourceMetadata record={national} />
+        </div>
+      </details>
     </section>
   )
 }
@@ -173,8 +203,12 @@ function IrrigationEvidenceTrailContent({
 }) {
   const detailsId = useId()
   const [expanded, setExpanded] = useState(false)
-  const { districtYield, nationalYield, districtIrrigation, nationalIrrigation } =
-    trailRecords
+  const {
+    districtYield,
+    nationalYield,
+    districtIrrigation,
+    nationalIrrigation,
+  } = trailRecords
 
   return (
     <div className="mt-4 border-t border-green-200 pt-3">
@@ -211,8 +245,7 @@ function IrrigationEvidenceTrailContent({
           <ol className="mt-2 list-inside list-decimal space-y-1 text-sm leading-6 text-slate-700">
             <li>District maize yield is below the national reference.</li>
             <li>
-              District-wide irrigation practice is below the national
-              reference.
+              District-wide irrigation practice is below the national reference.
             </li>
           </ol>
         </div>
@@ -286,8 +319,8 @@ function InterventionAreas({
           Investigation Areas
         </h2>
         <p className="mt-1 text-sm leading-6 text-slate-600">
-          Evidence conditions identify areas for further investigation. They
-          do not establish causes or recommend investment.
+          Evidence conditions identify areas for further investigation. They do
+          not establish causes or recommend investment.
         </p>
       </div>
 
@@ -512,7 +545,7 @@ export function DistrictProfilePage({
   if (!selectedDistrict) {
     return (
       <section className="mx-auto max-w-2xl border-l-2 border-green-700 py-2 pl-5 sm:pl-6">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-green-800">
+        <p className="text-[11px] font-bold uppercase tracking-wider text-agri-700">
           District profile
         </p>
         <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
@@ -541,17 +574,15 @@ export function DistrictProfilePage({
     year: year.replace('-', '/'),
     season: getSeasonCode(season),
   }
-  const [productivityGap, productivityTrend, irrigationSignal] = calculateAgriculturalSignals(
-    evidenceRecords,
-    period,
-  )
+  const [productivityGap, productivityTrend, irrigationSignal] =
+    calculateAgriculturalSignals(evidenceRecords, period)
   const irrigationSignals = [irrigationSignal]
 
   if (!insight || insight.source.kind !== 'nisr') {
     const metadata = getDistrictMetadata(selectedDistrict)
 
     return (
-      <div className="space-y-8">
+      <div className="space-y-6">
         <header className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <button
@@ -576,7 +607,7 @@ export function DistrictProfilePage({
               District profile
             </p>
             <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-2">
-              <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+              <h1 className="text-3xl font-bold tracking-tight text-forest-950 sm:text-4xl">
                 {selectedDistrict}
               </h1>
               {metadata && (
@@ -586,7 +617,7 @@ export function DistrictProfilePage({
                 </span>
               )}
             </div>
-            <p className="mt-2 text-sm text-slate-600">
+            <p className="mt-2 inline-flex rounded-full bg-sage-50 px-3 py-1.5 text-sm font-semibold text-forest-900">
               {period.crop} · Season {period.season} · Agricultural year{' '}
               {period.year}
             </p>
@@ -622,7 +653,7 @@ export function DistrictProfilePage({
           )}
         </section>
 
-        <DistrictSeasonalPracticeProfile
+        <DistrictCropPortfolio
           district={selectedDistrict}
           onOpenEvidence={(evidenceIds) =>
             onOpenEvidence(undefined, evidenceIds)
@@ -631,7 +662,7 @@ export function DistrictProfilePage({
           year={period.year}
         />
 
-        <DistrictCropPortfolio
+        <DistrictSeasonalPracticeProfile
           district={selectedDistrict}
           onOpenEvidence={(evidenceIds) =>
             onOpenEvidence(undefined, evidenceIds)
@@ -659,7 +690,7 @@ export function DistrictProfilePage({
   const signal = productivityGap
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <header className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <button
@@ -681,11 +712,11 @@ export function DistrictProfilePage({
         </div>
 
         <div className="border-b border-slate-200 pb-5">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-green-800">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-agri-700">
             District profile
           </p>
           <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
+            <h1 className="text-3xl font-bold tracking-tight text-forest-950 sm:text-4xl">
               {insight.district}
             </h1>
             {metadata && (
@@ -695,7 +726,7 @@ export function DistrictProfilePage({
               </span>
             )}
           </div>
-          <p className="mt-2 text-sm text-slate-600">
+          <p className="mt-2 inline-flex rounded-full bg-sage-50 px-3 py-1.5 text-sm font-semibold text-forest-900">
             {insight.crop} · {insight.season} · Agricultural year {insight.year}
           </p>
         </div>
@@ -703,7 +734,7 @@ export function DistrictProfilePage({
 
       <section
         aria-labelledby="district-signal-heading"
-        className="rounded-xl border border-slate-200 bg-white p-5 sm:p-6"
+        className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
       >
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_230px] lg:items-center">
           <div>
@@ -731,7 +762,7 @@ export function DistrictProfilePage({
             <p className="text-xs font-medium text-slate-600">
               Absolute yield gap · derived
             </p>
-            <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-900 tabular-nums">
+            <p className="mt-1 text-3xl font-bold tracking-tight text-forest-950 tabular-nums">
               {signal.absoluteGap?.toLocaleString('en-RW') ?? 'Unavailable'}{' '}
               {signal.unit ?? ''}
             </p>
@@ -744,33 +775,58 @@ export function DistrictProfilePage({
           </div>
         </div>
 
-        <dl className="mt-5 grid border-y border-slate-200 sm:grid-cols-2 sm:divide-x sm:divide-slate-200">
-          <div className="py-3 sm:pr-4">
-            <dt className="text-xs text-slate-500">District average yield</dt>
-            <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
-              {signal.districtYield === undefined
-                ? 'Unavailable'
-                : `${signal.districtYield.toLocaleString('en-RW')} ${signal.unit}`}
-            </dd>
-          </div>
-          <div className="border-t border-slate-200 py-3 sm:border-t-0 sm:pl-5">
-            <dt className="text-xs text-slate-500">National yield reference</dt>
-            <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
-              {signal.nationalYield === undefined
-                ? 'Unavailable'
-                : `${signal.nationalYield.toLocaleString('en-RW')} ${signal.unit}`}
-            </dd>
-          </div>
-        </dl>
-        <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
-          <EvidenceSourceMetadata record={insight.districtYieldRecord} />
-          {insight.nationalYieldRecord && (
-            <EvidenceSourceMetadata record={insight.nationalYieldRecord} />
-          )}
+        <div className="mt-5 rounded-xl border border-slate-100 bg-warm-50 p-4 sm:p-5">
+          <DistrictComparisonBar
+            difference={signal.absoluteGap}
+            districtName={insight.district}
+            districtValue={signal.districtYield}
+            label={`${insight.crop} yield · ${period.year} · Season ${period.season}`}
+            nationalValue={signal.nationalYield}
+            unit={insight.districtYieldRecord.unit}
+          />
         </div>
+        <details className="mt-3 border-t border-slate-200 pt-2">
+          <summary className="min-h-9 cursor-pointer content-center text-xs font-semibold text-green-800 underline decoration-green-300 underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2">
+            Observed values and NISR source records
+          </summary>
+          <dl className="mt-3 grid border-y border-slate-200 sm:grid-cols-2 sm:divide-x sm:divide-slate-200">
+            <div className="py-3 sm:pr-4">
+              <dt className="text-xs text-slate-500">District average yield</dt>
+              <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
+                {signal.districtYield === undefined
+                  ? 'Unavailable'
+                  : `${signal.districtYield.toLocaleString('en-RW')} ${signal.unit}`}
+              </dd>
+            </div>
+            <div className="border-t border-slate-200 py-3 sm:border-t-0 sm:pl-5">
+              <dt className="text-xs text-slate-500">
+                National yield reference
+              </dt>
+              <dd className="mt-1 text-lg font-semibold text-slate-900 tabular-nums">
+                {signal.nationalYield === undefined
+                  ? 'Unavailable'
+                  : `${signal.nationalYield.toLocaleString('en-RW')} ${signal.unit}`}
+              </dd>
+            </div>
+          </dl>
+          <div className="mt-3 grid min-w-0 gap-2 sm:grid-cols-2">
+            <EvidenceSourceMetadata record={insight.districtYieldRecord} />
+            {insight.nationalYieldRecord && (
+              <EvidenceSourceMetadata record={insight.nationalYieldRecord} />
+            )}
+          </div>
+        </details>
+        <button
+          className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+          onClick={() => onOpenEvidence(signal)}
+          type="button"
+        >
+          Inspect yield evidence in Evidence Explorer
+          <ArrowRight aria-hidden="true" className="size-4" />
+        </button>
       </section>
 
-      <section aria-labelledby="productivity-heading">
+      <section aria-labelledby="productivity-heading" className="space-y-3">
         <div className="mb-3">
           <h2
             className="text-base font-semibold text-slate-900"
@@ -782,16 +838,16 @@ export function DistrictProfilePage({
             Observed district production and cultivated area for this period.
           </p>
         </div>
-        <dl className="grid border-y border-slate-200 sm:grid-cols-2 sm:divide-x sm:divide-slate-200">
-          <div className="py-3 sm:pr-5">
+        <dl className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <dt className="text-xs text-slate-500">Production</dt>
-            <dd className="mt-1 text-xl font-semibold text-slate-900 tabular-nums">
+            <dd className="mt-1 text-xl font-bold text-forest-950 tabular-nums">
               {insight.totalProduction}
             </dd>
           </div>
-          <div className="border-t border-slate-200 py-3 sm:border-t-0 sm:pl-5">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <dt className="text-xs text-slate-500">Cultivated area</dt>
-            <dd className="mt-1 text-xl font-semibold text-slate-900 tabular-nums">
+            <dd className="mt-1 text-xl font-bold text-forest-950 tabular-nums">
               {insight.cultivatedArea}
             </dd>
           </div>
@@ -808,20 +864,16 @@ export function DistrictProfilePage({
         </p>
       </section>
 
-      <DistrictSeasonalPracticeProfile
+      <DistrictCropPortfolio
         district={insight.district}
-        onOpenEvidence={(evidenceIds) =>
-          onOpenEvidence(undefined, evidenceIds)
-        }
+        onOpenEvidence={(evidenceIds) => onOpenEvidence(undefined, evidenceIds)}
         season={period.season}
         year={period.year}
       />
 
-      <DistrictCropPortfolio
+      <DistrictSeasonalPracticeProfile
         district={insight.district}
-        onOpenEvidence={(evidenceIds) =>
-          onOpenEvidence(undefined, evidenceIds)
-        }
+        onOpenEvidence={(evidenceIds) => onOpenEvidence(undefined, evidenceIds)}
         season={period.season}
         year={period.year}
       />
@@ -842,9 +894,9 @@ export function DistrictProfilePage({
             </h2>
             <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
               The district yield and national reference are observed in the
-              selected NISR report. Absolute gap = district yield minus
-              national yield; relative gap is calculated only when the national
-              yield is greater than zero.
+              selected NISR report. Absolute gap = district yield minus national
+              yield; relative gap is calculated only when the national yield is
+              greater than zero.
             </p>
           </div>
           <EvidenceStatusBadge status="derived" />

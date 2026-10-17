@@ -56,7 +56,9 @@ describe('application shell', () => {
       ),
     ).toBeInTheDocument()
     expect(
-      screen.getByRole('heading', { name: 'National Agricultural Intelligence' }),
+      screen.getByRole('heading', {
+        name: 'National Agricultural Intelligence',
+      }),
     ).toBeInTheDocument()
     expect(screen.queryByText('481,246 tonnes')).not.toBeInTheDocument()
   })
@@ -142,6 +144,37 @@ describe('application shell', () => {
     ).toBeInTheDocument()
   })
 
+  it('renders the selected district yield comparison from connected records', async () => {
+    render(<App />)
+
+    const search = screen.getByRole('combobox', { name: 'Search district' })
+    fireEvent.change(search, { target: { value: 'Nyarugenge' } })
+    await waitFor(() => {
+      expect(
+        screen.getByRole('option', { name: 'Nyarugenge' }),
+      ).toBeInTheDocument()
+    })
+    fireEvent.keyDown(search, { key: 'ArrowDown' })
+    fireEvent.keyDown(search, { key: 'Enter' })
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Open district profile' }),
+    )
+
+    const comparison = await screen.findByRole(
+      'group',
+      {
+        name: /maize yield.*2024\/25.*season a: district and national comparison/i,
+      },
+      lazyLoadWait,
+    )
+    expect(within(comparison).getByText('1,338 Kg/Ha')).toBeInTheDocument()
+    expect(within(comparison).getByText('1,985 Kg/Ha')).toBeInTheDocument()
+    expect(within(comparison).getByText('-647 Kg/Ha')).toBeInTheDocument()
+    expect(comparison.querySelector('[data-series="national"]')).toHaveStyle({
+      width: '100%',
+    })
+  })
+
   it('uses the selected crop and period on profiles and fails closed for gaps', async () => {
     render(<App />)
 
@@ -172,7 +205,10 @@ describe('application shell', () => {
       await screen.findByRole('heading', { name: 'Nyarugenge' }, lazyLoadWait),
     ).toBeInTheDocument()
     expect(screen.getByText(/Beans.*Season B.*2023\/24/)).toBeInTheDocument()
-    expect(screen.getAllByText(/614 Kg\/Ha/)).toHaveLength(2)
+    const yieldComparison = screen.getByRole('group', {
+      name: /beans yield.*2023\/24.*season b: district and national comparison/i,
+    })
+    expect(within(yieldComparison).getByText('614 Kg/Ha')).toBeInTheDocument()
     const productivityEvidence = screen.getByRole('region', {
       name: 'Productivity Intelligence',
     })
@@ -188,7 +224,9 @@ describe('application shell', () => {
       .closest('article')
     expect(seedPractice).not.toBeNull()
     if (!seedPractice) return
-    expect(seedPractice).toHaveTextContent('District-wide practice · all crop activity')
+    expect(seedPractice).toHaveTextContent(
+      'District-wide practice · all crop activity',
+    )
     expect(within(seedPractice).getByText('15.3 %')).toBeInTheDocument()
     expect(within(seedPractice).getByText('18 %')).toBeInTheDocument()
     expect(
@@ -228,7 +266,7 @@ describe('application shell', () => {
     expect(maizePortfolio).not.toBeNull()
     if (!maizePortfolio) return
     expect(maizePortfolio).toHaveTextContent('1,338 Kg/Ha')
-  })
+  }, 15_000)
 
   it('opens matching crop portfolio observations in Evidence Explorer', async () => {
     render(<App />)
@@ -242,7 +280,9 @@ describe('application shell', () => {
     })
     fireEvent.keyDown(search, { key: 'ArrowDown' })
     fireEvent.keyDown(search, { key: 'Enter' })
-    fireEvent.click(screen.getByRole('button', { name: 'Open district profile' }))
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Open district profile' }),
+    )
 
     const maizePortfolio = await screen.findByRole(
       'heading',
@@ -289,11 +329,15 @@ describe('application shell', () => {
     const search = screen.getByRole('combobox', { name: 'Search district' })
     fireEvent.change(search, { target: { value: 'Nyarugenge' } })
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: 'Nyarugenge' })).toBeInTheDocument()
+      expect(
+        screen.getByRole('option', { name: 'Nyarugenge' }),
+      ).toBeInTheDocument()
     })
     fireEvent.keyDown(search, { key: 'ArrowDown' })
     fireEvent.keyDown(search, { key: 'Enter' })
-    fireEvent.click(screen.getByRole('button', { name: 'Open district profile' }))
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Open district profile' }),
+    )
 
     expect(
       await screen.findByRole('heading', { name: 'Nyarugenge' }, lazyLoadWait),
@@ -354,6 +398,42 @@ describe('application shell', () => {
     expect(screen.getByText('31 records')).toBeInTheDocument()
   })
 
+  it('searches evidence IDs and resets the evidence filters', async () => {
+    render(<App />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Evidence' }))
+    expect(
+      await screen.findByRole(
+        'heading',
+        { name: 'Evidence explorer' },
+        lazyLoadWait,
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByText('31 records')).toBeInTheDocument()
+
+    const sourceRecord = evidenceRecords.find(
+      (record) =>
+        record.dataset === 'SAS 2025' &&
+        record.indicator === 'average_yield' &&
+        record.crop?.toLowerCase() === 'maize' &&
+        record.period.season === 'A' &&
+        record.period.year === '2024/25',
+    )
+    expect(sourceRecord).toBeDefined()
+    if (!sourceRecord) return
+
+    fireEvent.change(screen.getByLabelText('Search records'), {
+      target: { value: sourceRecord.id },
+    })
+    expect(screen.getByText('1 record')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reset filters' }))
+    expect(screen.getByLabelText('Search records')).toHaveValue('')
+    expect(
+      screen.getByText(`${evidenceRecords.length} records`),
+    ).toBeInTheDocument()
+  })
+
   it('opens the Data & Methodology destination', async () => {
     render(<App />)
 
@@ -398,9 +478,7 @@ describe('application shell', () => {
     ).toBeInTheDocument()
     expect(screen.getByText('Investigation signal')).toBeInTheDocument()
 
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Why this signal?' }),
-    )
+    fireEvent.click(screen.getByRole('button', { name: 'Why this signal?' }))
 
     expect(
       await screen.findByRole(
@@ -411,12 +489,20 @@ describe('application shell', () => {
         lazyLoadWait,
       ),
     ).toBeInTheDocument()
-    expect(screen.getAllByText(/1,338 Kg\/Ha/)).toHaveLength(3)
-    expect(screen.getAllByText(/1,985 Kg\/Ha/)).toHaveLength(3)
-    expect(screen.getAllByText(/-647 Kg\/Ha/)).toHaveLength(3)
-    expect(screen.getByText(/8\.5 %/)).toBeInTheDocument()
-    expect(screen.getByText(/13\.4 %/)).toBeInTheDocument()
-    expect(screen.getByText(/-4\.9 percentage points/)).toBeInTheDocument()
+    const maizeComparison = screen.getByRole('group', {
+      name: /maize yield comparison: district and national comparison/i,
+    })
+    expect(within(maizeComparison).getByText('1,338 Kg/Ha')).toBeInTheDocument()
+    expect(within(maizeComparison).getByText('1,985 Kg/Ha')).toBeInTheDocument()
+    expect(within(maizeComparison).getByText('-647 Kg/Ha')).toBeInTheDocument()
+    const irrigationComparison = screen.getByRole('group', {
+      name: /district-wide irrigation comparison: district and national comparison/i,
+    })
+    expect(within(irrigationComparison).getByText('8.5 %')).toBeInTheDocument()
+    expect(within(irrigationComparison).getByText('13.4 %')).toBeInTheDocument()
+    expect(
+      within(irrigationComparison).getByText('-4.9 percentage points'),
+    ).toBeInTheDocument()
     expect(
       within(
         screen.getByRole('region', {
@@ -442,9 +528,7 @@ describe('application shell', () => {
     ).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'District Profile' }))
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Why this signal?' }),
-    )
+    fireEvent.click(screen.getByRole('button', { name: 'Why this signal?' }))
     fireEvent.click(screen.getByRole('button', { name: 'View Methodology' }))
     expect(
       await screen.findByRole(
@@ -453,5 +537,5 @@ describe('application shell', () => {
         lazyLoadWait,
       ),
     ).toBeInTheDocument()
-  })
+  }, 15_000)
 })

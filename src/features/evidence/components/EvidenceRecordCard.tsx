@@ -36,7 +36,7 @@ export function EvidenceRecordCard({
   const reference = record.sourceReference
 
   return (
-    <article className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+    <article className="min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-wider text-green-800">
@@ -47,7 +47,10 @@ export function EvidenceRecordCard({
           </h2>
           {record.category && (
             <p className="mt-1 break-words text-xs leading-5 text-slate-600">
-              Category: <span className="font-medium text-slate-800">{record.category}</span>
+              Category:{' '}
+              <span className="font-medium text-slate-800">
+                {record.category}
+              </span>
             </p>
           )}
           <p className="mt-1 text-xs text-slate-500">
@@ -102,7 +105,10 @@ export function EvidenceRecordCard({
 
       {record.sourceCrop && record.sourceCrop !== record.crop && (
         <p className="mt-3 text-xs text-slate-500">
-          Source crop label: <span className="font-medium text-slate-700">{record.sourceCrop}</span>
+          Source crop label:{' '}
+          <span className="font-medium text-slate-700">
+            {record.sourceCrop}
+          </span>
         </p>
       )}
 
@@ -123,10 +129,28 @@ export function EvidenceRecordCard({
         </p>
       )}
 
+      <details className="mt-3 border-t border-slate-100 pt-2">
+        <summary className="min-h-9 cursor-pointer content-center text-xs font-semibold text-forest-950 underline decoration-green-300 underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-agri-700 focus-visible:ring-offset-2">
+          Evidence ID and record details
+        </summary>
+        <dl className="mt-2 grid min-w-0 gap-x-3 gap-y-1 rounded-lg bg-warm-50 p-3 text-xs sm:grid-cols-[auto_minmax(0,1fr)]">
+          <dt className="font-medium text-slate-500">Evidence ID</dt>
+          <dd className="break-all font-mono text-[11px] text-slate-700">
+            {record.id}
+          </dd>
+          <dt className="font-medium text-slate-500">Geography level</dt>
+          <dd className="text-slate-700">{record.geography.level}</dd>
+          <dt className="font-medium text-slate-500">Source report</dt>
+          <dd className="break-words text-slate-700">{record.source.report}</dd>
+        </dl>
+      </details>
+
       <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-medium text-slate-700">{record.dataset}</p>
-          <p className="mt-1 text-[11px] text-slate-500">{record.source.report}</p>
+          <p className="mt-1 text-[11px] text-slate-500">
+            {record.source.report}
+          </p>
           <a
             className="mt-1 inline-flex max-w-full items-center gap-1 text-xs leading-5 text-green-800 underline decoration-green-300 underline-offset-2 hover:text-green-950"
             href={record.source.sourceUrl}

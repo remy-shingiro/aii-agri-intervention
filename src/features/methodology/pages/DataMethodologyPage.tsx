@@ -13,13 +13,28 @@ function datasetCoverage(dataset: string) {
   return {
     records: records.length,
     observed: records.filter((record) => record.status === 'observed').length,
-    unavailable: records.filter((record) => record.status === 'unavailable').length,
-    districtRows: records.filter((record) => record.geography.level === 'district').length,
-    provinceRows: records.filter((record) => record.geography.level === 'province').length,
-    nationalRows: records.filter((record) => record.geography.level === 'national').length,
-    crops: new Set(records.flatMap((record) => record.crop ? [record.crop] : [])).size,
+    unavailable: records.filter((record) => record.status === 'unavailable')
+      .length,
+    districtRows: records.filter(
+      (record) => record.geography.level === 'district',
+    ).length,
+    provinceRows: records.filter(
+      (record) => record.geography.level === 'province',
+    ).length,
+    nationalRows: records.filter(
+      (record) => record.geography.level === 'national',
+    ).length,
+    crops: new Set(
+      records.flatMap((record) => (record.crop ? [record.crop] : [])),
+    ).size,
     tables: new Set(records.map((record) => record.sourceReference.table)).size,
-    seasons: [...new Set(records.flatMap((record) => record.period.season ? [record.period.season] : []))],
+    seasons: [
+      ...new Set(
+        records.flatMap((record) =>
+          record.period.season ? [record.period.season] : [],
+        ),
+      ),
+    ],
   }
 }
 
@@ -35,24 +50,21 @@ const sourceCards = [
     name: 'Agricultural Household Survey 2024',
     role: 'National and province household evidence',
     period: 'Agricultural year 2023/24 · AHS seasons where reported',
-    detail:
-      `AII connects ${ahsCoverage.records} observations from ${ahsCoverage.tables} AHS tables (${ahsCoverage.observed} observed, ${ahsCoverage.unavailable} unavailable), including seasonal crop-growing shares, crop-specific seed use, fruit-growing, input, irrigation, and extension evidence at national and province levels. AHS remains distinct from SAS.`,
+    detail: `AII connects ${ahsCoverage.records} observations from ${ahsCoverage.tables} AHS tables (${ahsCoverage.observed} observed, ${ahsCoverage.unavailable} unavailable), including seasonal crop-growing shares, crop-specific seed use, fruit-growing, input, irrigation, and extension evidence at national and province levels. AHS remains distinct from SAS.`,
     href: 'https://www.statistics.gov.rw/data-sources/surveys/Agricultural-Household-Survey/agricultural-household-survey-2024',
   },
   {
     name: 'Seasonal Agricultural Survey 2024',
     role: 'Connected seasonal statistics',
     period: 'Agricultural year 2023/24 · Seasons A, B, and C',
-    detail:
-      `${sas2024Coverage.records.toLocaleString()} normalized records cover ${sas2024Coverage.crops} crop labels and district plus national rows across Seasons ${sas2024Coverage.seasons.join(', ')}. Crop columns vary by season; dash cells remain unavailable.`,
+    detail: `${sas2024Coverage.records.toLocaleString()} normalized records cover ${sas2024Coverage.crops} crop labels and district plus national rows across Seasons ${sas2024Coverage.seasons.join(', ')}. Crop columns vary by season; dash cells remain unavailable.`,
     href: 'https://www.statistics.gov.rw/sites/default/files/documents/2025-02/SAS%202024%20Annual.pdf',
   },
   {
     name: 'Seasonal Agricultural Survey 2025',
     role: 'Connected seasonal statistics',
     period: 'Agricultural year 2024/25 · Seasons A, B, and C',
-    detail:
-      `${sas2025Coverage.records.toLocaleString()} normalized records cover ${sas2025Coverage.crops} crop labels and district plus national rows across Seasons ${sas2025Coverage.seasons.join(', ')}. The existing Season A maize and irrigation records retain their verified IDs and values.`,
+    detail: `${sas2025Coverage.records.toLocaleString()} normalized records cover ${sas2025Coverage.crops} crop labels and district plus national rows across Seasons ${sas2025Coverage.seasons.join(', ')}. The existing Season A maize and irrigation records retain their verified IDs and values.`,
     href: 'https://www.statistics.gov.rw/sites/default/files/documents/2025-12/SAS%202025%20Final%20report.pdf',
   },
 ] as const
@@ -125,12 +137,12 @@ function SourceCard({
 
 export function DataMethodologyPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <header className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-green-800">
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-agri-700">
           Data transparency
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+        <h1 className="text-3xl font-bold tracking-tight text-forest-950 sm:text-4xl">
           Data &amp; Methodology
         </h1>
         <p className="max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
@@ -138,6 +150,35 @@ export function DataMethodologyPage() {
           calculated, and where the evidence stops supporting a conclusion.
         </p>
       </header>
+
+      <nav
+        aria-label="Methodology sections"
+        className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
+      >
+        <p className="mb-2 text-xs font-bold uppercase tracking-wider text-slate-600">
+          On this page
+        </p>
+        <ul className="flex flex-wrap gap-2">
+          {[
+            ['datasets-heading', 'Sources'],
+            ['extraction-heading', 'Coverage'],
+            ['geography-heading', 'Geography'],
+            ['signal-method-heading', 'Signal steps'],
+            ['intelligence-rules-heading', 'Calculations'],
+            ['status-heading', 'Value status'],
+            ['limitations-heading', 'Limitations'],
+          ].map(([id, label]) => (
+            <li key={id}>
+              <a
+                className="inline-flex min-h-9 items-center rounded-full border border-slate-200 bg-warm-50 px-3 text-xs font-semibold text-forest-950 transition-colors hover:border-agri-700 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-agri-700 focus-visible:ring-offset-2"
+                href={`#${id}`}
+              >
+                {label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
 
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-xl border border-green-200 bg-green-50 p-4">
@@ -189,26 +230,90 @@ export function DataMethodologyPage() {
             { name: 'SAS 2025', coverage: sas2025Coverage },
             { name: 'AHS 2024', coverage: ahsCoverage },
           ].map(({ name, coverage }) => (
-            <article className="rounded-xl border border-slate-200 bg-white p-4" key={name}>
+            <article
+              className="rounded-xl border border-slate-200 bg-white p-4"
+              key={name}
+            >
               <h3 className="text-sm font-semibold text-slate-900">{name}</h3>
               <dl className="mt-3 space-y-2 text-xs">
-                <div className="flex justify-between gap-3"><dt className="text-slate-500">Normalized records</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.records.toLocaleString()}</dd></div>
-                <div className="flex justify-between gap-3"><dt className="text-slate-500">Observed</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.observed.toLocaleString()}</dd></div>
-                <div className="flex justify-between gap-3"><dt className="text-slate-500">Unavailable</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.unavailable.toLocaleString()}</dd></div>
-                <div className="flex justify-between gap-3"><dt className="text-slate-500">District rows</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.districtRows.toLocaleString()}</dd></div>
-                {coverage.provinceRows > 0 && <div className="flex justify-between gap-3"><dt className="text-slate-500">Province rows</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.provinceRows.toLocaleString()}</dd></div>}
-                {coverage.nationalRows > 0 && <div className="flex justify-between gap-3"><dt className="text-slate-500">National rows</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.nationalRows.toLocaleString()}</dd></div>}
-                {coverage.crops > 0 && <div className="flex justify-between gap-3"><dt className="text-slate-500">Crop labels</dt><dd className="font-semibold tabular-nums text-slate-800">{coverage.crops}</dd></div>}
-                {coverage.seasons.length > 0 && <div className="flex justify-between gap-3"><dt className="text-slate-500">Reported seasons</dt><dd className="font-semibold text-slate-800">{coverage.seasons.join(', ')}</dd></div>}
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500">Normalized records</dt>
+                  <dd className="font-semibold tabular-nums text-slate-800">
+                    {coverage.records.toLocaleString()}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500">Observed</dt>
+                  <dd className="font-semibold tabular-nums text-slate-800">
+                    {coverage.observed.toLocaleString()}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500">Unavailable</dt>
+                  <dd className="font-semibold tabular-nums text-slate-800">
+                    {coverage.unavailable.toLocaleString()}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="text-slate-500">District rows</dt>
+                  <dd className="font-semibold tabular-nums text-slate-800">
+                    {coverage.districtRows.toLocaleString()}
+                  </dd>
+                </div>
+                {coverage.provinceRows > 0 && (
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-slate-500">Province rows</dt>
+                    <dd className="font-semibold tabular-nums text-slate-800">
+                      {coverage.provinceRows.toLocaleString()}
+                    </dd>
+                  </div>
+                )}
+                {coverage.nationalRows > 0 && (
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-slate-500">National rows</dt>
+                    <dd className="font-semibold tabular-nums text-slate-800">
+                      {coverage.nationalRows.toLocaleString()}
+                    </dd>
+                  </div>
+                )}
+                {coverage.crops > 0 && (
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-slate-500">Crop labels</dt>
+                    <dd className="font-semibold tabular-nums text-slate-800">
+                      {coverage.crops}
+                    </dd>
+                  </div>
+                )}
+                {coverage.seasons.length > 0 && (
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-slate-500">Reported seasons</dt>
+                    <dd className="font-semibold text-slate-800">
+                      {coverage.seasons.join(', ')}
+                    </dd>
+                  </div>
+                )}
               </dl>
             </article>
           ))}
         </div>
         <p className="mt-3 text-xs leading-5 text-slate-500">
-          The generated inventory contains {nisrDataInventory.length.toLocaleString()} observation and table-catalog entries. {inventoryCatalogCount} report tables are catalogued but not cell-extracted; their presence in a report is not treated as connected evidence.
+          The generated inventory contains{' '}
+          {nisrDataInventory.length.toLocaleString()} observation and
+          table-catalog entries. {inventoryCatalogCount} report tables are
+          catalogued but not cell-extracted; their presence in a report is not
+          treated as connected evidence.
         </p>
         <p className="mt-2 text-xs leading-5 text-slate-500">
-          Connected indicators include SAS seasonal crop cultivated area, yield, and production; seed, fertilizer, and pesticide use; irrigation practice; erosion control; agroforestry; and mechanical equipment. AHS 2024 adds crop-growing shares for its reported A, B, and C seasons, crop-specific seed-use, fruit-growing, province and national inputs, practices, erosion-control measures, irrigation methods and water sources, irrigated plots, and extension services. National household context also covers association membership, kitchen gardens, risk awareness, livestock ownership by species, and beekeeping. AHS values are never expanded to district geography.
+          Connected indicators include SAS seasonal crop cultivated area, yield,
+          and production; seed, fertilizer, and pesticide use; irrigation
+          practice; erosion control; agroforestry; and mechanical equipment. AHS
+          2024 adds crop-growing shares for its reported A, B, and C seasons,
+          crop-specific seed-use, fruit-growing, province and national inputs,
+          practices, erosion-control measures, irrigation methods and water
+          sources, irrigated plots, and extension services. National household
+          context also covers association membership, kitchen gardens, risk
+          awareness, livestock ownership by species, and beekeeping. AHS values
+          are never expanded to district geography.
         </p>
       </MethodologySection>
 
@@ -226,13 +331,13 @@ export function DataMethodologyPage() {
               </h3>
             </div>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              AII displays a district figure only when a NISR table reports
-              that indicator for the district. SAS 2024 and SAS 2025 connected
-              crop and practice tables contain district and national rows.
-              AHS Tables 1 and 16–27 contribute national and province values,
-              including crop-specific seed-use values. AHS does not provide
-              district observations in the connected tables, and no province
-              value is copied down to districts.
+              AII displays a district figure only when a NISR table reports that
+              indicator for the district. SAS 2024 and SAS 2025 connected crop
+              and practice tables contain district and national rows. AHS Tables
+              1 and 16–27 contribute national and province values, including
+              crop-specific seed-use values. AHS does not provide district
+              observations in the connected tables, and no province value is
+              copied down to districts.
             </p>
           </article>
           <article className="rounded-xl border border-slate-200 bg-white p-5">
@@ -246,10 +351,10 @@ export function DataMethodologyPage() {
               </h3>
             </div>
             <p className="mt-3 text-sm leading-6 text-slate-600">
-              EICV7 is part of AHS 2024 sampling-frame and design context; it
-              is not an agricultural observation dataset. AHS sampling
-              information is not used to expand national summary results into
-              district observations.
+              EICV7 is part of AHS 2024 sampling-frame and design context; it is
+              not an agricultural observation dataset. AHS sampling information
+              is not used to expand national summary results into district
+              observations.
             </p>
           </article>
         </div>
@@ -293,9 +398,8 @@ export function DataMethodologyPage() {
             <p className="mt-2 text-sm leading-6 text-slate-600">
               Absolute gap = district yield − national yield. Both observations
               must match crop, season, agricultural year, NISR dataset, and
-              Kg/Ha unit. The status follows the direct comparison: below,
-              equal to, or above the national value. No severity threshold is
-              applied.
+              Kg/Ha unit. The status follows the direct comparison: below, equal
+              to, or above the national value. No severity threshold is applied.
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-600">
               Relative gap = absolute gap ÷ national yield × 100. It is shown
@@ -308,18 +412,17 @@ export function DataMethodologyPage() {
               Productivity direction
             </h3>
             <p className="mt-2 text-sm leading-6 text-slate-600">
-              At least two distinct agricultural years are required for the
-              same district, crop, season, yield indicator, and unit. Direction
-              is the latest comparable yield minus the earliest comparable
-              yield: a positive result is improving, a negative result is
-              declining, and an exact zero is relatively stable. Missing,
-              duplicate, or incompatible matching periods produce an
-              insufficient-evidence state.
+              At least two distinct agricultural years are required for the same
+              district, crop, season, yield indicator, and unit. Direction is
+              the latest comparable yield minus the earliest comparable yield: a
+              positive result is improving, a negative result is declining, and
+              an exact zero is relatively stable. Missing, duplicate, or
+              incompatible matching periods produce an insufficient-evidence
+              state.
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-600">
               This endpoint comparison is descriptive. It does not test
-              statistical significance and does not attribute change to a
-              cause.
+              statistical significance and does not attribute change to a cause.
             </p>
           </article>
           <article className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
@@ -329,11 +432,11 @@ export function DataMethodologyPage() {
             <p className="mt-2 text-sm leading-6 text-slate-600">
               The signal requires four observed records: district and national
               maize yield, plus district-wide and national irrigation practice.
-              All records must share a compatible NISR dataset and period;
-              yield crop semantics, irrigation geography, units, and linked
-              national references are validated. The signal is supported only
-              when district yield and district-wide irrigation practice are
-              both below their respective national references.
+              All records must share a compatible NISR dataset and period; yield
+              crop semantics, irrigation geography, units, and linked national
+              references are validated. The signal is supported only when
+              district yield and district-wide irrigation practice are both
+              below their respective national references.
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-600">
               A complete comparison that does not meet both conditions is
@@ -352,8 +455,8 @@ export function DataMethodologyPage() {
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-700">
               AII does not use predictive modelling or AI/ML for these
-              calculations. Each displayed result links to the connected
-              source evidence and shows its observed and derived components.
+              calculations. Each displayed result links to the connected source
+              evidence and shows its observed and derived components.
             </p>
           </article>
         </div>

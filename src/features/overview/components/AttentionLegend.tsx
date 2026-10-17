@@ -11,18 +11,18 @@ const legendItems = [
 
 export function AttentionLegend({ hasObservations }: AttentionLegendProps) {
   return (
-    <div className="max-w-[235px] rounded-lg border border-slate-200 bg-white/95 px-3 py-3 shadow-sm sm:px-4">
+    <div className="max-w-[210px] rounded-lg border border-slate-200 bg-white/95 px-3 py-3 shadow-sm sm:px-4">
       <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
         District yield compared with national
       </p>
 
       {hasObservations ? (
-        <ul aria-label="Productivity comparison categories" className="space-y-1.5">
+        <ul
+          aria-label="Productivity comparison categories"
+          className="space-y-1.5"
+        >
           {legendItems.map((item) => (
-            <li
-              className="flex items-center gap-2"
-              key={item.label}
-            >
+            <li className="flex items-center gap-2" key={item.label}>
               <span
                 aria-hidden="true"
                 className="size-3 shrink-0 rounded-sm"

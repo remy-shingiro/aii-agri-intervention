@@ -14,10 +14,10 @@ export function MethodologySection({
   children,
 }: MethodologySectionProps) {
   return (
-    <section aria-labelledby={id} className="space-y-3">
+    <section aria-labelledby={id} className="scroll-mt-24 space-y-3">
       <div>
         <h2
-          className="text-lg font-semibold tracking-tight text-slate-900"
+          className="text-lg font-bold tracking-tight text-forest-950"
           id={id}
         >
           {title}

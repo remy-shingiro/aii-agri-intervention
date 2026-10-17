@@ -19,12 +19,12 @@ const navigationIcons: Record<NavigationItem, LucideIcon> = {
 
 export function Sidebar({ activePage, items, onNavigate }: SidebarProps) {
   return (
-    <aside className="border-b border-slate-200 bg-white lg:fixed lg:left-0 lg:top-20 lg:h-[calc(100vh-5rem)] lg:w-64 lg:border-b-0 lg:border-r">
+    <aside className="border-b border-slate-200 bg-white lg:fixed lg:left-0 lg:top-[4.25rem] lg:h-[calc(100vh-4.25rem)] lg:w-60 lg:border-b-0 lg:border-r">
       <nav
         aria-label="Primary"
-        className="overflow-x-auto px-4 py-2.5 sm:px-6 lg:flex lg:h-full lg:flex-col lg:overflow-hidden lg:px-4 lg:py-6"
+        className="overflow-x-auto px-3 py-2 sm:px-6 lg:flex lg:h-full lg:flex-col lg:overflow-hidden lg:px-4 lg:py-6"
       >
-        <div className="flex min-w-max gap-2 lg:min-w-0 lg:flex-col lg:gap-2">
+        <div className="flex min-w-max gap-1.5 lg:min-w-0 lg:flex-col lg:gap-1.5">
           {items.map((item) => (
             <SidebarNavItem
               active={activePage === item}
@@ -37,9 +37,9 @@ export function Sidebar({ activePage, items, onNavigate }: SidebarProps) {
         </div>
 
         <div className="hidden border-t border-slate-200 pt-4 text-xs leading-5 text-slate-500 lg:mt-auto lg:block">
-          <p className="font-semibold text-slate-700">Connected evidence</p>
-          <p className="mt-1">NISR Seasonal Agricultural Survey 2025</p>
-          <p>Season A · Agricultural year 2024/25</p>
+          <p className="font-semibold text-slate-700">NISR source coverage</p>
+          <p className="mt-1">SAS 2024 · SAS 2025 · AHS 2024</p>
+          <p>Published observations with source links</p>
         </div>
       </nav>
     </aside>

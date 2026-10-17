@@ -4,6 +4,7 @@ import { useId } from 'react'
 import { EvidenceStatusBadge } from '../../evidence/components/EvidenceStatusBadge'
 import { evidenceRecords } from '../../evidence/data/evidenceRecords'
 import type { EvidenceRecord } from '../../evidence/types/evidence.types'
+import { DistrictComparisonBar } from './DistrictComparisonBar'
 import {
   districtCropPortfolioIndicators,
   getDistrictCropPortfolio,
@@ -30,6 +31,14 @@ function formatValue(record: EvidenceRecord): string {
   return `${record.value.toLocaleString('en-RW', {
     maximumFractionDigits: 2,
   })} ${record.unit}`
+}
+
+function observedValue(record: EvidenceRecord | undefined): number | undefined {
+  return record?.status === 'observed' &&
+    record.value !== null &&
+    Number.isFinite(record.value)
+    ? record.value
+    : undefined
 }
 
 function SourceProvenance({ record }: { record: EvidenceRecord }) {
@@ -120,6 +129,13 @@ function CropMetric({
     maximumFractionDigits: 2,
     signDisplay: 'always',
   })
+  const districtValue = observedValue(metric.districtRecord)
+  const nationalValue = observedValue(metric.nationalRecord)
+  const showYieldComparison =
+    metric.indicator === 'average_yield' &&
+    districtValue !== undefined &&
+    nationalValue !== undefined &&
+    metric.difference !== undefined
 
   return (
     <section
@@ -129,33 +145,47 @@ function CropMetric({
       <h4 className="text-sm font-semibold text-slate-900" id={metricId}>
         {metric.label} ({metric.unit})
       </h4>
-      <dl className="mt-3 space-y-3">
-        <Observation
-          label={`District · ${district}`}
-          record={metric.districtRecord}
-          records={metric.districtRecords}
-        />
-        <Observation
-          label="National reference · Rwanda"
-          record={metric.nationalRecord}
-          records={metric.nationalRecords}
-          unmatched={metric.hasUnmatchedNationalRecords}
-        />
-        <div>
-          <dt className="text-xs text-slate-500">
-            District − national · derived
-          </dt>
-          <dd className="mt-1 break-words text-sm font-semibold tabular-nums text-slate-900">
-            {formattedDifference === undefined
-              ? 'Unavailable'
-              : `${formattedDifference} ${metric.unit}`}
-          </dd>
-          <EvidenceStatusBadge
-            status={formattedDifference === undefined ? 'unavailable' : 'derived'}
+      {showYieldComparison ? (
+        <div className="mt-3">
+          <DistrictComparisonBar
+            difference={metric.difference}
+            districtName={district}
+            districtValue={districtValue}
+            label={`${district} ${metric.label.toLowerCase()}`}
+            nationalValue={nationalValue}
+            unit={metric.unit}
           />
         </div>
-      </dl>
-
+      ) : (
+        <dl className="mt-3 space-y-3">
+          <Observation
+            label={`District · ${district}`}
+            record={metric.districtRecord}
+            records={metric.districtRecords}
+          />
+          <Observation
+            label="National reference · Rwanda"
+            record={metric.nationalRecord}
+            records={metric.nationalRecords}
+            unmatched={metric.hasUnmatchedNationalRecords}
+          />
+          <div>
+            <dt className="text-xs text-slate-500">
+              District − national · derived
+            </dt>
+            <dd className="mt-1 break-words text-sm font-semibold tabular-nums text-slate-900">
+              {formattedDifference === undefined
+                ? 'Unavailable'
+                : `${formattedDifference} ${metric.unit}`}
+            </dd>
+            <EvidenceStatusBadge
+              status={
+                formattedDifference === undefined ? 'unavailable' : 'derived'
+              }
+            />
+          </div>
+        </dl>
+      )}
     </section>
   )
 }
@@ -184,7 +214,7 @@ function CropCard({
   return (
     <article
       aria-labelledby={headingId}
-      className="min-w-0 rounded-xl border border-slate-200 bg-white p-3 sm:p-4"
+      className="min-w-0 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4"
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-sm font-semibold text-slate-900" id={headingId}>
@@ -243,7 +273,7 @@ export function DistrictCropPortfolio({
   return (
     <section aria-labelledby={headingId} className="space-y-3">
       <div>
-        <h2 className="text-base font-semibold text-slate-900" id={headingId}>
+        <h2 className="text-base font-bold text-forest-950" id={headingId}>
           District crop portfolio &amp; productivity
         </h2>
         <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
@@ -264,9 +294,9 @@ export function DistrictCropPortfolio({
         >
           <EvidenceStatusBadge status="unavailable" />
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            No district crop records are connected for this SAS year and
-            season. A crop absent from the source tables is not represented as
-            an unavailable observation.
+            No district crop records are connected for this SAS year and season.
+            A crop absent from the source tables is not represented as an
+            unavailable observation.
           </p>
         </div>
       ) : (

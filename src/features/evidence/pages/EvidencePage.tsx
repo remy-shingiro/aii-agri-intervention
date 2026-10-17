@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { RotateCcw, Search } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 import { evidenceRecords } from '../data/evidenceRecords'
@@ -24,9 +25,11 @@ const indicatorOptions: readonly {
   value: 'all' | EvidenceIndicator
 }[] = [
   { label: 'All indicators', value: 'all' },
-  ...[...new Map(
-    evidenceRecords.map((record) => [record.indicator, record.label]),
-  )]
+  ...[
+    ...new Map(
+      evidenceRecords.map((record) => [record.indicator, record.label]),
+    ),
+  ]
     .sort(([first], [second]) => first.localeCompare(second))
     .map(([value, label]) => ({
       value: value as EvidenceIndicator,
@@ -35,7 +38,7 @@ const indicatorOptions: readonly {
 ]
 
 const selectClassName =
-  'h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none focus:border-green-700 focus:ring-2 focus:ring-green-700/10'
+  'h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 outline-none transition-colors hover:border-slate-300 focus:border-agri-700 focus:ring-2 focus:ring-agri-700/10'
 
 const districts = Array.from(
   new Set(
@@ -45,21 +48,28 @@ const districts = Array.from(
   ),
 ).sort((first, second) => first.localeCompare(second))
 
-const crops = [...new Set(
-  evidenceRecords.flatMap((record) =>
-    record.crop && record.status === 'observed' ? [record.crop] : [],
+const crops = [
+  ...new Set(
+    evidenceRecords.flatMap((record) =>
+      record.crop && record.status === 'observed' ? [record.crop] : [],
+    ),
   ),
-)].sort((first, second) => first.localeCompare(second))
+].sort((first, second) => first.localeCompare(second))
 
-const seasons = [...new Set(
-  evidenceRecords.flatMap((record) => record.period.season ? [record.period.season] : []),
-)].sort()
+const seasons = [
+  ...new Set(
+    evidenceRecords.flatMap((record) =>
+      record.period.season ? [record.period.season] : [],
+    ),
+  ),
+].sort()
 
 const years = [...new Set(evidenceRecords.map((record) => record.period.year))]
   .sort()
   .reverse()
-const datasets = [...new Set(evidenceRecords.map((record) => record.dataset))]
-  .sort((first, second) => first.localeCompare(second))
+const datasets = [
+  ...new Set(evidenceRecords.map((record) => record.dataset)),
+].sort((first, second) => first.localeCompare(second))
 
 function comparisonKey(record: EvidenceRecord): string {
   return JSON.stringify([
@@ -78,19 +88,31 @@ function comparisonKey(record: EvidenceRecord): string {
 const districtObservationKeys = new Map<string, Set<string>>()
 for (const record of evidenceRecords) {
   if (record.geography.level !== 'district') continue
-  const keys = districtObservationKeys.get(record.geography.name) ?? new Set<string>()
+  const keys =
+    districtObservationKeys.get(record.geography.name) ?? new Set<string>()
   keys.add(comparisonKey(record))
   districtObservationKeys.set(record.geography.name, keys)
 }
 
-function hasDistrictReference(record: EvidenceRecord, district: string): boolean {
-  return district !== 'Rwanda' &&
+function hasDistrictReference(
+  record: EvidenceRecord,
+  district: string,
+): boolean {
+  return (
+    district !== 'Rwanda' &&
     record.geography.level === 'national' &&
     districtObservationKeys.get(district)?.has(comparisonKey(record)) === true
+  )
 }
 
-function matchesSeason(recordSeason: string | undefined, selected: string): boolean {
-  return selected === 'none' ? recordSeason === undefined : recordSeason === selected
+function matchesSeason(
+  recordSeason: string | undefined,
+  selected: string,
+): boolean {
+  if (selected === 'all') return true
+  return selected === 'none'
+    ? recordSeason === undefined
+    : recordSeason === selected
 }
 
 function FilterSelect({
@@ -138,22 +160,27 @@ export function EvidencePage({
   const hasSignalContext = signalContext?.signalType !== undefined
   const hasEvidenceSelection =
     hasSignalContext || signalContext?.evidenceIds !== undefined
-  const [district, setDistrict] = useState(context?.district ?? selectedDistrict ?? 'all')
+  const [district, setDistrict] = useState(
+    context?.district ?? selectedDistrict ?? 'all',
+  )
   const [crop, setCrop] = useState(
     hasSignalContext || hasEvidenceSelection
       ? 'all'
-      : (context?.crop ?? selectedCrop)?.toLowerCase() ?? 'all',
+      : ((context?.crop ?? selectedCrop)?.toLowerCase() ?? 'all'),
   )
   const [season, setSeason] = useState<string>(
-    context?.season ?? selectedSeason?.replace('season-', '').toUpperCase() ?? 'A',
+    context?.season ??
+      selectedSeason?.replace('season-', '').toUpperCase() ??
+      'A',
   )
   const [year, setYear] = useState(
     context?.signalType === 'productivity_trend'
       ? 'all'
-      : context?.year ?? selectedYear?.replace('-', '/') ?? '2024/25',
+      : (context?.year ?? selectedYear?.replace('-', '/') ?? '2024/25'),
   )
   const [dataset, setDataset] = useState('all')
   const [status, setStatus] = useState<'all' | EvidenceRecord['status']>('all')
+  const [searchQuery, setSearchQuery] = useState('')
   const [indicator, setIndicator] = useState<'all' | EvidenceIndicator>(
     hasSignalContext || hasEvidenceSelection ? 'all' : 'average_yield',
   )
@@ -166,39 +193,94 @@ export function EvidencePage({
     dataset,
     status,
     indicator,
+    searchQuery,
     signalContext?.intervention,
     signalContext?.signalType,
     signalContext?.evidenceIds,
   ])
   const visibleCount = visiblePage.key === filterKey ? visiblePage.count : 50
+  const normalizedQuery = searchQuery.trim().toLowerCase()
 
-  const filteredRecords = useMemo(() => evidenceRecords.filter((record) => {
-    const districtMatches = district === 'all' ||
-      record.geography.name === district ||
-      hasDistrictReference(record, district)
-    const cropMatches =
-      crop === 'all' || record.crop?.toLowerCase() === crop
-    const seasonMatches = matchesSeason(record.period.season, season)
-    const yearMatches = year === 'all' || record.period.year === year
-    const indicatorMatches =
-      indicator === 'all' || record.indicator === indicator
-    const datasetMatches = dataset === 'all' || record.dataset === dataset
-    const statusMatches = status === 'all' || record.status === status
-    const evidenceSelectionMatches =
-      !hasEvidenceSelection ||
-      signalContext?.evidenceIds?.includes(record.id) === true
+  const filteredRecords = useMemo(
+    () =>
+      evidenceRecords.filter((record) => {
+        const districtMatches =
+          district === 'all' ||
+          record.geography.name === district ||
+          hasDistrictReference(record, district)
+        const cropMatches =
+          crop === 'all' || record.crop?.toLowerCase() === crop
+        const seasonMatches = matchesSeason(record.period.season, season)
+        const yearMatches = year === 'all' || record.period.year === year
+        const indicatorMatches =
+          indicator === 'all' || record.indicator === indicator
+        const datasetMatches = dataset === 'all' || record.dataset === dataset
+        const statusMatches = status === 'all' || record.status === status
+        const evidenceSelectionMatches =
+          !hasEvidenceSelection ||
+          signalContext?.evidenceIds?.includes(record.id) === true
 
-    return (
-      districtMatches &&
-      cropMatches &&
-      seasonMatches &&
-      yearMatches &&
-      indicatorMatches &&
-      datasetMatches &&
-      statusMatches &&
-      evidenceSelectionMatches
-    )
-  }), [crop, dataset, district, hasEvidenceSelection, indicator, season, signalContext, status, year])
+        const searchMatches =
+          !normalizedQuery ||
+          [
+            record.id,
+            record.label,
+            record.dataset,
+            record.source.report,
+            record.sourceReference.table,
+            record.sourceReference.page,
+            record.geography.name,
+            record.geography.level,
+            record.crop,
+            record.sourceCrop,
+            record.period.year,
+            record.period.season,
+            record.period.label,
+            record.category,
+            record.species,
+          ]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase()
+            .includes(normalizedQuery)
+
+        return (
+          districtMatches &&
+          cropMatches &&
+          seasonMatches &&
+          yearMatches &&
+          indicatorMatches &&
+          datasetMatches &&
+          statusMatches &&
+          evidenceSelectionMatches &&
+          searchMatches
+        )
+      }),
+    [
+      crop,
+      dataset,
+      district,
+      hasEvidenceSelection,
+      indicator,
+      normalizedQuery,
+      season,
+      signalContext,
+      status,
+      year,
+    ],
+  )
+
+  const resetFilters = () => {
+    setSignalContext(undefined)
+    setDistrict('all')
+    setCrop('all')
+    setSeason('all')
+    setYear('all')
+    setDataset('all')
+    setStatus('all')
+    setIndicator('all')
+    setSearchQuery('')
+  }
 
   const signalLabel = signalContext?.signalType
     ? {
@@ -210,12 +292,12 @@ export function EvidencePage({
   const visibleRecords = filteredRecords.slice(0, visibleCount)
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       <header className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-green-800">
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-agri-700">
           Agricultural evidence
         </p>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
+        <h1 className="text-3xl font-bold tracking-tight text-forest-950 sm:text-4xl">
           Evidence explorer
         </h1>
         <p className="max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
@@ -257,6 +339,7 @@ export function EvidencePage({
               setIndicator('average_yield')
               setDataset('all')
               setStatus('all')
+              setSearchQuery('')
             }}
             type="button"
           >
@@ -277,98 +360,159 @@ export function EvidencePage({
 
       <section
         aria-label="Evidence filters"
-        className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-2 sm:p-5 xl:grid-cols-7"
+        className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
       >
-        <FilterSelect
-          id="evidence-district"
-          label="District"
-          onChange={setDistrict}
-          value={district}
-        >
-          <option value="all">All geographies</option>
-          <option value="Rwanda">National · Rwanda</option>
-          {districts.map((name) => (
-            <option key={name} value={name}>
-              {name}
-            </option>
-          ))}
-        </FilterSelect>
-        <FilterSelect
-          id="evidence-crop"
-          label="Crop"
-          onChange={setCrop}
-          value={crop}
-        >
-          <option value="all">All crops and practices</option>
-          {crops.map((name) => (
-            <option key={name} value={name.toLowerCase()}>
-              {name}
-            </option>
-          ))}
-        </FilterSelect>
-        <FilterSelect
-          id="evidence-season"
-          label="Season"
-          onChange={setSeason}
-          value={season}
-        >
-          {seasons.map((value) => (
-            <option key={value} value={value}>Season {value}</option>
-          ))}
-          <option value="none">Annual / no SAS season</option>
-        </FilterSelect>
-        <FilterSelect
-          id="evidence-year"
-          label="Agricultural year"
-          onChange={setYear}
-          value={year}
-        >
-          <option value="all">All referenced years</option>
-          {years.map((value) => (
-            <option key={value} value={value}>{value}</option>
-          ))}
-        </FilterSelect>
-        <FilterSelect
-          id="evidence-dataset"
-          label="Dataset"
-          onChange={setDataset}
-          value={dataset}
-        >
-          <option value="all">All NISR datasets</option>
-          {datasets.map((value) => (
-            <option key={value} value={value}>{value}</option>
-          ))}
-        </FilterSelect>
-        <FilterSelect
-          id="evidence-indicator"
-          label="Indicator"
-          onChange={(value) => setIndicator(value as 'all' | EvidenceIndicator)}
-          value={indicator}
-        >
-          {indicatorOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </FilterSelect>
-        <FilterSelect
-          id="evidence-status"
-          label="Evidence status"
-          onChange={(value) => setStatus(value as 'all' | EvidenceRecord['status'])}
-          value={status}
-        >
-          <option value="all">All statuses</option>
-          <option value="observed">Observed</option>
-          <option value="derived">Derived</option>
-          <option value="unavailable">Unavailable</option>
-        </FilterSelect>
+        <div>
+          <label
+            className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-600"
+            htmlFor="evidence-search"
+          >
+            Search records
+          </label>
+          <div className="relative">
+            <Search
+              aria-hidden="true"
+              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"
+            />
+            <input
+              className="h-11 w-full rounded-lg border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-800 outline-none transition-colors placeholder:text-slate-400 hover:border-slate-300 focus:border-agri-700 focus:ring-2 focus:ring-agri-700/10"
+              id="evidence-search"
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Crop, district, NISR table or evidence ID"
+              type="search"
+              value={searchQuery}
+            />
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <FilterSelect
+            id="evidence-district"
+            label="District"
+            onChange={setDistrict}
+            value={district}
+          >
+            <option value="all">All geographies</option>
+            <option value="Rwanda">National · Rwanda</option>
+            {districts.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </FilterSelect>
+          <FilterSelect
+            id="evidence-crop"
+            label="Crop"
+            onChange={setCrop}
+            value={crop}
+          >
+            <option value="all">All crops and practices</option>
+            {crops.map((name) => (
+              <option key={name} value={name.toLowerCase()}>
+                {name}
+              </option>
+            ))}
+          </FilterSelect>
+          <FilterSelect
+            id="evidence-season"
+            label="Season"
+            onChange={setSeason}
+            value={season}
+          >
+            <option value="all">All seasons</option>
+            {seasons.map((value) => (
+              <option key={value} value={value}>
+                Season {value}
+              </option>
+            ))}
+            <option value="none">Annual / no SAS season</option>
+          </FilterSelect>
+          <FilterSelect
+            id="evidence-year"
+            label="Agricultural year"
+            onChange={setYear}
+            value={year}
+          >
+            <option value="all">All referenced years</option>
+            {years.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </FilterSelect>
+        </div>
+
+        <details className="rounded-xl border border-slate-100 bg-warm-50 px-3 sm:px-4">
+          <summary className="flex min-h-10 cursor-pointer flex-wrap items-center justify-between gap-2 py-2 text-sm font-semibold text-forest-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-agri-700 focus-visible:ring-offset-2">
+            More filters
+            <span className="text-xs font-medium text-slate-500">
+              Dataset, indicator, evidence status
+            </span>
+          </summary>
+          <div className="grid gap-3 border-t border-slate-200 py-3 md:grid-cols-3">
+            <FilterSelect
+              id="evidence-dataset"
+              label="Dataset"
+              onChange={setDataset}
+              value={dataset}
+            >
+              <option value="all">All NISR datasets</option>
+              {datasets.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </FilterSelect>
+            <FilterSelect
+              id="evidence-indicator"
+              label="Indicator"
+              onChange={(value) =>
+                setIndicator(value as 'all' | EvidenceIndicator)
+              }
+              value={indicator}
+            >
+              {indicatorOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </FilterSelect>
+            <FilterSelect
+              id="evidence-status"
+              label="Evidence status"
+              onChange={(value) =>
+                setStatus(value as 'all' | EvidenceRecord['status'])
+              }
+              value={status}
+            >
+              <option value="all">All statuses</option>
+              <option value="observed">Observed</option>
+              <option value="derived">Derived</option>
+              <option value="unavailable">Unavailable</option>
+            </FilterSelect>
+          </div>
+        </details>
+
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
+          <p className="text-xs leading-5 text-slate-500">
+            Search covers record IDs, NISR source tables, reports and geography.
+          </p>
+          <button
+            className="inline-flex min-h-10 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-forest-950 transition-colors hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-agri-700 focus-visible:ring-offset-2"
+            onClick={resetFilters}
+            type="button"
+          >
+            <RotateCcw aria-hidden="true" className="size-4" />
+            Reset filters
+          </button>
+        </div>
       </section>
 
       <section aria-labelledby="evidence-results-heading" className="space-y-3">
-        <div className="flex flex-wrap items-end justify-between gap-2">
+        <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
           <div>
             <h2
-              className="text-base font-semibold text-slate-900"
+              className="text-base font-bold text-forest-950"
               id="evidence-results-heading"
             >
               Source-backed observations
@@ -389,7 +533,7 @@ export function EvidencePage({
         </div>
 
         {filteredRecords.length > 0 ? (
-          <div className="grid gap-3 lg:grid-cols-2">
+          <div className="grid min-w-0 gap-3 lg:grid-cols-2">
             {visibleRecords.map((record) => (
               <EvidenceRecordCard
                 key={record.id}
