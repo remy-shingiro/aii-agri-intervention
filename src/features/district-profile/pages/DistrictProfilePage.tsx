@@ -34,6 +34,7 @@ interface DistrictProfilePageProps {
   ) => void
   onNavigateOverview: () => void
   onNavigateMethodology: () => void
+  onOpenInvestigationBrief: () => void
 }
 
 function getCropLabel(value: string): string {
@@ -536,6 +537,7 @@ export function DistrictProfilePage({
   onOpenEvidence,
   onNavigateOverview,
   onNavigateMethodology,
+  onOpenInvestigationBrief,
 }: DistrictProfilePageProps) {
   const candidate = selectedDistrict
     ? getDistrictInsight(selectedDistrict, crop, season, year)
@@ -593,14 +595,24 @@ export function DistrictProfilePage({
               <ArrowLeft aria-hidden="true" className="size-4" />
               Back to Overview
             </button>
-            <button
-              className="inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
-              onClick={() => onOpenEvidence()}
-              type="button"
-            >
-              Explore evidence
-              <ArrowRight aria-hidden="true" className="size-4" />
-            </button>
+            <div className="flex flex-wrap items-center gap-1">
+              <button
+                className="inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+                onClick={() => onOpenEvidence()}
+                type="button"
+              >
+                Explore evidence
+                <ArrowRight aria-hidden="true" className="size-4" />
+              </button>
+              <button
+                className="inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+                onClick={onOpenInvestigationBrief}
+                type="button"
+              >
+                Investigation brief
+                <ArrowRight aria-hidden="true" className="size-4" />
+              </button>
+            </div>
           </div>
           <div className="border-b border-slate-200 pb-5">
             <p className="text-[11px] font-semibold uppercase tracking-wider text-green-800">
@@ -701,14 +713,24 @@ export function DistrictProfilePage({
             <ArrowLeft aria-hidden="true" className="size-4" />
             Back to Overview
           </button>
-          <button
-            className="inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
-            onClick={() => onOpenEvidence()}
-            type="button"
-          >
-            Explore evidence
-            <ArrowRight aria-hidden="true" className="size-4" />
-          </button>
+          <div className="flex flex-wrap items-center gap-1">
+            <button
+              className="inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+              onClick={() => onOpenEvidence()}
+              type="button"
+            >
+              Explore evidence
+              <ArrowRight aria-hidden="true" className="size-4" />
+            </button>
+            <button
+              className="inline-flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-semibold text-green-800 hover:bg-green-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+              onClick={onOpenInvestigationBrief}
+              type="button"
+            >
+              Investigation brief
+              <ArrowRight aria-hidden="true" className="size-4" />
+            </button>
+          </div>
         </div>
 
         <div className="border-b border-slate-200 pb-5">

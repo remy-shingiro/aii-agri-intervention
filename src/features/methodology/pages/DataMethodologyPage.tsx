@@ -383,6 +383,13 @@ export function DataMethodologyPage() {
             </li>
           ))}
         </ol>
+        <p className="mt-3 rounded-lg border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600">
+          The District investigation brief reuses these signal calculations and
+          their evidence IDs. It includes matched observations, source
+          references, evidence gaps, and neutral follow-up questions; printing
+          the page preserves that scope and does not turn a signal into an
+          intervention recommendation.
+        </p>
       </MethodologySection>
 
       <MethodologySection

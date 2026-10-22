@@ -27,10 +27,22 @@ const limitations = [
 
 interface EvidenceIndex {
   readonly recordsById: ReadonlyMap<string, EvidenceRecord>
-  readonly districtRecordsByGeography: ReadonlyMap<string, readonly EvidenceRecord[]>
-  readonly nationalRecordsByGeography: ReadonlyMap<string, readonly EvidenceRecord[]>
-  readonly districtYieldsByDimensions: ReadonlyMap<string, readonly EvidenceRecord[]>
-  readonly derivedGapsBySourcePair: ReadonlyMap<string, readonly EvidenceRecord[]>
+  readonly districtRecordsByGeography: ReadonlyMap<
+    string,
+    readonly EvidenceRecord[]
+  >
+  readonly nationalRecordsByGeography: ReadonlyMap<
+    string,
+    readonly EvidenceRecord[]
+  >
+  readonly districtYieldsByDimensions: ReadonlyMap<
+    string,
+    readonly EvidenceRecord[]
+  >
+  readonly derivedGapsBySourcePair: ReadonlyMap<
+    string,
+    readonly EvidenceRecord[]
+  >
 }
 
 const evidenceIndexes = new WeakMap<readonly EvidenceRecord[], EvidenceIndex>()
@@ -65,7 +77,9 @@ function sourcePairKey(ids: readonly string[]): string {
   return JSON.stringify([...ids].sort())
 }
 
-function createEvidenceIndex(records: readonly EvidenceRecord[]): EvidenceIndex {
+function createEvidenceIndex(
+  records: readonly EvidenceRecord[],
+): EvidenceIndex {
   const recordsById = new Map<string, EvidenceRecord>()
   const districtRecordsByGeography = new Map<string, EvidenceRecord[]>()
   const nationalRecordsByGeography = new Map<string, EvidenceRecord[]>()
@@ -103,7 +117,10 @@ function createEvidenceIndex(records: readonly EvidenceRecord[]): EvidenceIndex 
           ]),
           record,
         )
-        if (normalizeDistrict(record.geography.id) !== normalizeDistrict(record.geography.name)) {
+        if (
+          normalizeDistrict(record.geography.id) !==
+          normalizeDistrict(record.geography.name)
+        ) {
           appendToIndex(
             districtYieldsByDimensions,
             indexKey([
@@ -185,7 +202,9 @@ function hasNisrProvenance(record: EvidenceRecord): boolean {
   )
 }
 
-function isObserved(record: EvidenceRecord | undefined): record is EvidenceRecord & {
+function isObserved(
+  record: EvidenceRecord | undefined,
+): record is EvidenceRecord & {
   readonly status: 'observed'
   readonly value: number
 } {
@@ -250,13 +269,15 @@ function observedCandidates(
   index: EvidenceIndex,
   context: AgriculturalSignalContext,
 ): EvidenceRecord[] {
-  return [...(index.districtYieldsByDimensions.get(
-    indexKey([
-      normalizeDistrict(context.district),
-      context.crop,
-      context.season,
-    ]),
-  ) ?? [])].filter(
+  return [
+    ...(index.districtYieldsByDimensions.get(
+      indexKey([
+        normalizeDistrict(context.district),
+        context.crop,
+        context.season,
+      ]),
+    ) ?? []),
+  ].filter(
     (record) =>
       record.indicator === 'average_yield' &&
       isDistrict(record, context.district) &&
@@ -285,14 +306,18 @@ function getNationalRecords(
   index: EvidenceIndex,
   geographyId: string,
 ): readonly EvidenceRecord[] {
-  return index.nationalRecordsByGeography.get(normalizeDistrict(geographyId)) ?? []
+  return (
+    index.nationalRecordsByGeography.get(normalizeDistrict(geographyId)) ?? []
+  )
 }
 
 function getComparableYieldPair(
   district: EvidenceRecord | undefined,
   national: EvidenceRecord | undefined,
   context: AgriculturalSignalContext,
-): { readonly district: ObservedRecord; readonly national: ObservedRecord } | undefined {
+):
+  | { readonly district: ObservedRecord; readonly national: ObservedRecord }
+  | undefined {
   const comparable =
     isObserved(district) &&
     isObserved(national) &&
@@ -334,25 +359,25 @@ function getDerivedGapRecord(
   return index.derivedGapsBySourcePair
     .get(sourcePairKey([district.id, national.id]))
     ?.find(
-    (record) =>
-      record.status === 'derived' &&
-      hasNisrProvenance(record) &&
-      record.indicator === 'yield_gap' &&
-      record.dataset === district.dataset &&
-      record.period.year === district.period.year &&
-      record.period.season === district.period.season &&
-      normalize(record.crop ?? '') === normalize(district.crop ?? '') &&
-      record.geography.level === 'district' &&
-      normalize(record.geography.id) === normalize(district.geography.id) &&
-      record.unit === '%' &&
-      record.value === expectedRelativeGap &&
-      record.referenceEvidenceId === national.id &&
-      record.sourceReference.table === district.sourceReference.table &&
-      record.sourceReference.page === district.sourceReference.page &&
-      record.derivedFromEvidenceIds?.length === 2 &&
-      record.derivedFromEvidenceIds.includes(district.id) &&
-      record.derivedFromEvidenceIds.includes(national.id),
-  )
+      (record) =>
+        record.status === 'derived' &&
+        hasNisrProvenance(record) &&
+        record.indicator === 'yield_gap' &&
+        record.dataset === district.dataset &&
+        record.period.year === district.period.year &&
+        record.period.season === district.period.season &&
+        normalize(record.crop ?? '') === normalize(district.crop ?? '') &&
+        record.geography.level === 'district' &&
+        normalize(record.geography.id) === normalize(district.geography.id) &&
+        record.unit === '%' &&
+        record.value === expectedRelativeGap &&
+        record.referenceEvidenceId === national.id &&
+        record.sourceReference.table === district.sourceReference.table &&
+        record.sourceReference.page === district.sourceReference.page &&
+        record.derivedFromEvidenceIds?.length === 2 &&
+        record.derivedFromEvidenceIds.includes(district.id) &&
+        record.derivedFromEvidenceIds.includes(national.id),
+    )
 }
 
 function createProductivityGapSignal(
@@ -366,15 +391,16 @@ function createProductivityGapSignal(
   const district = candidates.length === 1 ? candidates[0] : undefined
   const national = district ? getNationalReference(index, district) : undefined
   const comparable = getComparableYieldPair(district, national, context)
-  const connectedRecords = [district, national].filter(
-    (record): record is EvidenceRecord => record !== undefined,
-  )
+  const connectedRecords = district
+    ? [district, national].filter(
+        (record): record is EvidenceRecord => record !== undefined,
+      )
+    : candidates
   const sourceRecordIds = sourceIds(connectedRecords)
   const observedEvidenceIds = observedIds(connectedRecords)
-  const derivedGap =
-    comparable
-      ? getDerivedGapRecord(index, comparable.district, comparable.national)
-      : undefined
+  const derivedGap = comparable
+    ? getDerivedGapRecord(index, comparable.district, comparable.national)
+    : undefined
   const derivedEvidenceIds = derivedGap ? [derivedGap.id] : []
 
   if (!comparable) {
@@ -382,10 +408,14 @@ function createProductivityGapSignal(
       'A district and Rwanda yield observation must both be observed for the same crop, season, agricultural year, dataset, and Kg/Ha unit.',
     ]
     if (candidates.length > 1) {
-      reasons.push('More than one district yield record matches this selection; the comparison is ambiguous.')
+      reasons.push(
+        'More than one district yield record matches this selection; the comparison is ambiguous.',
+      )
     }
     if (district && !national) {
-      reasons.push('The district record does not resolve to a connected national reference record.')
+      reasons.push(
+        'The district record does not resolve to a connected national reference record.',
+      )
     }
     return {
       id: signalId('productivity_gap', context),
@@ -395,7 +425,8 @@ function createProductivityGapSignal(
       crop: context.crop,
       period: period(context),
       title: 'Productivity gap',
-      summary: 'Insufficient connected NISR evidence for this district, crop, and period.',
+      summary:
+        'Insufficient connected NISR evidence for this district, crop, and period.',
       rationale: reasons,
       limitations,
       observedEvidenceIds,
@@ -478,7 +509,9 @@ function createProductivityTrendSignal(
   const invalidPeriod = periodsUsed.some(
     (year) => agriculturalYearStart(year) === undefined,
   )
-  const ambiguousPeriod = [...byYear.values()].some((group) => group.length !== 1)
+  const ambiguousPeriod = [...byYear.values()].some(
+    (group) => group.length !== 1,
+  )
   const recordsAreObserved = candidates.every(isObserved)
   const unitIsComparable = candidates.every(
     (record) =>
@@ -501,9 +534,13 @@ function createProductivityTrendSignal(
       'At least two distinct agricultural years with comparable observed district yield are required for the same crop, season, indicator, and Kg/Ha unit.',
     ]
     if (hasUnavailableCandidate) {
-      rationale.push('A matching period has an unavailable or missing yield value, so the time comparison is not calculated.')
+      rationale.push(
+        'A matching period has an unavailable or missing yield value, so the time comparison is not calculated.',
+      )
     } else if (ambiguousPeriod) {
-      rationale.push('A matching agricultural year has multiple district yield records, so the period is ambiguous.')
+      rationale.push(
+        'A matching agricultural year has multiple district yield records, so the period is ambiguous.',
+      )
     }
     return {
       id: signalId('productivity_trend', context),
@@ -513,7 +550,8 @@ function createProductivityTrendSignal(
       crop: context.crop,
       period: period(context),
       title: 'Productivity direction',
-      summary: 'Insufficient comparable periods to calculate productivity direction.',
+      summary:
+        'Insufficient comparable periods to calculate productivity direction.',
       rationale,
       limitations: [
         ...limitations,
@@ -583,7 +621,10 @@ function createIrrigationInvestigationSignal(
   const nationalYield = districtYield
     ? getNationalReference(index, districtYield)
     : undefined
-  const matchingDistrictIrrigation = getDistrictRecords(index, context.district).filter(
+  const matchingDistrictIrrigation = getDistrictRecords(
+    index,
+    context.district,
+  ).filter(
     (record) =>
       record.indicator === 'irrigation_practice' &&
       record.period.year === periodYear &&
@@ -605,16 +646,22 @@ function createIrrigationInvestigationSignal(
     matchingNationalIrrigation.length === 1
       ? matchingNationalIrrigation[0]
       : undefined
-  const connected = [districtYield, nationalYield, districtIrrigation, nationalIrrigation]
+  const connected = [
+    districtYield,
+    nationalYield,
+    districtIrrigation,
+    nationalIrrigation,
+  ]
   const sourceRecordIds = sourceIds(connected)
-  const observedEvidenceIds = observedIds(connected.filter(
-    (record): record is EvidenceRecord => record !== undefined,
-  ))
+  const observedEvidenceIds = observedIds(
+    connected.filter(
+      (record): record is EvidenceRecord => record !== undefined,
+    ),
+  )
   const isMaize = normalize(context.crop) === 'maize'
-  const yieldPair =
-    isMaize
-      ? getComparableYieldPair(districtYield, nationalYield, context)
-      : undefined
+  const yieldPair = isMaize
+    ? getComparableYieldPair(districtYield, nationalYield, context)
+    : undefined
   const validIrrigationPair =
     isObserved(districtIrrigation) &&
     isObserved(nationalIrrigation) &&
@@ -644,13 +691,19 @@ function createIrrigationInvestigationSignal(
 
   const rationale: string[] = []
   if (!isMaize) {
-    rationale.push('The connected irrigation investigation screen currently requires maize yield evidence; no other crop is substituted.')
+    rationale.push(
+      'The connected irrigation investigation screen currently requires maize yield evidence; no other crop is substituted.',
+    )
   }
   if (!yieldPair) {
-    rationale.push('Comparable observed district and national maize yield records for the selected period are required.')
+    rationale.push(
+      'Comparable observed district and national maize yield records for the selected period are required.',
+    )
   }
   if (!validIrrigationPair) {
-    rationale.push('Comparable observed district-wide and national irrigation practice records for the selected period are required.')
+    rationale.push(
+      'Comparable observed district-wide and national irrigation practice records for the selected period are required.',
+    )
   }
 
   let status: IrrigationInvestigationSignal['status'] = 'insufficient_evidence'
@@ -665,15 +718,23 @@ function createIrrigationInvestigationSignal(
       districtIrrigation.value < nationalIrrigation.value
     ) {
       status = 'supported'
-      rationale.push('District maize yield and district-wide irrigation practice are both below their same-period national references.')
-      rationale.push('This pattern identifies irrigation as an evidence-supported area for further investigation.')
+      rationale.push(
+        'District maize yield and district-wide irrigation practice are both below their same-period national references.',
+      )
+      rationale.push(
+        'This pattern identifies irrigation as an evidence-supported area for further investigation.',
+      )
     } else {
       status = 'conditions_not_met'
       if (yieldPair.district.value >= yieldPair.national.value) {
-        rationale.push('District maize yield is at or above its same-period national reference.')
+        rationale.push(
+          'District maize yield is at or above its same-period national reference.',
+        )
       }
       if (districtIrrigation.value >= nationalIrrigation.value) {
-        rationale.push('District-wide irrigation practice is at or above its same-period national reference.')
+        rationale.push(
+          'District-wide irrigation practice is at or above its same-period national reference.',
+        )
       }
     }
   }
@@ -714,12 +775,19 @@ export const agriculturalSignalRegistry: Readonly<
 export function calculateAgriculturalSignals(
   records: readonly EvidenceRecord[],
   context: AgriculturalSignalContext,
-): readonly [ProductivityGapSignal, ProductivityTrendSignal, IrrigationInvestigationSignal] {
+): readonly [
+  ProductivityGapSignal,
+  ProductivityTrendSignal,
+  IrrigationInvestigationSignal,
+] {
   const builders = agriculturalSignalRegistry
   return [
     builders.productivity_gap(records, context) as ProductivityGapSignal,
     builders.productivity_trend(records, context) as ProductivityTrendSignal,
-    builders.irrigation_investigation(records, context) as IrrigationInvestigationSignal,
+    builders.irrigation_investigation(
+      records,
+      context,
+    ) as IrrigationInvestigationSignal,
   ]
 }
 

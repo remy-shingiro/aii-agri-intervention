@@ -162,7 +162,9 @@ describe('productivity gap', () => {
   })
 
   it('returns above-reference and at-reference from direct comparisons', () => {
-    expect(gap(yieldPair({ districtYield: 2200 })).status).toBe('above_reference')
+    expect(gap(yieldPair({ districtYield: 2200 })).status).toBe(
+      'above_reference',
+    )
     expect(gap(yieldPair({ districtYield: 2000 })).status).toBe('at_reference')
   })
 
@@ -178,8 +180,9 @@ describe('productivity gap', () => {
 
   it('returns insufficient evidence when the national reference is missing or unavailable', () => {
     expect(
-      gap(yieldPair().filter((record) => record.id !== 'fixture-national-yield'))
-        .status,
+      gap(
+        yieldPair().filter((record) => record.id !== 'fixture-national-yield'),
+      ).status,
     ).toBe('insufficient_evidence')
 
     const records = yieldPair().map((record) =>
@@ -188,6 +191,23 @@ describe('productivity gap', () => {
         : record,
     )
     expect(gap(records).status).toBe('insufficient_evidence')
+  })
+
+  it('retains all matching district records when a yield comparison is ambiguous', () => {
+    const records = yieldPair()
+    const district = records[0]
+    const duplicate = { ...district, id: 'fixture-district-yield-duplicate' }
+    const signal = gap([...records, duplicate])
+
+    expect(signal.status).toBe('insufficient_evidence')
+    expect(signal.rationale).toContain(
+      'More than one district yield record matches this selection; the comparison is ambiguous.',
+    )
+    expect(signal.sourceRecordIds).toEqual([
+      'fixture-district-yield',
+      'fixture-district-yield-duplicate',
+    ])
+    expect(signal.observedEvidenceIds).toEqual(signal.sourceRecordIds)
   })
 
   it('rejects a mismatched period, crop, or yield unit', () => {
@@ -248,8 +268,7 @@ describe('productivity gap', () => {
   })
 
   it('ignores a derived yield-gap row when its value or provenance disagrees with the observed inputs', () => {
-    const derivedId =
-      'sas-2025-season-a-nyarugenge-average_yield-yield-gap'
+    const derivedId = 'sas-2025-season-a-nyarugenge-average_yield-yield-gap'
     const mismatchedValue = evidenceRecords.map((record) =>
       record.id === derivedId ? { ...record, value: 999 } : record,
     )
@@ -328,22 +347,26 @@ describe('productivity direction', () => {
       fixtureContext,
     )
     expect(signal.status).toBe('insufficient_evidence')
-    expect(signal.rationale.join(' ')).toContain('unavailable or missing yield value')
+    expect(signal.rationale.join(' ')).toContain(
+      'unavailable or missing yield value',
+    )
   })
 
   it('rejects incompatible units and crop semantics', () => {
     const differentUnit = trendRecords([1000, 1100]).map((record) =>
-      record.period.year === '2023/24'
-        ? { ...record, unit: 'MT/Ha' }
-        : record,
+      record.period.year === '2023/24' ? { ...record, unit: 'MT/Ha' } : record,
     )
     const differentCrop = trendRecords([1000, 1100]).map((record) =>
-      record.period.year === '2023/24'
-        ? { ...record, crop: 'Wheat' }
-        : record,
+      record.period.year === '2023/24' ? { ...record, crop: 'Wheat' } : record,
     )
-    const [, unitSignal] = calculateAgriculturalSignals(differentUnit, fixtureContext)
-    const [, cropSignal] = calculateAgriculturalSignals(differentCrop, fixtureContext)
+    const [, unitSignal] = calculateAgriculturalSignals(
+      differentUnit,
+      fixtureContext,
+    )
+    const [, cropSignal] = calculateAgriculturalSignals(
+      differentCrop,
+      fixtureContext,
+    )
     expect(unitSignal.status).toBe('insufficient_evidence')
     expect(cropSignal.status).toBe('insufficient_evidence')
   })
@@ -397,7 +420,10 @@ describe('irrigation investigation', () => {
     )
     const mismatchedDistrict = complete.map((record) =>
       record.id === 'fixture-district-irrigation'
-        ? { ...record, geography: { ...record.geography, id: 'other-district' } }
+        ? {
+            ...record,
+            geography: { ...record.geography, id: 'other-district' },
+          }
         : record,
     )
     const invalidUnit = complete.map((record) =>
@@ -407,7 +433,10 @@ describe('irrigation investigation', () => {
     )
     const mismatchedSourceTable = complete.map((record) =>
       record.id === 'fixture-national-irrigation'
-        ? { ...record, sourceReference: { table: 'Incompatible fixture table' } }
+        ? {
+            ...record,
+            sourceReference: { table: 'Incompatible fixture table' },
+          }
         : record,
     )
 
@@ -429,17 +458,25 @@ describe('irrigation investigation', () => {
       year: '2024/25',
       season: 'A',
     })
-    const recordById = new Map(evidenceRecords.map((record) => [record.id, record]))
+    const recordById = new Map(
+      evidenceRecords.map((record) => [record.id, record]),
+    )
 
     for (const signal of signals) {
       expect(signal.evidenceIds.length).toBeGreaterThan(0)
-      expect(signal.sourceRecordIds.every((id) => recordById.has(id))).toBe(true)
-      expect(signal.observedEvidenceIds.every(
-        (id) => recordById.get(id)?.status === 'observed',
-      )).toBe(true)
-      expect(signal.derivedEvidenceIds.every(
-        (id) => recordById.get(id)?.status === 'derived',
-      )).toBe(true)
+      expect(signal.sourceRecordIds.every((id) => recordById.has(id))).toBe(
+        true,
+      )
+      expect(
+        signal.observedEvidenceIds.every(
+          (id) => recordById.get(id)?.status === 'observed',
+        ),
+      ).toBe(true)
+      expect(
+        signal.derivedEvidenceIds.every(
+          (id) => recordById.get(id)?.status === 'derived',
+        ),
+      ).toBe(true)
       expect(signal.evidenceIds.every((id) => recordById.has(id))).toBe(true)
     }
   })

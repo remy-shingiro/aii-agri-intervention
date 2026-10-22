@@ -94,6 +94,7 @@ interface OverviewPageProps {
   onFilterChange: (filter: keyof OverviewFilters, value: string) => void
   onDistrictSelect: (district: string | undefined) => void
   onOpenDistrictProfile: () => void
+  onOpenInvestigationBrief: () => void
   onOpenEvidence: () => void
 }
 
@@ -103,6 +104,7 @@ export function OverviewPage({
   onFilterChange,
   onDistrictSelect,
   onOpenDistrictProfile,
+  onOpenInvestigationBrief,
   onOpenEvidence,
 }: OverviewPageProps) {
   const [districtSearch, setDistrictSearch] = useState('')
@@ -271,6 +273,7 @@ export function OverviewPage({
             selectedDistrict={selectedDistrict}
             year={filters.year}
             onOpenDistrictProfile={onOpenDistrictProfile}
+            onOpenInvestigationBrief={onOpenInvestigationBrief}
             onOpenEvidence={onOpenEvidence}
           />
         </div>

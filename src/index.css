@@ -64,3 +64,44 @@ input:focus-visible {
     transition-duration: 0.01ms !important;
   }
 }
+
+@page {
+  margin: 16mm;
+}
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .printable-brief,
+  .printable-brief * {
+    visibility: visible !important;
+  }
+
+  .printable-brief {
+    position: relative;
+    width: 100%;
+    margin: 0 0 10mm;
+    border: 0 !important;
+    box-shadow: none !important;
+    break-inside: avoid-page;
+  }
+
+  .investigation-brief-page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  a {
+    color: #123c2d !important;
+    text-decoration: underline !important;
+  }
+}

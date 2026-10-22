@@ -12,6 +12,7 @@ interface AgriculturalInsightPanelProps {
   selectedDistrict?: string
   year: string
   onOpenDistrictProfile: () => void
+  onOpenInvestigationBrief: () => void
   onOpenEvidence: () => void
 }
 
@@ -69,6 +70,7 @@ export function AgriculturalInsightPanel({
   selectedDistrict,
   year,
   onOpenDistrictProfile,
+  onOpenInvestigationBrief,
   onOpenEvidence,
 }: AgriculturalInsightPanelProps) {
   const periodInsights = useMemo(
@@ -246,6 +248,14 @@ export function AgriculturalInsightPanel({
             <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
               <button
                 className="inline-flex min-h-11 items-center justify-between rounded-lg bg-forest-950 px-3.5 text-sm font-semibold text-white transition-colors hover:bg-forest-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-agri-700 focus-visible:ring-offset-2"
+                onClick={onOpenInvestigationBrief}
+                type="button"
+              >
+                Prepare investigation brief
+                <ArrowRight aria-hidden="true" className="size-4" />
+              </button>
+              <button
+                className="inline-flex min-h-11 items-center justify-between rounded-lg border border-slate-300 px-3.5 text-sm font-semibold text-forest-950 transition-colors hover:border-agri-700 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-agri-700 focus-visible:ring-offset-2"
                 onClick={onOpenDistrictProfile}
                 type="button"
               >
@@ -300,6 +310,17 @@ export function AgriculturalInsightPanel({
                 ` · p. ${insight.districtYieldRecord.sourceReference.page}`}
             </p>
           </div>
+        )}
+
+        {!insight && selectedDistrict && (
+          <button
+            className="mt-4 inline-flex min-h-11 w-full items-center justify-between rounded-lg border border-slate-300 px-3.5 text-sm font-semibold text-forest-950 transition-colors hover:border-agri-700 hover:bg-sage-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-agri-700 focus-visible:ring-offset-2"
+            onClick={onOpenInvestigationBrief}
+            type="button"
+          >
+            Prepare investigation brief
+            <ArrowRight aria-hidden="true" className="size-4" />
+          </button>
         )}
       </section>
     </aside>

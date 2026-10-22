@@ -31,6 +31,12 @@ const DataMethodologyPage = lazy(async () => {
   return { default: module.DataMethodologyPage }
 })
 
+const InvestigationBriefPage = lazy(async () => {
+  const module =
+    await import('../features/investigation-brief/pages/InvestigationBriefPage')
+  return { default: module.InvestigationBriefPage }
+})
+
 function getSeasonCode(value: string): AgriculturalSeason {
   if (value === 'season-b') return 'B'
   if (value === 'season-c') return 'C'
@@ -106,6 +112,9 @@ export function App() {
               selectedDistrict={selectedDistrict}
               onDistrictSelect={setSelectedDistrict}
               onOpenDistrictProfile={() => setActivePage('District Profile')}
+              onOpenInvestigationBrief={() =>
+                setActivePage('Investigation Brief')
+              }
               onOpenEvidence={() => openProfileEvidence()}
             />
           )}
@@ -117,6 +126,9 @@ export function App() {
               selectedDistrict={selectedDistrict}
               year={overviewFilters.year}
               onOpenEvidence={openProfileEvidence}
+              onOpenInvestigationBrief={() =>
+                setActivePage('Investigation Brief')
+              }
               onNavigateOverview={() => setActivePage('Overview')}
               onNavigateMethodology={() => {
                 setEvidenceContext(undefined)
@@ -140,6 +152,19 @@ export function App() {
           )}
 
           {activePage === 'Data & Methodology' && <DataMethodologyPage />}
+          {activePage === 'Investigation Brief' && (
+            <InvestigationBriefPage
+              crop={overviewFilters.crop}
+              district={selectedDistrict}
+              onNavigateDistrictProfile={() =>
+                setActivePage('District Profile')
+              }
+              onNavigateOverview={() => setActivePage('Overview')}
+              onOpenEvidence={(signal) => openProfileEvidence(signal)}
+              season={getSeasonCode(overviewFilters.season)}
+              year={overviewFilters.year}
+            />
+          )}
         </Suspense>
       </AsyncContentBoundary>
     </AppShell>

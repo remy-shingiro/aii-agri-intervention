@@ -1,4 +1,10 @@
-import { BarChart3, BookOpenText, FileSearch, Map } from 'lucide-react'
+import {
+  BarChart3,
+  BookOpenText,
+  ClipboardList,
+  FileSearch,
+  Map,
+} from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 import { SidebarNavItem } from './SidebarNavItem'
@@ -13,6 +19,7 @@ interface SidebarProps {
 const navigationIcons: Record<NavigationItem, LucideIcon> = {
   Overview: BarChart3,
   'District Profile': Map,
+  'Investigation Brief': ClipboardList,
   Evidence: FileSearch,
   'Data & Methodology': BookOpenText,
 }

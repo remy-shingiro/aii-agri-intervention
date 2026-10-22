@@ -175,6 +175,126 @@ describe('application shell', () => {
     })
   })
 
+  it('prepares a source-traceable brief that follows district selection changes', async () => {
+    const print = vi.fn()
+    vi.stubGlobal('print', print)
+    render(<App />)
+
+    const search = screen.getByRole('combobox', { name: 'Search district' })
+    fireEvent.change(search, { target: { value: 'Nyarugenge' } })
+    await waitFor(() => {
+      expect(
+        screen.getByRole('option', { name: 'Nyarugenge' }),
+      ).toBeInTheDocument()
+    })
+    fireEvent.keyDown(search, { key: 'ArrowDown' })
+    fireEvent.keyDown(search, { key: 'Enter' })
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Prepare investigation brief' }),
+    )
+
+    expect(
+      await screen.findByRole(
+        'heading',
+        { name: 'District investigation brief' },
+        lazyLoadWait,
+      ),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText('Nyarugenge', { selector: 'h2' }),
+    ).toBeInTheDocument()
+    expect(screen.getAllByText('-647 Kg/Ha').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('-32.6%').length).toBeGreaterThan(0)
+    expect(
+      screen.getByText(
+        /district-wide across crop activity, not maize-specific/i,
+      ),
+    ).toBeInTheDocument()
+    expect(
+      screen.getAllByText(/sas-2025-season-a-nyarugenge-average_yield/).length,
+    ).toBeGreaterThan(0)
+    expect(
+      screen.getAllByRole('link', {
+        name: /Table 19: 2025 Season A_Average yield/,
+      })[0],
+    ).toHaveAttribute('href', expect.stringContaining('SAS%202025'))
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Print or save as PDF' }),
+    )
+    expect(print).toHaveBeenCalledOnce()
+
+    const productivityCard = screen
+      .getByRole('heading', { name: 'Productivity gap' })
+      .closest('article')
+    expect(productivityCard).not.toBeNull()
+    if (!productivityCard) return
+    fireEvent.click(
+      within(productivityCard).getByRole('button', {
+        name: 'Open signal records in Evidence Explorer',
+      }),
+    )
+    expect(
+      await screen.findByRole(
+        'heading',
+        { name: 'Evidence explorer' },
+        lazyLoadWait,
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByText('3 records')).toBeInTheDocument()
+    expect(
+      screen.getAllByText(/sas-2025-season-a-nyarugenge-average_yield/).length,
+    ).toBeGreaterThan(0)
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Overview' })[0])
+    const nextSearch = screen.getByRole('combobox', { name: 'Search district' })
+    fireEvent.change(nextSearch, { target: { value: 'Kayonza' } })
+    await waitFor(() => {
+      expect(
+        screen.getByRole('option', { name: 'Kayonza' }),
+      ).toBeInTheDocument()
+    })
+    fireEvent.keyDown(nextSearch, { key: 'ArrowDown' })
+    fireEvent.keyDown(nextSearch, { key: 'Enter' })
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Prepare investigation brief' }),
+    )
+
+    expect(
+      await screen.findByRole(
+        'heading',
+        { name: 'District investigation brief' },
+        lazyLoadWait,
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Kayonza', { selector: 'h2' })).toBeInTheDocument()
+    expect(screen.getAllByText('-60 Kg/Ha').length).toBeGreaterThan(0)
+    expect(
+      screen.queryByText(/sas-2025-season-a-nyarugenge-average_yield/),
+    ).not.toBeInTheDocument()
+  }, 15_000)
+
+  it('shows a useful prompt when the brief is opened without a district', async () => {
+    render(<App />)
+    fireEvent.click(screen.getByRole('button', { name: 'Investigation Brief' }))
+
+    expect(
+      await screen.findByRole(
+        'heading',
+        { name: 'District investigation brief' },
+        lazyLoadWait,
+      ),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', {
+        name: 'Select a district to prepare its brief',
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Select district in Overview' }),
+    ).toBeInTheDocument()
+  })
+
   it('uses the selected crop and period on profiles and fails closed for gaps', async () => {
     render(<App />)
 
