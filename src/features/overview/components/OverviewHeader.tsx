@@ -1,8 +1,8 @@
 import { CalendarDays, ChevronDown, Leaf } from 'lucide-react'
-import { useEffect, useState } from 'react'
 
 import { DistrictSearchInput } from './DistrictSearchInput'
 import { normalizedEvidenceRecords } from '../../evidence/data/agriculturalEvidence'
+import { districtMetadata } from '../../district-profile/data/districtMetadata'
 
 interface OverviewFilters {
   crop: string
@@ -23,15 +23,9 @@ interface FilterOption {
   value: string
 }
 
-interface DistrictGeoJson {
-  features?: Array<{
-    properties?: {
-      district?: string
-    }
-  }>
-}
-
-const DISTRICT_SOURCE_URL = '/data/rwanda-districts.geojson'
+const districts = districtMetadata
+  .map(({ district }) => district)
+  .sort((first, second) => first.localeCompare(second))
 
 const yieldObservations = normalizedEvidenceRecords.filter(
   (record) =>
@@ -82,46 +76,6 @@ export function OverviewHeader({
   onDistrictSearchChange,
   onFilterChange,
 }: OverviewHeaderProps) {
-  const [districts, setDistricts] = useState<string[]>([])
-
-  useEffect(() => {
-    let cancelled = false
-
-    const loadDistricts = async () => {
-      try {
-        const response = await fetch(DISTRICT_SOURCE_URL)
-
-        if (!response.ok) {
-          throw new Error(
-            `Failed to load district boundaries: ${response.status}`,
-          )
-        }
-
-        const geoJson = (await response.json()) as DistrictGeoJson
-
-        const districtNames = Array.from(
-          new Set(
-            (geoJson.features ?? [])
-              .map((feature) => feature.properties?.district?.trim())
-              .filter((district): district is string => Boolean(district)),
-          ),
-        ).sort((first, second) => first.localeCompare(second))
-
-        if (!cancelled) {
-          setDistricts(districtNames)
-        }
-      } catch (error) {
-        console.error('Failed to load Rwanda district names:', error)
-      }
-    }
-
-    void loadDistricts()
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
   return (
     <section className="space-y-4">
       <div className="space-y-2">
