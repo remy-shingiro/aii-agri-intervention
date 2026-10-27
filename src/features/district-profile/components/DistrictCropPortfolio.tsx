@@ -9,6 +9,7 @@ import { DistrictComparisonBar } from './DistrictComparisonBar'
 import {
   districtCropPortfolioIndicators,
   getDistrictCropPortfolio,
+  rankObservedDistrictCropYields,
   type DistrictCropPortfolioEntry,
   type DistrictCropPortfolioMetric,
 } from '../utils/districtCropPortfolio'
@@ -264,6 +265,133 @@ function CropCard({
   )
 }
 
+function ObservedCropYieldChart({
+  district,
+  year,
+  season,
+  portfolio,
+  onOpenEvidence,
+}: {
+  district: string
+  year: string
+  season: string
+  portfolio: readonly DistrictCropPortfolioEntry[]
+  onOpenEvidence: (evidenceIds: readonly string[]) => void
+}) {
+  const ranking = rankObservedDistrictCropYields(portfolio)
+  const maximum = Math.max(
+    0,
+    ...ranking.observations.map((observation) => observation.value),
+  )
+  const formatter = new Intl.NumberFormat('en-RW', {
+    maximumFractionDigits: 2,
+  })
+  const omittedCount =
+    ranking.missingOrAmbiguousCount +
+    ranking.unavailableCount +
+    ranking.invalidCount
+
+  return (
+    <section
+      aria-labelledby="district-crop-yield-chart-heading"
+      className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+    >
+      <div className="flex items-start gap-2">
+        <EvidenceIndicatorIcon
+          className="mt-0.5 size-4 shrink-0 text-agri-700"
+          indicator="average_yield"
+        />
+        <div className="min-w-0">
+          <h3
+            className="text-sm font-semibold text-slate-900"
+            id="district-crop-yield-chart-heading"
+          >
+            Observed yield by crop
+          </h3>
+          <p className="mt-1 text-xs leading-5 text-slate-600">
+            {district} Â· {year} Â· Season {season} Â· Kg/Ha
+          </p>
+        </div>
+      </div>
+
+      {ranking.observations.length === 0 ? (
+        <div className="mt-3 rounded-lg border border-dashed border-slate-300 p-3">
+          <EvidenceStatusBadge status="unavailable" />
+          <p className="mt-2 text-sm leading-5 text-slate-600">
+            No uniquely observed district yields are available to rank for this
+            period. The {ranking.portfolioCropCount} portfolio crop categories
+            remain listed below with their individual availability states.
+          </p>
+        </div>
+      ) : (
+        <>
+          <p className="mt-2 text-xs leading-5 text-slate-600">
+            Ranked highest to lowest: {ranking.observations.length} of{' '}
+            {ranking.portfolioCropCount} crop categories have one observed
+            district yield. {omittedCount} categories with missing, ambiguous,
+            unavailable, or invalid yields are not plotted.
+          </p>
+          <div
+            aria-hidden="true"
+            className="mt-3 grid grid-cols-[minmax(0,1fr)_auto] text-[11px] text-slate-500 sm:grid-cols-[minmax(0,1fr)_minmax(5rem,2fr)_auto]"
+          >
+            <span className="col-span-2 flex justify-between sm:col-span-1 sm:col-start-2 sm:row-start-1">
+              <span>0 Kg/Ha</span>
+              <span>{formatter.format(maximum)} Kg/Ha</span>
+            </span>
+          </div>
+          <ol
+            aria-label={`Observed ${district} crop yields, ranked highest to lowest`}
+            className="mt-1 space-y-2"
+          >
+            {ranking.observations.map((observation) => {
+              const width =
+                maximum > 0 ? (observation.value / maximum) * 100 : 0
+
+              return (
+                <li
+                  className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 sm:grid-cols-[minmax(0,1fr)_minmax(5rem,2fr)_auto]"
+                  key={observation.record.id}
+                >
+                  <button
+                    aria-label={`View ${observation.label} yield evidence`}
+                    className="inline-flex min-w-0 items-center gap-1 truncate text-left text-xs font-medium text-green-800 underline decoration-green-300 underline-offset-2 hover:text-green-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-700 focus-visible:ring-offset-2"
+                    onClick={() => onOpenEvidence([observation.record.id])}
+                    type="button"
+                  >
+                    <span className="truncate">{observation.label}</span>
+                    <ArrowUpRight
+                      aria-hidden="true"
+                      className="size-3 shrink-0"
+                    />
+                  </button>
+                  <span className="text-right text-xs font-semibold tabular-nums text-slate-800 sm:col-start-3 sm:row-start-1">
+                    {formatter.format(observation.value)} {observation.unit}
+                  </span>
+                  <div
+                    aria-hidden="true"
+                    className="col-span-2 h-2 overflow-hidden rounded-sm bg-slate-100 sm:col-span-1 sm:col-start-2 sm:row-start-1"
+                  >
+                    <div
+                      className="h-full bg-agri-700"
+                      style={{ width: `${width}%` }}
+                    />
+                  </div>
+                </li>
+              )
+            })}
+          </ol>
+          <p className="mt-3 border-t border-slate-100 pt-2 text-xs leading-5 text-slate-500">
+            Bars use a shared 0 to {formatter.format(maximum)} Kg/Ha scale.
+            Select a crop label to open its connected observation and NISR
+            source reference.
+          </p>
+        </>
+      )}
+    </section>
+  )
+}
+
 export function DistrictCropPortfolio({
   district,
   year,
@@ -308,16 +436,25 @@ export function DistrictCropPortfolio({
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {portfolio.map((entry) => (
-            <CropCard
-              district={district}
-              entry={entry}
-              key={`${entry.crop}|${entry.species ?? ''}|${entry.category ?? ''}`}
-              onOpenEvidence={onOpenEvidence}
-            />
-          ))}
-        </div>
+        <>
+          <ObservedCropYieldChart
+            district={district}
+            onOpenEvidence={onOpenEvidence}
+            portfolio={portfolio}
+            season={season}
+            year={year}
+          />
+          <div className="space-y-2">
+            {portfolio.map((entry) => (
+              <CropCard
+                district={district}
+                entry={entry}
+                key={`${entry.crop}|${entry.species ?? ''}|${entry.category ?? ''}`}
+                onOpenEvidence={onOpenEvidence}
+              />
+            ))}
+          </div>
+        </>
       )}
     </section>
   )
