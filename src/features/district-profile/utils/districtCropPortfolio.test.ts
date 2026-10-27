@@ -5,6 +5,7 @@ import type { EvidenceRecord } from '../../evidence/types/evidence.types'
 import {
   districtCropPortfolioIndicators,
   getDistrictCropPortfolio,
+  rankObservedDistrictCropYields,
 } from './districtCropPortfolio'
 
 function getCrop(
@@ -317,5 +318,72 @@ describe('district crop portfolio', () => {
   it('returns no synthetic crop rows for unsupported periods or seasons', () => {
     expect(getDistrictCropPortfolio(evidenceRecords, 'Nyarugenge', '2022/23', 'A')).toEqual([])
     expect(getDistrictCropPortfolio(evidenceRecords, 'Nyarugenge', '2024/25', 'D')).toEqual([])
+  })
+
+  it('ranks only observed district yields from the selected SAS period', () => {
+    const portfolio = getDistrictCropPortfolio(
+      evidenceRecords,
+      'Nyarugenge',
+      '2024/25',
+      'A',
+    )
+    const ranking = rankObservedDistrictCropYields(portfolio)
+
+    expect(ranking.observations.length).toBeGreaterThan(0)
+    expect(
+      ranking.observations.map((observation) => observation.value),
+    ).toEqual(
+      [...ranking.observations]
+        .map((observation) => observation.value)
+        .sort((first, second) => second - first),
+    )
+    expect(ranking.observations.every(({ record }) =>
+      record.dataset === 'SAS 2025' &&
+      record.geography.level === 'district' &&
+      record.geography.name === 'Nyarugenge' &&
+      record.period.year === '2024/25' &&
+      record.period.season === 'A' &&
+      record.indicator === 'average_yield' &&
+      record.unit === 'Kg/Ha' &&
+      record.status === 'observed',
+    )).toBe(true)
+    expect(ranking.observations.find(({ label }) => label === 'Maize')?.value)
+      .toBe(getCrop('Maize')?.metrics.average_yield.districtRecord?.value)
+    expect(ranking.portfolioCropCount).toBe(portfolio.length)
+  })
+
+  it('keeps observed zero yields and excludes unavailable and negative values', () => {
+    const zeroYield = getObservation('average_yield', 'district')
+    expect(zeroYield).toBeDefined()
+    if (!zeroYield) return
+
+    const zeroPortfolio = getDistrictCropPortfolio(
+      [{ ...zeroYield, value: 0 }],
+      'Nyarugenge',
+      '2024/25',
+      'A',
+    )
+    const zeroRanking = rankObservedDistrictCropYields(zeroPortfolio)
+    expect(zeroRanking.observations).toHaveLength(1)
+    expect(zeroRanking.observations[0].value).toBe(0)
+
+    const unavailable = getCrop('Sorghum')?.metrics.average_yield.districtRecord
+    expect(unavailable).toMatchObject({ status: 'unavailable', value: null })
+    const mixedRanking = rankObservedDistrictCropYields(
+      getDistrictCropPortfolio(evidenceRecords, 'Nyarugenge', '2024/25', 'A'),
+    )
+    expect(mixedRanking.unavailableCount).toBeGreaterThan(0)
+    expect(mixedRanking.observations.some(({ label }) => label === 'Sorghum'))
+      .toBe(false)
+
+    const negativePortfolio = getDistrictCropPortfolio(
+      [{ ...zeroYield, value: -1 }],
+      'Nyarugenge',
+      '2024/25',
+      'A',
+    )
+    const negativeRanking = rankObservedDistrictCropYields(negativePortfolio)
+    expect(negativeRanking.invalidCount).toBe(1)
+    expect(negativeRanking.observations).toHaveLength(0)
   })
 })

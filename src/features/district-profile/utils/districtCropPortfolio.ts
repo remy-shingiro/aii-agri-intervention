@@ -34,6 +34,83 @@ export interface DistrictCropPortfolioEntry {
   readonly evidenceIds: readonly string[]
 }
 
+export interface DistrictCropYieldObservation {
+  readonly label: string
+  readonly value: number
+  readonly unit: 'Kg/Ha'
+  readonly record: EvidenceRecord
+}
+
+export interface DistrictCropYieldRanking {
+  readonly observations: readonly DistrictCropYieldObservation[]
+  readonly portfolioCropCount: number
+  readonly missingOrAmbiguousCount: number
+  readonly unavailableCount: number
+  readonly invalidCount: number
+}
+
+/**
+ * Ranks only uniquely matched, observed district yields already selected for
+ * one compatible SAS period by getDistrictCropPortfolio. Zero is retained;
+ * missing, ambiguous, unavailable, and invalid values remain out of the bars.
+ */
+export function rankObservedDistrictCropYields(
+  portfolio: readonly DistrictCropPortfolioEntry[],
+): DistrictCropYieldRanking {
+  const observations: DistrictCropYieldObservation[] = []
+  let missingOrAmbiguousCount = 0
+  let unavailableCount = 0
+  let invalidCount = 0
+
+  for (const entry of portfolio) {
+    const metric = entry.metrics.average_yield
+    const candidates = metric.districtRecords
+    const record = metric.districtRecord
+
+    if (!record) {
+      if (candidates.length === 0 || candidates.length > 1) {
+        missingOrAmbiguousCount += 1
+      } else {
+        unavailableCount += 1
+      }
+      continue
+    }
+
+    if (record.status !== 'observed' || record.value === null) {
+      unavailableCount += 1
+      continue
+    }
+
+    if (!Number.isFinite(record.value) || record.value < 0) {
+      invalidCount += 1
+      continue
+    }
+
+    const qualifiers = [entry.species, entry.category].filter(Boolean)
+    observations.push({
+      label: qualifiers.length > 0
+        ? `${entry.crop} (${qualifiers.join(' · ')})`
+        : entry.crop,
+      value: record.value,
+      unit: 'Kg/Ha',
+      record,
+    })
+  }
+
+  observations.sort(
+    (first, second) =>
+      second.value - first.value || first.label.localeCompare(second.label),
+  )
+
+  return {
+    observations,
+    portfolioCropCount: portfolio.length,
+    missingOrAmbiguousCount,
+    unavailableCount,
+    invalidCount,
+  }
+}
+
 const indicatorDetails: Readonly<
   Record<
     DistrictCropPortfolioIndicator,
