@@ -199,7 +199,7 @@ export function RwandaMapPanel({
   const countryLabelElementsRef = useRef(
     new globalThis.Map<string, HTMLSpanElement>(),
   )
-  const labelSourceLoadedRef = useRef(false)
+  const districtSourceLoadedRef = useRef(false)
 
   const [mapReady, setMapReady] = useState(false)
   const [mapError, setMapError] = useState<string | null>(null)
@@ -260,9 +260,13 @@ export function RwandaMapPanel({
       return
     }
 
+    let disposed = false
+    let districtSourceAdded = false
+    let districtSourceFailed = false
+
     setMapError(null)
     setMapReady(false)
-    labelSourceLoadedRef.current = false
+    districtSourceLoadedRef.current = false
     setDistrictLabelAnchors([])
 
     const map = new Map({
@@ -304,7 +308,7 @@ export function RwandaMapPanel({
     mapResizeObserver.observe(mapContainerRef.current)
 
     const handleMapLoad = () => {
-      if (mapRef.current !== map) {
+      if (disposed || mapRef.current !== map) {
         return
       }
 
@@ -314,6 +318,7 @@ export function RwandaMapPanel({
           data: DISTRICT_SOURCE_URL,
           promoteId: 'code_dist',
         })
+        districtSourceAdded = true
 
         map.addLayer({
           id: FILL_LAYER_ID,
@@ -382,9 +387,8 @@ export function RwandaMapPanel({
             'aria-label',
             'Interactive Rwanda district map with district labels and neighboring country context. Use district search above for keyboard-accessible selection.',
           )
-
-        setMapReady(true)
       } catch (error) {
+        districtSourceFailed = true
         console.error('Failed to initialize Rwanda district map:', error)
 
         setMapError('The Rwanda district map could not be initialized.')
@@ -401,6 +405,17 @@ export function RwandaMapPanel({
       if (message) {
         console.error('MapLibre error:', message)
       }
+
+      if (
+        !disposed &&
+        mapRef.current === map &&
+        districtSourceAdded &&
+        !districtSourceLoadedRef.current &&
+        !districtSourceFailed
+      ) {
+        districtSourceFailed = true
+        setMapError('The Rwanda district map could not be initialized.')
+      }
     }
 
     const handleDistrictSourceData = (event: {
@@ -408,44 +423,61 @@ export function RwandaMapPanel({
       isSourceLoaded?: boolean
     }) => {
       if (
+        disposed ||
+        mapRef.current !== map ||
+        districtSourceFailed ||
         event.sourceId !== SOURCE_ID ||
         !event.isSourceLoaded ||
-        labelSourceLoadedRef.current
+        districtSourceLoadedRef.current
       ) {
         return
       }
 
-      const labelFeatures: DistrictLabelFeature[] = map
-        .querySourceFeatures(SOURCE_ID)
-        .flatMap((feature) => {
-          const name = String(feature.properties?.district ?? '')
-          const id = String(feature.properties?.code_dist ?? feature.id ?? '')
-          const geometry = feature.geometry
+      try {
+        const labelFeatures: DistrictLabelFeature[] = map
+          .querySourceFeatures(SOURCE_ID)
+          .flatMap((feature) => {
+            const name = String(feature.properties?.district ?? '')
+            const id = String(
+              feature.properties?.code_dist ?? feature.id ?? '',
+            )
+            const geometry = feature.geometry
 
-          if (
-            !id ||
-            !name ||
-            (geometry.type !== 'Polygon' && geometry.type !== 'MultiPolygon')
-          ) {
-            return []
-          }
+            if (
+              !id ||
+              !name ||
+              (geometry.type !== 'Polygon' &&
+                geometry.type !== 'MultiPolygon')
+            ) {
+              return []
+            }
 
-          return [
-            {
-              id,
-              name,
-              geometry: {
-                type: geometry.type,
-                coordinates: geometry.coordinates,
-              } as DistrictLabelFeature['geometry'],
-            },
-          ]
-        })
+            return [
+              {
+                id,
+                name,
+                geometry: {
+                  type: geometry.type,
+                  coordinates: geometry.coordinates,
+                } as DistrictLabelFeature['geometry'],
+              },
+            ]
+          })
 
-      const anchors = createDistrictLabelAnchors(labelFeatures)
-      if (anchors.length > 0) {
-        labelSourceLoadedRef.current = true
+        const anchors = createDistrictLabelAnchors(labelFeatures)
+        if (anchors.length === 0) {
+          districtSourceFailed = true
+          setMapError('The Rwanda district map could not be initialized.')
+          return
+        }
+
+        districtSourceLoadedRef.current = true
         setDistrictLabelAnchors(anchors)
+        setMapReady(true)
+      } catch (error) {
+        districtSourceFailed = true
+        console.error('Failed to process Rwanda district features:', error)
+        setMapError('The Rwanda district map could not be initialized.')
       }
     }
 
@@ -530,8 +562,15 @@ export function RwandaMapPanel({
     map.on('mouseleave', FILL_LAYER_ID, clearDistrictHover)
 
     return () => {
-      setMapReady(false)
+      disposed = true
       mapResizeObserver.disconnect()
+      map.off('load', handleMapLoad)
+      map.off('sourcedata', handleDistrictSourceData)
+      map.off('error', handleMapError)
+      map.off('click', FILL_LAYER_ID, handleDistrictClick)
+      map.off('mouseenter', FILL_LAYER_ID, handleMouseEnter)
+      map.off('mousemove', FILL_LAYER_ID, handleDistrictHover)
+      map.off('mouseleave', FILL_LAYER_ID, clearDistrictHover)
       map.remove()
       mapRef.current = null
     }
