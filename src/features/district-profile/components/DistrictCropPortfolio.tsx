@@ -2,6 +2,7 @@ import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { useId } from 'react'
 
 import { EvidenceStatusBadge } from '../../evidence/components/EvidenceStatusBadge'
+import { EvidenceIndicatorIcon } from '../../evidence/components/EvidenceIndicatorIcon'
 import { evidenceRecords } from '../../evidence/data/evidenceRecords'
 import type { EvidenceRecord } from '../../evidence/types/evidence.types'
 import { DistrictComparisonBar } from './DistrictComparisonBar'
@@ -142,7 +143,14 @@ function CropMetric({
       aria-labelledby={metricId}
       className="min-w-0 rounded-lg border border-slate-100 bg-slate-50/70 p-3"
     >
-      <h4 className="text-sm font-semibold text-slate-900" id={metricId}>
+      <h4
+        className="flex items-center gap-1.5 text-sm font-semibold text-slate-900"
+        id={metricId}
+      >
+        <EvidenceIndicatorIcon
+          className="size-4 shrink-0 text-agri-700"
+          indicator={metric.indicator}
+        />
         {metric.label} ({metric.unit})
       </h4>
       {showYieldComparison ? (

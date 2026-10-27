@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { RotateCcw, Search } from 'lucide-react'
+import { Database, RotateCcw, Search } from 'lucide-react'
 import type { ReactNode } from 'react'
 
 import { evidenceRecords } from '../data/evidenceRecords'
@@ -512,9 +512,13 @@ export function EvidencePage({
         <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
           <div>
             <h2
-              className="text-base font-bold text-forest-950"
+              className="flex items-center gap-2 text-base font-bold text-forest-950"
               id="evidence-results-heading"
             >
+              <Database
+                aria-hidden="true"
+                className="size-4 shrink-0 text-agri-700"
+              />
               Source-backed observations
             </h2>
             <p className="mt-1 text-xs text-slate-500" aria-live="polite">

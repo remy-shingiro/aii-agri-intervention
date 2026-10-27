@@ -175,6 +175,40 @@ describe('application shell', () => {
     })
   })
 
+  it('shows matched yield and irrigation comparisons in the Overview evidence panel', async () => {
+    render(<App />)
+
+    const search = screen.getByRole('combobox', { name: 'Search district' })
+    fireEvent.change(search, { target: { value: 'Nyarugenge' } })
+    await waitFor(() => {
+      expect(
+        screen.getByRole('option', { name: 'Nyarugenge' }),
+      ).toBeInTheDocument()
+    })
+    fireEvent.keyDown(search, { key: 'ArrowDown' })
+    fireEvent.keyDown(search, { key: 'Enter' })
+
+    const yieldComparison = await screen.findByRole('group', {
+      name: /maize yield: district and national comparison/i,
+    })
+    expect(within(yieldComparison).getByText('1,338 Kg/Ha')).toBeInTheDocument()
+    expect(within(yieldComparison).getByText('1,985 Kg/Ha')).toBeInTheDocument()
+    expect(within(yieldComparison).getByText('-647 Kg/Ha')).toBeInTheDocument()
+
+    const irrigationComparison = screen.getByRole('group', {
+      name: /irrigation practice: district and national comparison/i,
+    })
+    expect(within(irrigationComparison).getByText('8.5 %')).toBeInTheDocument()
+    expect(within(irrigationComparison).getByText('13.4 %')).toBeInTheDocument()
+    expect(
+      within(irrigationComparison).getByText('-4.9 percentage points'),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/This measure covers district-wide crop activity/),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/National reference:.*Table/)).toBeInTheDocument()
+  })
+
   it('prepares a source-traceable brief that follows district selection changes', async () => {
     const print = vi.fn()
     vi.stubGlobal('print', print)

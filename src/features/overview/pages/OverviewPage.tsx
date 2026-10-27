@@ -7,6 +7,7 @@ import {
   useState,
   type ComponentProps,
 } from 'react'
+import { ChartNoAxesCombined, Droplets, MapPin } from 'lucide-react'
 
 import { evidenceRecords } from '../../evidence/data/evidenceRecords'
 import type { AgriculturalSeason } from '../../../types/data-contract'
@@ -23,6 +24,35 @@ const RwandaMapPanel = lazy(async () => {
 
 const mapPanelClassName =
   'relative h-[clamp(360px,60vh,660px)] min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 sm:h-[min(68vh,700px)]'
+
+type IntelligenceMetricIconKind = 'districts' | 'yield' | 'irrigation'
+
+function IntelligenceMetricIcon({
+  kind,
+}: {
+  kind: IntelligenceMetricIconKind
+}) {
+  switch (kind) {
+    case 'districts':
+      return (
+        <MapPin aria-hidden="true" className="size-4 shrink-0 text-agri-700" />
+      )
+    case 'yield':
+      return (
+        <ChartNoAxesCombined
+          aria-hidden="true"
+          className="size-4 shrink-0 text-agri-700"
+        />
+      )
+    case 'irrigation':
+      return (
+        <Droplets
+          aria-hidden="true"
+          className="size-4 shrink-0 text-agri-700"
+        />
+      )
+  }
+}
 
 function DeferredDistrictMapPanel(
   props: ComponentProps<typeof RwandaMapPanel>,
@@ -146,11 +176,13 @@ export function OverviewPage({
 
   const intelligenceMetrics: readonly {
     readonly label: string
+    readonly icon: IntelligenceMetricIconKind
     readonly value: number
     readonly detail: string
   }[] = [
     {
       label: 'Districts analyzed',
+      icon: 'districts',
       value: nationalIntelligence.districtsAnalyzed,
       detail:
         nationalIntelligence.districtsInScope > 0
@@ -159,6 +191,7 @@ export function OverviewPage({
     },
     {
       label: 'Below national reference',
+      icon: 'yield',
       value: nationalIntelligence.productivityGapCount,
       detail:
         nationalIntelligence.districtsAnalyzed > 0
@@ -167,6 +200,7 @@ export function OverviewPage({
     },
     {
       label: 'Irrigation investigation',
+      icon: 'irrigation',
       value: nationalIntelligence.irrigationInvestigationCount,
       detail: `${nationalIntelligence.irrigationEvaluatedDistrictCount} comparable checks; ${nationalIntelligence.irrigationInsufficientEvidenceCount} lack required evidence`,
     },
@@ -313,7 +347,8 @@ export function OverviewPage({
               }`}
               key={metric.label}
             >
-              <h3 className="text-xs font-bold text-slate-600">
+              <h3 className="flex items-center gap-1.5 text-xs font-bold text-slate-600">
+                <IntelligenceMetricIcon kind={metric.icon} />
                 {metric.label}
               </h3>
               <p className="mt-1 text-2xl font-bold tabular-nums text-forest-950">

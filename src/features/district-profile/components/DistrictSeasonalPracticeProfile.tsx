@@ -2,6 +2,7 @@ import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { useId } from 'react'
 
 import { EvidenceStatusBadge } from '../../evidence/components/EvidenceStatusBadge'
+import { EvidenceIndicatorIcon } from '../../evidence/components/EvidenceIndicatorIcon'
 import { evidenceRecords } from '../../evidence/data/evidenceRecords'
 import type { EvidenceRecord } from '../../evidence/types/evidence.types'
 import { getDistrictSeasonalPracticeProfile } from '../utils/districtSeasonalPracticeProfile'
@@ -149,9 +150,13 @@ export function DistrictSeasonalPracticeProfile({
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3
-                    className="text-sm font-semibold text-slate-900"
+                    className="flex items-center gap-2 text-sm font-semibold text-slate-900"
                     id={rowHeadingId}
                   >
+                    <EvidenceIndicatorIcon
+                      className="size-4 shrink-0 text-agri-700"
+                      indicator={practice.indicator}
+                    />
                     {practice.label}
                   </h3>
                   <p className="mt-1 text-xs text-slate-500">

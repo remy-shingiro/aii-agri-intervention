@@ -1,6 +1,15 @@
-import { ArrowUpRight, BookOpenText, Calculator, MapPinned } from 'lucide-react'
+import {
+  ArrowUpRight,
+  BookOpenText,
+  Calculator,
+  ChartNoAxesCombined,
+  ClipboardList,
+  MapPinned,
+  ShieldAlert,
+} from 'lucide-react'
 
 import { MethodologySection } from '../components/MethodologySection'
+import { EvidenceStatusBadge } from '../../evidence/components/EvidenceStatusBadge'
 import {
   nisrDataInventory,
   normalizedEvidenceRecords,
@@ -13,6 +22,7 @@ function datasetCoverage(dataset: string) {
   return {
     records: records.length,
     observed: records.filter((record) => record.status === 'observed').length,
+    derived: records.filter((record) => record.status === 'derived').length,
     unavailable: records.filter((record) => record.status === 'unavailable')
       .length,
     districtRows: records.filter(
@@ -209,6 +219,9 @@ export function DataMethodologyPage() {
 
       <MethodologySection
         id="datasets-heading"
+        icon={
+          <BookOpenText aria-hidden="true" className="size-4 text-agri-700" />
+        }
         intro="The reports are kept as separate datasets with their published periods and geographies. The local inventory distinguishes extracted observations from tables that are catalogued but not connected."
         title="NISR source register"
       >
@@ -221,6 +234,12 @@ export function DataMethodologyPage() {
 
       <MethodologySection
         id="extraction-heading"
+        icon={
+          <ChartNoAxesCombined
+            aria-hidden="true"
+            className="size-4 text-agri-700"
+          />
+        }
         intro="The extraction script reads the untouched local PDF reports, preserves the printed crop header, geography, period, unit, and table page, then validates records before writing frontend JSON."
         title="Extraction and connected coverage"
       >
@@ -235,6 +254,39 @@ export function DataMethodologyPage() {
               key={name}
             >
               <h3 className="text-sm font-semibold text-slate-900">{name}</h3>
+              <div
+                aria-label={`${coverage.observed.toLocaleString()} observed, ${coverage.derived.toLocaleString()} derived, and ${coverage.unavailable.toLocaleString()} unavailable connected records out of ${coverage.records.toLocaleString()} normalized records`}
+                className="mt-3 flex h-2.5 overflow-hidden rounded-full bg-slate-100"
+                role="img"
+              >
+                {coverage.observed > 0 && (
+                  <span
+                    className="bg-green-700"
+                    style={{
+                      width: `${(coverage.observed / coverage.records) * 100}%`,
+                    }}
+                  />
+                )}
+                {coverage.derived > 0 && (
+                  <span
+                    className="bg-blue-600"
+                    style={{
+                      width: `${(coverage.derived / coverage.records) * 100}%`,
+                    }}
+                  />
+                )}
+                {coverage.unavailable > 0 && (
+                  <span
+                    className="bg-slate-400"
+                    style={{
+                      width: `${(coverage.unavailable / coverage.records) * 100}%`,
+                    }}
+                  />
+                )}
+              </div>
+              <p className="mt-1 text-[11px] text-slate-500">
+                Record status share · denominator: normalized records
+              </p>
               <dl className="mt-3 space-y-2 text-xs">
                 <div className="flex justify-between gap-3">
                   <dt className="text-slate-500">Normalized records</dt>
@@ -243,13 +295,37 @@ export function DataMethodologyPage() {
                   </dd>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <dt className="text-slate-500">Observed</dt>
+                  <dt className="flex items-center gap-1.5 text-slate-500">
+                    <span
+                      aria-hidden="true"
+                      className="size-2 rounded-sm bg-green-700"
+                    />
+                    Observed
+                  </dt>
                   <dd className="font-semibold tabular-nums text-slate-800">
                     {coverage.observed.toLocaleString()}
                   </dd>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <dt className="text-slate-500">Unavailable</dt>
+                  <dt className="flex items-center gap-1.5 text-slate-500">
+                    <span
+                      aria-hidden="true"
+                      className="size-2 rounded-sm bg-blue-600"
+                    />
+                    Derived
+                  </dt>
+                  <dd className="font-semibold tabular-nums text-slate-800">
+                    {coverage.derived.toLocaleString()}
+                  </dd>
+                </div>
+                <div className="flex justify-between gap-3">
+                  <dt className="flex items-center gap-1.5 text-slate-500">
+                    <span
+                      aria-hidden="true"
+                      className="size-2 rounded-sm bg-slate-400"
+                    />
+                    Unavailable
+                  </dt>
                   <dd className="font-semibold tabular-nums text-slate-800">
                     {coverage.unavailable.toLocaleString()}
                   </dd>
@@ -319,6 +395,7 @@ export function DataMethodologyPage() {
 
       <MethodologySection
         id="geography-heading"
+        icon={<MapPinned aria-hidden="true" className="size-4 text-agri-700" />}
         intro="A district appearing in a sample design does not, by itself, mean a district-level statistic was published."
         title="Published geography and sampling design"
       >
@@ -362,6 +439,9 @@ export function DataMethodologyPage() {
 
       <MethodologySection
         id="signal-method-heading"
+        icon={
+          <ClipboardList aria-hidden="true" className="size-4 text-agri-700" />
+        }
         intro="Each step keeps the source observation separate from the calculation and the possible decision it informs."
         title="How an evidence signal is made"
       >
@@ -394,6 +474,9 @@ export function DataMethodologyPage() {
 
       <MethodologySection
         id="intelligence-rules-heading"
+        icon={
+          <Calculator aria-hidden="true" className="size-4 text-agri-700" />
+        }
         intro="The intelligence engine applies explicit comparison rules to connected observed records. It does not predict outcomes or infer causes."
         title="Agricultural intelligence calculations"
       >
@@ -476,14 +559,14 @@ export function DataMethodologyPage() {
       >
         <div className="grid gap-3 md:grid-cols-3">
           <article className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="text-sm font-semibold text-green-800">Observed</p>
+            <EvidenceStatusBadge status="observed" />
             <p className="mt-2 text-sm leading-6 text-slate-600">
               Reported by NISR in a cited table, such as district yield,
               cultivated area, production, or irrigation practice.
             </p>
           </article>
           <article className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="text-sm font-semibold text-blue-800">Derived</p>
+            <EvidenceStatusBadge status="derived" />
             <p className="mt-2 text-sm leading-6 text-slate-600">
               Calculated from observed values. AII labels the yield gap and
               comparison differences as derived and shows their formula or
@@ -491,7 +574,7 @@ export function DataMethodologyPage() {
             </p>
           </article>
           <article className="rounded-xl border border-slate-200 bg-white p-4">
-            <p className="text-sm font-semibold text-slate-700">Unavailable</p>
+            <EvidenceStatusBadge status="unavailable" />
             <p className="mt-2 text-sm leading-6 text-slate-600">
               A source value is not connected for the selected place, crop,
               season, or year. AII does not fill gaps with a national value or a
@@ -503,6 +586,9 @@ export function DataMethodologyPage() {
 
       <MethodologySection
         id="limitations-heading"
+        icon={
+          <ShieldAlert aria-hidden="true" className="size-4 text-agri-700" />
+        }
         intro="AII is a decision-support screen for investigation. It does not establish causes or estimate intervention impact."
         title="Limitations"
       >

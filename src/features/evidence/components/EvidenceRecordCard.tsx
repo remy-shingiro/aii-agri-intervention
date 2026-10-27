@@ -1,6 +1,7 @@
 import { ArrowUpRight } from 'lucide-react'
 
 import type { EvidenceRecord } from '../types/evidence.types'
+import { EvidenceIndicatorIcon } from './EvidenceIndicatorIcon'
 import { EvidenceStatusBadge } from './EvidenceStatusBadge'
 
 interface EvidenceRecordCardProps {
@@ -39,8 +40,9 @@ export function EvidenceRecordCard({
     <article className="min-w-0 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-wider text-green-800">
-            {record.label}
+          <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-green-800">
+            <EvidenceIndicatorIcon indicator={record.indicator} />
+            <span>{record.label}</span>
           </p>
           <h2 className="mt-1 text-base font-semibold text-slate-900">
             {record.geography.name}

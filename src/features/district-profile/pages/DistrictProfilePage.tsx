@@ -2,6 +2,7 @@ import { useId, useState } from 'react'
 import { ArrowLeft, ArrowRight, MapPin } from 'lucide-react'
 
 import { EvidenceStatusBadge } from '../../evidence/components/EvidenceStatusBadge'
+import { EvidenceIndicatorIcon } from '../../evidence/components/EvidenceIndicatorIcon'
 import { evidenceRecords } from '../../evidence/data/evidenceRecords'
 import type {
   AgriculturalSignal,
@@ -862,13 +863,25 @@ export function DistrictProfilePage({
         </div>
         <dl className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <dt className="text-xs text-slate-500">Production</dt>
+            <dt className="flex items-center gap-1.5 text-xs text-slate-500">
+              <EvidenceIndicatorIcon
+                className="size-3.5 shrink-0 text-agri-700"
+                indicator="crop_production"
+              />
+              Production
+            </dt>
             <dd className="mt-1 text-xl font-bold text-forest-950 tabular-nums">
               {insight.totalProduction}
             </dd>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <dt className="text-xs text-slate-500">Cultivated area</dt>
+            <dt className="flex items-center gap-1.5 text-xs text-slate-500">
+              <EvidenceIndicatorIcon
+                className="size-3.5 shrink-0 text-agri-700"
+                indicator="cultivated_area"
+              />
+              Cultivated area
+            </dt>
             <dd className="mt-1 text-xl font-bold text-forest-950 tabular-nums">
               {insight.cultivatedArea}
             </dd>

@@ -1,10 +1,23 @@
-import { ArrowLeft, ArrowRight, Printer } from 'lucide-react'
+import {
+  ArrowLeft,
+  ArrowRight,
+  ChartNoAxesCombined,
+  CircleHelp,
+  ClipboardList,
+  Database,
+  Printer,
+  MapPin,
+  MessageCircleQuestion,
+  Sprout,
+} from 'lucide-react'
 import { useMemo } from 'react'
 
 import type { AgriculturalSeason } from '../../../types/data-contract'
 import type { AgriculturalSignal } from '../../../types/agricultural-signal'
 import type { EvidenceRecord } from '../../evidence/types/evidence.types'
 import { EvidenceStatusBadge } from '../../evidence/components/EvidenceStatusBadge'
+import { EvidenceIndicatorIcon } from '../../evidence/components/EvidenceIndicatorIcon'
+import { DistrictComparisonBar } from '../../district-profile/components/DistrictComparisonBar'
 import { buildDistrictInvestigationBrief } from '../data/districtInvestigationBrief'
 
 interface InvestigationBriefPageProps {
@@ -56,7 +69,11 @@ function EvidenceRecordDetails({
     <article className="rounded-lg border border-slate-200 bg-white p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h4 className="text-sm font-semibold text-slate-900">
+          <h4 className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+            <EvidenceIndicatorIcon
+              className="size-4 shrink-0 text-agri-700"
+              indicator={record.indicator}
+            />
             {record.label}
           </h4>
           <p className="mt-1 text-xs leading-5 text-slate-600">
@@ -150,7 +167,11 @@ export function InvestigationBriefPage({
           <p className="text-xs font-bold uppercase tracking-[0.16em] text-agri-700">
             Evidence-led investigation support
           </p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight text-forest-950 sm:text-4xl">
+          <h1 className="mt-1 flex items-center gap-2 text-3xl font-bold tracking-tight text-forest-950 sm:text-4xl">
+            <ClipboardList
+              aria-hidden="true"
+              className="size-6 shrink-0 text-agri-700 sm:size-7"
+            />
             District investigation brief
           </h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
@@ -171,7 +192,11 @@ export function InvestigationBriefPage({
 
       {!brief ? (
         <section className="rounded-xl border border-dashed border-slate-300 bg-white p-5 sm:p-6">
-          <h2 className="text-base font-semibold text-slate-900">
+          <h2 className="flex items-center gap-2 text-base font-semibold text-slate-900">
+            <MapPin
+              aria-hidden="true"
+              className="size-4 shrink-0 text-agri-700"
+            />
             Select a district to prepare its brief
           </h2>
           <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -195,10 +220,18 @@ export function InvestigationBriefPage({
                 <p className="text-xs font-semibold uppercase tracking-wider text-green-800">
                   Selected investigation scope
                 </p>
-                <h2 className="mt-1 text-2xl font-bold text-forest-950">
+                <h2 className="mt-1 flex items-center gap-2 text-2xl font-bold text-forest-950">
+                  <MapPin
+                    aria-hidden="true"
+                    className="size-5 shrink-0 text-agri-700"
+                  />
                   {brief.district}
                 </h2>
-                <p className="mt-1 text-sm text-slate-700">
+                <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-slate-700">
+                  <Sprout
+                    aria-hidden="true"
+                    className="size-4 shrink-0 text-agri-700"
+                  />
                   {brief.crop} · Season {brief.season} · Agricultural year{' '}
                   {brief.year}
                 </p>
@@ -233,10 +266,32 @@ export function InvestigationBriefPage({
                     key={signal.id}
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h3 className="text-sm font-semibold text-slate-900">
+                      <h3 className="flex items-center gap-1.5 text-sm font-semibold text-slate-900">
+                        {signal.signalType === 'productivity_gap' ? (
+                          <EvidenceIndicatorIcon
+                            className="size-4 shrink-0 text-agri-700"
+                            indicator="average_yield"
+                          />
+                        ) : signal.signalType === 'irrigation_investigation' ? (
+                          <EvidenceIndicatorIcon
+                            className="size-4 shrink-0 text-agri-700"
+                            indicator="irrigation_practice"
+                          />
+                        ) : (
+                          <ChartNoAxesCombined
+                            aria-hidden="true"
+                            className="size-4 shrink-0 text-agri-700"
+                          />
+                        )}
                         {signal.title}
                       </h3>
                       <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                        {signal.status === 'insufficient_evidence' && (
+                          <CircleHelp
+                            aria-hidden="true"
+                            className="mr-1 inline size-3.5 align-[-2px] text-slate-500"
+                          />
+                        )}
                         {signalStatus(signal)}
                       </span>
                     </div>
@@ -244,20 +299,105 @@ export function InvestigationBriefPage({
                       {signal.summary}
                     </p>
 
+                    {signal.signalType === 'productivity_gap' && (
+                      <section
+                        className="mt-4 rounded-lg border border-slate-200 bg-warm-50 p-3"
+                        aria-label="Yield comparison"
+                      >
+                        <h4 className="mb-3 flex items-center gap-2 text-xs font-semibold text-slate-700">
+                          <EvidenceIndicatorIcon
+                            className="size-4 shrink-0 text-agri-700"
+                            indicator="average_yield"
+                          />
+                          Observed yield · {signal.period.year} · Season{' '}
+                          {signal.period.season}
+                        </h4>
+                        <DistrictComparisonBar
+                          difference={signal.absoluteGap}
+                          differenceUnit={signal.unit ?? 'Kg/Ha'}
+                          districtName={district ?? 'Selected district'}
+                          districtValue={signal.districtYield}
+                          label="Yield"
+                          nationalValue={signal.nationalYield}
+                          unit={signal.unit ?? 'Kg/Ha'}
+                        />
+                      </section>
+                    )}
+
+                    {signal.signalType === 'irrigation_investigation' && (
+                      <section
+                        className="mt-4 rounded-lg border border-slate-200 bg-warm-50 p-3"
+                        aria-label="Irrigation evidence comparison"
+                      >
+                        <h4 className="mb-3 flex items-center gap-2 text-xs font-semibold text-slate-700">
+                          <EvidenceIndicatorIcon
+                            className="size-4 shrink-0 text-agri-700"
+                            indicator="irrigation_practice"
+                          />
+                          Same-period evidence comparisons
+                        </h4>
+                        {brief.irrigationTrail.status === 'available' ? (
+                          <div className="space-y-4">
+                            <DistrictComparisonBar
+                              difference={brief.irrigationTrail.yieldDifference}
+                              differenceUnit={
+                                brief.irrigationTrail.records.districtYield
+                                  .differenceUnit ?? 'Kg/Ha'
+                              }
+                              districtName={district ?? 'Selected district'}
+                              districtValue={
+                                brief.irrigationTrail.records.districtYield
+                                  .value ?? undefined
+                              }
+                              label="Maize yield"
+                              nationalValue={
+                                brief.irrigationTrail.records.nationalYield
+                                  .value ?? undefined
+                              }
+                              unit={
+                                brief.irrigationTrail.records.districtYield.unit
+                              }
+                            />
+                            <DistrictComparisonBar
+                              difference={
+                                brief.irrigationTrail.irrigationDifference
+                              }
+                              differenceUnit="percentage points"
+                              districtName={district ?? 'Selected district'}
+                              districtValue={
+                                brief.irrigationTrail.records.districtIrrigation
+                                  .value ?? undefined
+                              }
+                              label="District-wide irrigation practice"
+                              nationalValue={
+                                brief.irrigationTrail.records.nationalIrrigation
+                                  .value ?? undefined
+                              }
+                              scaleMaximum={100}
+                              unit="%"
+                            />
+                          </div>
+                        ) : (
+                          <p
+                            className="flex items-start gap-2 text-sm text-slate-600"
+                            role="status"
+                          >
+                            <CircleHelp
+                              aria-hidden="true"
+                              className="mt-0.5 size-4 shrink-0 text-slate-500"
+                            />
+                            Comparable observed yield and irrigation values are
+                            unavailable. No chart is drawn.
+                          </p>
+                        )}
+                      </section>
+                    )}
+
                     {signal.signalType === 'productivity_gap' &&
                       signal.absoluteGap !== undefined && (
                         <div className="mt-3 rounded-md bg-warm-50 p-3 text-sm leading-6 text-slate-700">
                           <p>
-                            District yield minus matched Rwanda yield:{' '}
-                            <strong>
-                              {formatValue(
-                                signal.absoluteGap,
-                                signal.unit ?? 'Kg/Ha',
-                              )}
-                            </strong>
-                          </p>
-                          <p>
-                            Relative difference:{' '}
+                            Relative difference (derived):{' '}
                             <strong>
                               {signal.relativeGapPct === undefined
                                 ? 'Unavailable'
@@ -292,34 +432,6 @@ export function InvestigationBriefPage({
 
                     {signal.signalType === 'irrigation_investigation' && (
                       <div className="mt-3 rounded-md bg-warm-50 p-3 text-sm leading-6 text-slate-700">
-                        {brief.irrigationTrail.status === 'available' ? (
-                          <>
-                            <p>
-                              Maize yield difference:{' '}
-                              <strong>
-                                {formatValue(
-                                  brief.irrigationTrail.yieldDifference,
-                                  brief.irrigationTrail.records.districtYield
-                                    .unit,
-                                )}
-                              </strong>
-                            </p>
-                            <p>
-                              District-wide irrigation practice difference:{' '}
-                              <strong>
-                                {formatValue(
-                                  brief.irrigationTrail.irrigationDifference,
-                                  'percentage points',
-                                )}
-                              </strong>
-                            </p>
-                          </>
-                        ) : (
-                          <p>
-                            The four comparable observed inputs required by this
-                            screen are not all available or unambiguous.
-                          </p>
-                        )}
                         <p className="mt-1">
                           Irrigation practice is district-wide across crop
                           activity, not maize-specific. This comparison is an
@@ -350,7 +462,11 @@ export function InvestigationBriefPage({
                         {signalEvidence.map((record) => record.id).join(', ')}
                       </p>
                     ) : (
-                      <p className="mt-3 text-xs leading-5 text-slate-600">
+                      <p className="mt-3 flex items-start gap-1.5 text-xs leading-5 text-slate-600">
+                        <CircleHelp
+                          aria-hidden="true"
+                          className="mt-0.5 size-4 shrink-0 text-slate-500"
+                        />
                         No connected source records were available for this
                         signal under the current selection.
                       </p>
@@ -371,7 +487,11 @@ export function InvestigationBriefPage({
           </section>
 
           <section className="printable-brief rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-            <h2 className="text-lg font-bold text-forest-950">
+            <h2 className="flex items-center gap-2 text-lg font-bold text-forest-950">
+              <Database
+                aria-hidden="true"
+                className="size-4 shrink-0 text-agri-700"
+              />
               Evidence records
             </h2>
             <p className="mt-1 text-sm leading-6 text-slate-600">
@@ -389,7 +509,11 @@ export function InvestigationBriefPage({
                 ))}
               </div>
             ) : (
-              <p className="mt-3 rounded-lg border border-dashed border-slate-300 p-4 text-sm leading-6 text-slate-600">
+              <p className="mt-3 flex items-start gap-2 rounded-lg border border-dashed border-slate-300 p-4 text-sm leading-6 text-slate-600">
+                <CircleHelp
+                  aria-hidden="true"
+                  className="mt-1 size-4 shrink-0 text-slate-500"
+                />
                 No connected record is available for this district and
                 selection. The signal sections above retain their
                 insufficient-evidence explanations; no value has been
@@ -399,7 +523,11 @@ export function InvestigationBriefPage({
           </section>
 
           <section className="printable-brief rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-            <h2 className="text-lg font-bold text-forest-950">
+            <h2 className="flex items-center gap-2 text-lg font-bold text-forest-950">
+              <MessageCircleQuestion
+                aria-hidden="true"
+                className="size-4 shrink-0 text-agri-700"
+              />
               Questions for follow-up
             </h2>
             <p className="mt-1 text-sm leading-6 text-slate-600">
