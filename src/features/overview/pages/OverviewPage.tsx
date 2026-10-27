@@ -13,6 +13,7 @@ import { evidenceRecords } from '../../evidence/data/evidenceRecords'
 import type { AgriculturalSeason } from '../../../types/data-contract'
 import { calculateNationalIntelligence } from '../../intelligence/nationalIntelligence'
 import { AgriculturalInsightPanel } from '../components/AgriculturalInsightPanel'
+import { DistrictYieldHistoryChart } from '../components/DistrictYieldHistoryChart'
 import { OverviewHeader } from '../components/OverviewHeader'
 import { AsyncContentBoundary } from '../../../components/layout/AsyncContentBoundary'
 import type { OverviewFilters } from '../types/overview.types'
@@ -138,20 +139,20 @@ export function OverviewPage({
   onOpenEvidence,
 }: OverviewPageProps) {
   const [districtSearch, setDistrictSearch] = useState('')
+  const seasonCode = (
+    {
+      'season-a': 'A',
+      'season-b': 'B',
+      'season-c': 'C',
+    } as const
+  )[filters.season] as AgriculturalSeason | undefined
   const nationalIntelligence = useMemo(() => {
-    const seasonCode = (
-      {
-        'season-a': 'A',
-        'season-b': 'B',
-        'season-c': 'C',
-      } as const
-    )[filters.season] as AgriculturalSeason | undefined
     return calculateNationalIntelligence(evidenceRecords, {
       crop: filters.crop,
       season: seasonCode,
       year: filters.year,
     })
-  }, [filters.crop, filters.season, filters.year])
+  }, [filters.crop, filters.year, seasonCode])
 
   const handleDistrictSearchChange = (value: string) => {
     setDistrictSearch(value)
@@ -312,6 +313,15 @@ export function OverviewPage({
           />
         </div>
       </section>
+
+      {selectedDistrict && seasonCode && (
+        <DistrictYieldHistoryChart
+          crop={filters.crop}
+          district={selectedDistrict}
+          season={seasonCode}
+          year={filters.year}
+        />
+      )}
 
       <section
         aria-labelledby="national-intelligence-heading"

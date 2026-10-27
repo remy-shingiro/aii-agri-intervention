@@ -12,7 +12,7 @@ export function RwandaMapControls({
   onZoomOut,
 }: RwandaMapControlsProps) {
   return (
-    <div className="absolute bottom-4 left-4 z-10 flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div className="map-glass-surface absolute bottom-4 left-4 z-10 flex flex-col overflow-hidden rounded-lg border border-slate-200">
       <button
         aria-label="Zoom in"
         className="flex size-11 items-center justify-center text-slate-700 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-600"

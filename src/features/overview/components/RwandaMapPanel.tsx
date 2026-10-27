@@ -857,7 +857,7 @@ export function RwandaMapPanel({
       {hoveredDistrict && (
         <aside
           aria-label={`Map preview for ${hoveredDistrict.district}`}
-          className="pointer-events-none absolute right-3 top-3 z-10 max-h-[calc(100%-1.5rem)] w-[min(19rem,calc(100%-1.5rem))] overflow-y-auto rounded-xl border border-slate-200 bg-white/95 p-4 shadow-lg backdrop-blur-sm sm:right-4 sm:top-4"
+          className="map-glass-surface pointer-events-none absolute right-3 top-3 z-10 max-h-[calc(100%-1.5rem)] w-[min(19rem,calc(100%-1.5rem))] overflow-y-auto rounded-xl border border-slate-200 p-4 sm:right-4 sm:top-4"
           role="tooltip"
         >
           <header className="border-b border-slate-200 pb-3">

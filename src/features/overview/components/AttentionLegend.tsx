@@ -11,7 +11,7 @@ const legendItems = [
 
 export function AttentionLegend({ hasObservations }: AttentionLegendProps) {
   return (
-    <div className="max-w-[210px] rounded-lg border border-slate-200 bg-white/95 px-3 py-3 shadow-sm sm:px-4">
+    <div className="map-glass-surface max-w-[210px] rounded-lg border border-slate-200 px-3 py-3 sm:px-4">
       <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-600">
         District yield compared with national
       </p>

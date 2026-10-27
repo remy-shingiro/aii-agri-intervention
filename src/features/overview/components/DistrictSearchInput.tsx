@@ -210,7 +210,7 @@ export function DistrictSearchInput({
           ref={inputRef}
           id={inputId}
           name="district-search"
-          type="search"
+          type="text"
           role="combobox"
           value={value}
           placeholder={placeholder}
