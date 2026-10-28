@@ -65,7 +65,7 @@ const NEIGHBOR_COUNTRY_LABELS: readonly NeighborCountryLabel[] = [
   {
     id: 'uganda',
     lines: ['UGANDA'],
-    coordinates: [30.85, -1.04],
+    coordinates: [30.65, -1.04],
     horizontalAnchor: 'center',
     verticalAnchor: 'above',
   },
@@ -79,7 +79,7 @@ const NEIGHBOR_COUNTRY_LABELS: readonly NeighborCountryLabel[] = [
   {
     id: 'tanzania',
     lines: ['TANZANIA'],
-    coordinates: [30.85, -2.15],
+    coordinates: [31.85, -2.15],
     horizontalAnchor: 'right',
     verticalAnchor: 'center',
   },
@@ -335,7 +335,7 @@ export function RwandaMapPanel({
             'fill-opacity': [
               'case',
               ['boolean', ['feature-state', 'selected'], false],
-              0.98,
+              0.01,
               [
                 'case',
                 ['boolean', ['feature-state', 'search-active'], false],
@@ -896,7 +896,7 @@ export function RwandaMapPanel({
       {hoveredDistrict && (
         <aside
           aria-label={`Map preview for ${hoveredDistrict.district}`}
-          className="map-glass-surface pointer-events-none absolute right-3 top-3 z-10 max-h-[calc(100%-1.5rem)] w-[min(19rem,calc(100%-1.5rem))] overflow-y-auto rounded-xl border border-slate-200 p-4 sm:right-4 sm:top-4"
+          className="map-glass-surface map-glass-preview pointer-events-none absolute right-3 top-3 z-10 max-h-[calc(100%-1.5rem)] w-[min(19rem,calc(100%-1.5rem))] overflow-y-auto rounded-xl border border-slate-200 p-4 sm:right-4 sm:top-4"
           role="tooltip"
         >
           <header className="border-b border-slate-200 pb-3">

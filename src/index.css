@@ -27,6 +27,15 @@
       background-color: rgb(255 255 255 / 90%);
       backdrop-filter: blur(8px) saturate(1.08);
     }
+
+    .map-glass-preview {
+      background-color: rgb(255 255 255 / 78%);
+      backdrop-filter: blur(6px) saturate(1.05);
+    }
+  }
+
+  .map-glass-preview {
+    background-color: rgb(255 255 255 / 86%);
   }
 }
 

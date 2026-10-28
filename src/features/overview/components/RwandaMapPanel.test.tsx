@@ -7,6 +7,10 @@ import { RwandaMapPanel } from './RwandaMapPanel'
 const mapState = vi.hoisted(() => ({
   listeners: {} as Record<string, Array<(...args: never[]) => void>>,
   features: [] as object[],
+  layers: [] as Array<{
+    id: string
+    paint?: Record<string, unknown>
+  }>,
   fire: null as ((event: string, eventData?: unknown) => void) | null,
 }))
 
@@ -16,6 +20,7 @@ vi.mock('maplibre-gl', () => {
 
     constructor() {
       mapState.listeners = {}
+      mapState.layers = []
       mapState.fire = (event, eventData = {}) => {
         for (const listener of mapState.listeners[event] ?? []) {
           Reflect.apply(listener, this, [eventData])
@@ -53,7 +58,9 @@ vi.mock('maplibre-gl', () => {
     }
 
     addSource() {}
-    addLayer() {}
+    addLayer(layer: { id: string; paint?: Record<string, unknown> }) {
+      mapState.layers.push(layer)
+    }
     getCanvas() {
       return this.canvas
     }
@@ -132,6 +139,7 @@ function fireMapEvent(event: string, eventData?: unknown) {
 beforeEach(() => {
   mapState.listeners = {}
   mapState.features = []
+  mapState.layers = []
   mapState.fire = null
   vi.stubGlobal('ResizeObserver', MockResizeObserver)
   vi.stubGlobal(
@@ -147,6 +155,32 @@ afterEach(() => {
 })
 
 describe('RwandaMapPanel source readiness', () => {
+  it('keeps the selected district fill distinguishable with reduced opacity', () => {
+    renderMap()
+
+    fireMapEvent('load')
+
+    const fillLayer = mapState.layers.find(
+      (layer) => layer.id === 'rwanda-district-fills',
+    )
+    expect(fillLayer?.paint?.['fill-opacity']).toEqual([
+      'case',
+      ['boolean', ['feature-state', 'selected'], false],
+      0.78,
+      [
+        'case',
+        ['boolean', ['feature-state', 'search-active'], false],
+        [
+          'case',
+          ['boolean', ['feature-state', 'search-match'], false],
+          0.9,
+          0.18,
+        ],
+        0.78,
+      ],
+    ])
+  })
+
   it('keeps the loading state until the district source is loaded', () => {
     renderMap()
 
