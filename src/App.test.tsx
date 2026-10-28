@@ -63,6 +63,44 @@ describe('application shell', () => {
     expect(screen.queryByText('481,246 tonnes')).not.toBeInTheDocument()
   })
 
+  it('opens the exact district and national yield evidence from the explorer', async () => {
+    render(<App />)
+
+    const evidenceButtons = await screen.findAllByRole(
+      'button',
+      { name: /Review opportunity evidence for/i },
+      lazyLoadWait,
+    )
+    const firstButton = evidenceButtons[0]
+    expect(firstButton).toBeDefined()
+    if (!firstButton) return
+    const district = firstButton
+      .closest('article')
+      ?.querySelector('h4')
+      ?.textContent
+    expect(district).toBeTruthy()
+
+    fireEvent.click(firstButton)
+
+    expect(
+      await screen.findByRole(
+        'heading',
+        { name: 'Evidence explorer' },
+        lazyLoadWait,
+      ),
+    ).toBeInTheDocument()
+    expect(
+      await screen.findByRole(
+        'heading',
+        { name: district ?? '' },
+        lazyLoadWait,
+      ),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'Rwanda' }),
+    ).toBeInTheDocument()
+  })
+
   it('keeps the national scope when searching a district and follows crop filters', async () => {
     render(<App />)
 
@@ -123,7 +161,9 @@ describe('application shell', () => {
       screen.getByRole('heading', { name: 'Productivity comparison' }),
     ).toBeInTheDocument()
     fireEvent.click(
-      screen.getByRole('button', { name: 'Open district profile' }),
+      screen.getByRole('button', {
+        name: 'Open profile for Kayonza',
+      }),
     )
 
     expect(
@@ -157,7 +197,9 @@ describe('application shell', () => {
     fireEvent.keyDown(search, { key: 'ArrowDown' })
     fireEvent.keyDown(search, { key: 'Enter' })
     fireEvent.click(
-      screen.getByRole('button', { name: 'Open district profile' }),
+      screen.getByRole('button', {
+        name: 'Open profile for Nyarugenge',
+      }),
     )
 
     const comparison = await screen.findByRole(
@@ -352,7 +394,9 @@ describe('application shell', () => {
     fireEvent.keyDown(search, { key: 'ArrowDown' })
     fireEvent.keyDown(search, { key: 'Enter' })
     fireEvent.click(
-      screen.getByRole('button', { name: 'Open district profile' }),
+      screen.getByRole('button', {
+        name: 'Open profile for Nyarugenge',
+      }),
     )
 
     expect(
@@ -435,7 +479,7 @@ describe('application shell', () => {
     fireEvent.keyDown(search, { key: 'ArrowDown' })
     fireEvent.keyDown(search, { key: 'Enter' })
     fireEvent.click(
-      screen.getByRole('button', { name: 'Open district profile' }),
+      screen.getByRole('button', { name: 'Open profile for Nyarugenge' }),
     )
 
     const maizePortfolio = await screen.findByRole(
@@ -490,7 +534,7 @@ describe('application shell', () => {
     fireEvent.keyDown(search, { key: 'ArrowDown' })
     fireEvent.keyDown(search, { key: 'Enter' })
     fireEvent.click(
-      screen.getByRole('button', { name: 'Open district profile' }),
+      screen.getByRole('button', { name: 'Open profile for Nyarugenge' }),
     )
 
     expect(
@@ -620,7 +664,7 @@ describe('application shell', () => {
     fireEvent.keyDown(search, { key: 'ArrowDown' })
     fireEvent.keyDown(search, { key: 'Enter' })
     fireEvent.click(
-      screen.getByRole('button', { name: 'Open district profile' }),
+      screen.getByRole('button', { name: 'Open profile for Nyarugenge' }),
     )
 
     expect(

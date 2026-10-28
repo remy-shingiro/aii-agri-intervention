@@ -32,8 +32,8 @@ export interface DistrictInsight {
   areaRecord?: EvidenceRecord
 }
 
-function normalize(value: string): string {
-  return value.trim().toLowerCase()
+function normalize(value: string | undefined | null): string {
+  return String(value ?? '').trim().toLowerCase()
 }
 
 function toYear(value: string): string {

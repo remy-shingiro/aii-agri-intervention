@@ -13,6 +13,7 @@ import { evidenceRecords } from '../../evidence/data/evidenceRecords'
 import type { AgriculturalSeason } from '../../../types/data-contract'
 import { calculateNationalIntelligence } from '../../intelligence/nationalIntelligence'
 import { AgriculturalInsightPanel } from '../components/AgriculturalInsightPanel'
+import { AgriculturalOpportunityExplorer } from '../components/AgriculturalOpportunityExplorer'
 import { DistrictYieldHistoryChart } from '../components/DistrictYieldHistoryChart'
 import { OverviewHeader } from '../components/OverviewHeader'
 import { AsyncContentBoundary } from '../../../components/layout/AsyncContentBoundary'
@@ -124,9 +125,12 @@ interface OverviewPageProps {
   selectedDistrict?: string
   onFilterChange: (filter: keyof OverviewFilters, value: string) => void
   onDistrictSelect: (district: string | undefined) => void
-  onOpenDistrictProfile: () => void
+  onOpenDistrictProfile: (district?: string) => void
   onOpenInvestigationBrief: () => void
-  onOpenEvidence: () => void
+  onOpenEvidence: (
+    district?: string,
+    evidenceIds?: readonly string[],
+  ) => void
 }
 
 export function OverviewPage({
@@ -320,6 +324,19 @@ export function OverviewPage({
           district={selectedDistrict}
           season={seasonCode}
           year={filters.year}
+        />
+      )}
+
+      {seasonCode && (
+        <AgriculturalOpportunityExplorer
+          crop={filters.crop}
+          season={seasonCode}
+          year={filters.year}
+          selectedDistrict={selectedDistrict}
+          onOpenDistrictProfile={onOpenDistrictProfile}
+          onOpenEvidence={(district, evidenceIds) =>
+            onOpenEvidence(district, evidenceIds)
+          }
         />
       )}
 

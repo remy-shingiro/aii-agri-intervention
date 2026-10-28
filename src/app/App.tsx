@@ -111,11 +111,29 @@ export function App() {
               }
               selectedDistrict={selectedDistrict}
               onDistrictSelect={setSelectedDistrict}
-              onOpenDistrictProfile={() => setActivePage('District Profile')}
+              onOpenDistrictProfile={(district) => {
+                if (district) setSelectedDistrict(district)
+                setActivePage('District Profile')
+              }}
               onOpenInvestigationBrief={() =>
                 setActivePage('Investigation Brief')
               }
-              onOpenEvidence={() => openProfileEvidence()}
+              onOpenEvidence={(district, evidenceIds) => {
+                if (district && evidenceIds) {
+                  setSelectedDistrict(district)
+                  setEvidenceContext({
+                    district,
+                    crop: 'all',
+                    year: overviewFilters.year.replace('-', '/'),
+                    season: getSeasonCode(overviewFilters.season),
+                    evidenceIds,
+                  })
+                  setActivePage('Evidence')
+                  return
+                }
+
+                openProfileEvidence()
+              }}
             />
           )}
 
