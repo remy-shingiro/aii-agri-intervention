@@ -44,7 +44,11 @@ export function Sidebar({ activePage, items, onNavigate }: SidebarProps) {
         </div>
 
         <div className="hidden border-t border-slate-200 pt-4 text-xs leading-5 text-slate-500 lg:mt-auto lg:block">
-          <p className="font-semibold text-slate-700">NISR source coverage</p>
+          <img
+            alt="National Institute of Statistics of Rwanda (NISR) logo"
+            className="mt-2 h-18 w-auto max-w-full object-contain "
+            src="/logo-rwanda-nisr-transparent_0.png"
+          />
           <p className="mt-1">SAS 2024 · SAS 2025 · AHS 2024</p>
           <p>Published observations with source links</p>
         </div>
