@@ -3,8 +3,36 @@
 Agricultural Intervention Intelligence (AII) is a frontend decision-support prototype for exploring Rwanda’s agricultural productivity evidence ahead of the NISR Rwanda Big Data Hackathon 2026. It connects selected district and national observations from NISR’s Seasonal Agricultural Survey (SAS) and Agricultural Household Survey (AHS), shows comparable differences and investigation signals, and keeps source references available so users can inspect the evidence behind a finding.
 
 - **Live application:** (https://agri-intervention-intelligence.netlify.app/)
-- **Repository:** [github.com/remy-shingiro/aii-agri-intervention](https://github.com/remy-shingiro/aii-agri-intervention) (from the configured Git remote; public accessibility has not been verified).
-- **Hackathon:** [NISR 2026 Big Data Hackathon](https://www.alpha.statistics.gov.rw/about/hackathon/2026-hackathon-competition)
+- **Repository:** [github.com/remy-shingiro/aii-agri-intervention](https://github.com/remy-shingiro/aii-agri-intervention)
+
+## Getting started
+
+### Prerequisites
+
+- Node.js `^20.19.0` or `>=22.12.0` (the engine requirement of the installed Vite version).
+- npm, included with Node.js.
+
+### Install and run
+
+```sh
+npm ci
+npm run dev
+```
+
+Vite prints the local development URL in the terminal.
+
+### Project scripts
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the Vite development server. |
+| `npm run test` | Run the Vitest test suite once. |
+| `npm run typecheck` | Run TypeScript project checks (`tsc -b`). |
+| `npm run lint` | Run ESLint. |
+| `npm run build` | Typecheck and create the production build in `dist/`. |
+| `npm run preview` | Serve the most recent production build locally. |
+| `npm run extract:nisr` | Regenerate processed observations, inventory, and source metadata from the original PDFs. This writes generated data files; review the changes before keeping them. |
+| `npm run format` | Run Prettier in write mode across the repository. This modifies files. |
 
 ## Problem and intended use
 
@@ -77,7 +105,7 @@ If necessary evidence is missing, unavailable, or ambiguous, signal generation r
 
 ### Current source verification status
 
-An independent pilot selected 18 candidate records across both SAS reports, three geographies, two seasons, yield, cultivated area, and irrigation practice. **Zero source cells were independently verified** because the local PDF rendering attempt failed. The audit ledger marks all 18 candidates `not_checked`; the pilot did not establish either matches or errors. See `artifacts/source-reconciliation-pilot/REPORT.md` and `artifacts/source-reconciliation-pilot/ledger.json`. Do not interpret repository coverage or application tests as comprehensive reconciliation to the original PDFs.
+An independent pilot selected 18 candidate records across both SAS reports, three geographies, two seasons, yield, cultivated area, and irrigation practice. **Zero source cells were independently verified** because the local PDF rendering attempt failed. The pilot did not establish either matches or errors. Do not interpret repository coverage or application tests as comprehensive reconciliation to the original PDFs.
 
 ## Limitations and responsible interpretation
 
@@ -97,35 +125,6 @@ An independent pilot selected 18 candidate records across both SAS reports, thre
 - Static processed JSON observations and inventory loaded by the browser; no application backend or database is configured.
 - Feature code is grouped under `src/features/`: overview, district profile, evidence, intelligence, investigation brief, and methodology. Shared application shell and navigation are under `src/components/`.
 - Source reports, processed data, source metadata, and extraction code are kept under `data/` and `scripts/`.
-
-## Getting started
-
-### Prerequisites
-
-- Node.js `^20.19.0` or `>=22.12.0` (the engine requirement of the installed Vite version).
-- npm, included with Node.js.
-
-### Install and run
-
-```sh
-npm ci
-npm run dev
-```
-
-Vite prints the local development URL in the terminal.
-
-### Project scripts
-
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Start the Vite development server. |
-| `npm run test` | Run the Vitest test suite once. |
-| `npm run typecheck` | Run TypeScript project checks (`tsc -b`). |
-| `npm run lint` | Run ESLint. |
-| `npm run build` | Typecheck and create the production build in `dist/`. |
-| `npm run preview` | Serve the most recent production build locally. |
-| `npm run extract:nisr` | Regenerate processed observations, inventory, and source metadata from the original PDFs. This writes generated data files; review the changes before keeping them. |
-| `npm run format` | Run Prettier in write mode across the repository. This modifies files. |
 
 ## Extraction and provenance
 
